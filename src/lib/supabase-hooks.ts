@@ -1207,10 +1207,10 @@ export function useSettings() {
       throw new Error("Missing VITE_META_APP_ID environment variable.");
     }
     const redirectUri = (import.meta.env.VITE_META_REDIRECT_URI as string | undefined) ?? `${window.location.origin}/auth/meta/callback`;
-    const url = new URL("https://www.facebook.com/v23.0/dialog/oauth");
+    const url = new URL("https://api.instagram.com/oauth/authorize");
     url.searchParams.set("client_id", appId);
     url.searchParams.set("redirect_uri", redirectUri);
-    url.searchParams.set("scope", ["instagram_basic", "instagram_manage_comments", "instagram_manage_messages", "pages_show_list", "pages_read_engagement"].join(","));
+    url.searchParams.set("scope", ["instagram_basic", "instagram_manage_comments", "instagram_manage_messages", "instagram_content_publish", "pages_show_list", "pages_read_engagement"].join(","));
     url.searchParams.set("response_type", "code");
     url.searchParams.set("state", args.state);
     return url.toString();

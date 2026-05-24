@@ -101,8 +101,8 @@ function startMetaOAuth() {
   }
   const redirectUri = (import.meta.env.VITE_META_REDIRECT_URI as string | undefined) ?? `${window.location.origin}/auth/meta/callback`;
   const graphVersion = (import.meta.env.VITE_META_GRAPH_VERSION as string | undefined) ?? "v23.0";
-  const scopes = ["instagram_basic", "instagram_manage_comments", "instagram_manage_messages", "pages_show_list", "pages_read_engagement"];
-  const url = new URL(`https://www.facebook.com/${graphVersion}/dialog/oauth`);
+  const scopes = ["instagram_basic", "instagram_manage_comments", "instagram_manage_messages", "instagram_content_publish", "pages_show_list", "pages_read_engagement"];
+  const url = new URL("https://api.instagram.com/oauth/authorize");
   url.searchParams.set("client_id", appId);
   url.searchParams.set("redirect_uri", redirectUri);
   url.searchParams.set("scope", scopes.join(","));
