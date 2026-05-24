@@ -277,7 +277,7 @@ function InstagramAccountCard({ account }: { account: any }) {
   const StatusIcon = config.icon;
 
   const handleReauth = async () => {
-    const appId = import.meta.env.VITE_META_APP_ID as string | undefined;
+    const appId = (import.meta.env.VITE_META_APP_ID as string | undefined) ?? "3486992541476144";
     if (!appId) { toast.error("Missing VITE_META_APP_ID"); return; }
 
     const redirectUri =

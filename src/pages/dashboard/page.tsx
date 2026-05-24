@@ -35,7 +35,7 @@ import { useNavigate } from "react-router-dom";
 import { GettingStartedChecklist } from "@/components/GettingStartedChecklist.tsx";
 
 function startMetaOAuth() {
-  const appId = import.meta.env.VITE_META_APP_ID as string | undefined;
+  const appId = (import.meta.env.VITE_META_APP_ID as string | undefined) ?? "3486992541476144";
   if (!appId) {
     toast.error("Add VITE_META_APP_ID in .env, restart dev server, then connect Instagram.");
     return;
