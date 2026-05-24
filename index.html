@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Flowora — Instagram DM Automation for Creators</title>
+    <meta name="description" content="Automate Instagram comments, stories, DMs, lead capture, digital products, and creator campaigns." />
+    <meta name="author" content="Flowora" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta property="og:title" content="Flowora" />
+    <meta property="og:description" content="Instagram DM automation, lead capture, digital products, and campaign analytics for creators." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+      crossorigin
+    />
+
+    <!-- Detect dark mode preference and set the class before next-themes loads. This avoids a flash of unstyled content (FOUC) when the page loads. -->
+    <script>
+      try {
+        let theme = localStorage.getItem("theme");
+        if (theme === "system" || !theme) {
+          let prefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)",
+          ).matches;
+          theme = prefersDark ? "dark" : "light";
+        }
+        document.documentElement.classList.add(theme);
+      } catch (e) {}
+    </script>
+
+    <link href="/src/index.css" rel="stylesheet" />
+  </head>
+  <body>
+    <script>
+      window.addEventListener('error', function(event) {
+        var errorDiv = document.createElement('div');
+        errorDiv.style.position = 'fixed';
+        errorDiv.style.top = '0';
+        errorDiv.style.left = '0';
+        errorDiv.style.width = '100%';
+        errorDiv.style.backgroundColor = '#fef2f2';
+        errorDiv.style.color = '#991b1b';
+        errorDiv.style.padding = '20px';
+        errorDiv.style.borderBottom = '3px solid #f87171';
+        errorDiv.style.fontFamily = 'monospace';
+        errorDiv.style.zIndex = '999999';
+        errorDiv.innerHTML = '<strong>Uncaught Error:</strong> ' + event.message + ' at ' + event.filename + ':' + event.lineno;
+        document.body.appendChild(errorDiv);
+      });
+      window.addEventListener('unhandledrejection', function(event) {
+        var errorDiv = document.createElement('div');
+        errorDiv.style.position = 'fixed';
+        errorDiv.style.top = '0';
+        errorDiv.style.left = '0';
+        errorDiv.style.width = '100%';
+        errorDiv.style.backgroundColor = '#fef2f2';
+        errorDiv.style.color = '#991b1b';
+        errorDiv.style.padding = '20px';
+        errorDiv.style.borderBottom = '3px solid #f87171';
+        errorDiv.style.fontFamily = 'monospace';
+        errorDiv.style.zIndex = '999999';
+        errorDiv.innerHTML = '<strong>Unhandled Promise Rejection:</strong> ' + event.reason;
+        document.body.appendChild(errorDiv);
+      });
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
