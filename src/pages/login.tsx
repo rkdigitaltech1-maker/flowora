@@ -66,24 +66,74 @@ export default function LoginPage() {
     }
   }, [isUserAuthenticated, isAdminAuthenticated, navigate]);
 
-  // ── Supabase Google OAuth ─────────────────────────────────────────────────
+  // ── Supabase Google OAuth (Popup) ─────────────────────────────────────────
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-    if (error) {
-      if (error.message.includes("provider is not enabled") || error.message.includes("not configured")) {
-        toast.error("Google OAuth is not enabled yet. Enable it in Supabase → Authentication → Providers → Google.");
-      } else {
-        toast.error(error.message);
+    try {
+      // Get the OAuth URL from Supabase
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          skipBrowserRedirect: true, // prevent full-page redirect
+        },
+      });
+
+      if (error) {
+        if (error.message.includes("provider is not enabled") || error.message.includes("not configured")) {
+          toast.error("Google OAuth is not enabled yet. Enable it in Supabase → Authentication → Providers → Google.");
+        } else {
+          toast.error(error.message);
+        }
+        setGoogleLoading(false);
+        return;
       }
+
+      if (!data?.url) {
+        toast.error("Failed to get Google sign-in URL.");
+        setGoogleLoading(false);
+        return;
+      }
+
+      // Open Google login in a popup window
+      const width = 500;
+      const height = 600;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+
+      const popup = window.open(
+        data.url,
+        "GoogleSignIn",
+        `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`
+      );
+
+      if (!popup) {
+        // Popup blocked — fallback to redirect
+        toast.info("Popup blocked. Redirecting...");
+        window.location.href = data.url;
+        return;
+      }
+
+      // Poll for popup close and session
+      const timer = setInterval(async () => {
+        if (popup.closed) {
+          clearInterval(timer);
+          // Check if session was established
+          const { data: sessionData } = await supabase.auth.getSession();
+          if (sessionData?.session) {
+            toast.success("Signed in with Google!");
+            const onboardingDone = localStorage.getItem("cs_onboarding_done");
+            navigate(onboardingDone ? "/dashboard" : "/onboarding");
+          } else {
+            setGoogleLoading(false);
+          }
+        }
+      }, 500);
+
+    } catch (err: any) {
+      toast.error(err.message ?? "Google sign-in failed.");
       setGoogleLoading(false);
     }
-    // If successful, Supabase redirects the browser — no further action needed
   };
 
   // ── Instagram placeholder ─────────────────────────────────────────────────
