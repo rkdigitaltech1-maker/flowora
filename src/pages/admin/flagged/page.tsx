@@ -135,12 +135,12 @@ export default function AdminFlaggedAccountsPage() {
   };
 
   const handleSelectAll = () => {
-    const currentlyFilteredIds = filteredFlags.map((f) => f.id);
+    const currentlyFilteredIds = filteredFlags.map((f: any) => f.id);
     const allSelected = currentlyFilteredIds.every((id) => selectedIds.includes(id));
 
     if (allSelected) {
       // Unselect only the currently filtered ones
-      setSelectedIds((prev) => prev.filter((id) => !currentlyFilteredIds.includes(id)));
+      setSelectedIds((prev) => prev.filter((id: any) => !currentlyFilteredIds.includes(id)));
     } else {
       // Add all currently filtered ones (avoid duplicates)
       setSelectedIds((prev) => Array.from(new Set([...prev, ...currentlyFilteredIds])));
