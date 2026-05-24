@@ -287,7 +287,7 @@ function InstagramAccountCard({ account }: { account: any }) {
     const url = new URL("https://api.instagram.com/oauth/authorize");
     url.searchParams.set("client_id", appId);
     url.searchParams.set("redirect_uri", redirectUri);
-    url.searchParams.set("scope", "instagram_basic,instagram_manage_comments,instagram_manage_messages,instagram_content_publish,pages_show_list,pages_read_engagement");
+    url.searchParams.set("scope", "instagram_basic,instagram_manage_comments,instagram_manage_messages,instagram_content_publish");
     url.searchParams.set("response_type", "code");
     url.searchParams.set("state", crypto.randomUUID());
     window.location.href = url.toString();
