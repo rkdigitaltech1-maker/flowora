@@ -1,0 +1,19 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="flowora-bg" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5D7CFF"/>
+      <stop offset="0.46" stop-color="#8B3DFF"/>
+      <stop offset="1" stop-color="#EC149E"/>
+    </linearGradient>
+    <linearGradient id="flowora-shine" x1="17" y1="13" x2="47" y2="54" gradientUnits="userSpaceOnUse">
+      <stop stop-color="white" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="white" stop-opacity="0.35"/>
+    </linearGradient>
+    <filter id="soft-shadow" x="-10" y="-8" width="84" height="84" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#6D48FF" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <rect x="8" y="8" width="48" height="48" rx="16" fill="url(#flowora-bg)" filter="url(#soft-shadow)"/>
+  <path d="M23 42V21.5C23 19.57 24.57 18 26.5 18H44C45.1 18 46 18.9 46 20V22.4C46 23.5 45.1 24.4 44 24.4H31.4V29.6H40.4C41.5 29.6 42.4 30.5 42.4 31.6V33.8C42.4 34.9 41.5 35.8 40.4 35.8H31.4V42C31.4 43.1 30.5 44 29.4 44H25C23.9 44 23 43.1 23 42Z" fill="url(#flowora-shine)"/>
+  <path d="M20 25C26.8 25 31.8 20.4 34.2 16.5H26.5C22.9 16.5 20 19.4 20 23V25Z" fill="white" fill-opacity="0.95"/>
+</svg>
