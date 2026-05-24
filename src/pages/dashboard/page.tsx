@@ -31,8 +31,67 @@ import { CountUp } from "@/components/ui/count-up.tsx";
 import { useAuth } from "@/hooks/use-auth.ts";
 import { useOverview } from "@/lib/supabase-hooks.ts";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { GettingStartedChecklist } from "@/components/GettingStartedChecklist.tsx";
+
+/* ── Welcome Modal ──────────────────────────────────────────────────────────── */
+function WelcomeModal({ name, onClose }: { name: string; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 relative flex flex-col items-center gap-6 animate-in zoom-in-95 duration-200">
+        {/* Close */}
+        <button onClick={onClose} className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer">
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Step dots */}
+        <div className="flex items-center gap-2 self-start">
+          <div className="w-8 h-2.5 rounded-full bg-gradient-to-r from-purple-600 to-pink-500" />
+          <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
+          <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
+        </div>
+
+        {/* Icon */}
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/25">
+          <MessageSquare className="w-8 h-8 text-white" />
+        </div>
+
+        {/* Text */}
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl font-black text-slate-900">Welcome, {name}!</h2>
+          <p className="text-sm text-slate-500 leading-relaxed">
+            You're a few steps away from automating your Instagram DMs and turning comments into customers.
+          </p>
+        </div>
+
+        {/* Feature grid */}
+        <div className="grid grid-cols-2 gap-3 w-full">
+          {[
+            { icon: MessageSquare, label: "Auto-DM commenters instantly" },
+            { icon: Users, label: "Capture leads from DM conversations" },
+            { icon: DollarSign, label: "Track replies, leads & conversion rates" },
+            { icon: Zap, label: "Run unlimited automations on Pro" },
+          ].map(({ icon: Icon, label }) => (
+            <div key={label} className="flex items-center gap-3 bg-slate-50 rounded-2xl p-3 border border-slate-100">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center shrink-0">
+                <Icon className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-xs font-semibold text-slate-700 leading-snug">{label}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <button
+          onClick={onClose}
+          className="w-full h-12 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-500 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-purple-500/25 hover:opacity-90 transition-opacity cursor-pointer"
+        >
+          Let's get started →
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function startMetaOAuth() {
   const appId = (import.meta.env.VITE_META_APP_ID as string | undefined) ?? "3486992541476144";
@@ -151,12 +210,28 @@ function MetricCard({ card }: MetricCardProps) {
 
 
 export default function DashboardOverview() {
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth();
   const { stats, sendVolume, leadSources, campaignDetails, activity, accounts, workspace, loading } = useOverview();
   const [bootstrapping] = useState(false);
   const [showIgAlert, setShowIgAlert] = useState(true);
   const [isRefetching, setIsRefetching] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  // Show welcome modal if redirected from Google OAuth
+  useEffect(() => {
+    if (searchParams.get("welcome") === "1") {
+      setShowWelcome(true);
+      // Clean up the URL
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
+  const handleCloseWelcome = () => {
+    setShowWelcome(false);
+    localStorage.setItem("cs_onboarding_done", "true");
+  };
 
   const handleRefresh = () => {
     setIsRefetching(true);
@@ -211,6 +286,13 @@ export default function DashboardOverview() {
 
   return (
     <div className="mx-auto max-w-[1440px] px-5 py-6 lg:px-10">
+      {/* Welcome Modal for new users after Google sign-in */}
+      {showWelcome && (
+        <WelcomeModal
+          name={user?.profile?.name?.split(" ")[0] || user?.profile?.email?.split("@")[0] || "Creator"}
+          onClose={handleCloseWelcome}
+        />
+      )}
       <section className="mb-6 relative overflow-hidden rounded-stripe-card bg-gradient-to-r from-stripe-brand-dark to-[#1a3a60] p-6 text-white shadow-stripe-card border border-slate-800">
         {/* Glow decoration */}
         <div className="absolute right-0 top-0 -mr-20 -mt-20 h-40 w-40 rounded-full bg-stripe-brand/20 blur-3xl" />

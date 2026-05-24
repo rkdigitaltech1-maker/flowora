@@ -12,7 +12,9 @@ export default function AuthCallback() {
     if (!isLoading) {
       if (isAuthenticated) {
         toast.success("Signed in successfully!");
-        navigate("/dashboard", { replace: true });
+        // Pass welcome=1 so dashboard shows the welcome modal
+        const isNewUser = !localStorage.getItem("cs_onboarding_done");
+        navigate(isNewUser ? "/dashboard?welcome=1" : "/dashboard", { replace: true });
       } else {
         // If loading finished and we are not authenticated, give a short grace period
         // for the PKCE code exchange to complete, then fall back to login.
