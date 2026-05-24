@@ -284,7 +284,7 @@ function InstagramAccountCard({ account }: { account: any }) {
       (import.meta.env.VITE_META_REDIRECT_URI as string | undefined) ??
       `${window.location.origin}/auth/meta/callback`;
 
-    const url = new URL("https://www.instagram.com/oauth/authorize");
+    const url = new URL("https://www.facebook.com/dialog/oauth");
     url.searchParams.set("force_reauth", "true");
     url.searchParams.set("client_id", "3486992541476144");
     url.searchParams.set("redirect_uri", "https://flowora-roan.vercel.app/auth/meta/callback");

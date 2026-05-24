@@ -96,7 +96,7 @@ function WelcomeModal({ name, onClose }: { name: string; onClose: () => void }) 
 function startMetaOAuth() {
   // Use exact URL format from Meta's embed URL (copied from Step 3 in Meta Developer Console)
   const redirectUri = "https://flowora-roan.vercel.app/auth/meta/callback";
-  const url = new URL("https://www.instagram.com/oauth/authorize");
+  const url = new URL("https://www.facebook.com/dialog/oauth");
   url.searchParams.set("force_reauth", "true");
   url.searchParams.set("client_id", "3486992541476144");
   url.searchParams.set("redirect_uri", redirectUri);
