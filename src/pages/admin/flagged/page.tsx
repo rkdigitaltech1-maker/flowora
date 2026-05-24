@@ -43,9 +43,9 @@ export default function AdminFlaggedAccountsPage() {
   }
 
   // Filter flaggedList
-  const allFlags = stats.flaggedList.filter((f) => !dismissedList.includes(f.id));
+  const allFlags = stats.flaggedList.filter((f: any) => !dismissedList.includes(f.id));
 
-  const filteredFlags = allFlags.filter((f) => {
+  const filteredFlags = allFlags.filter((f: any) => {
     // Search filter
     const matchesSearch =
       f.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -88,8 +88,8 @@ export default function AdminFlaggedAccountsPage() {
 
   // Bulk Suspend Selected
   const handleBulkSuspend = async () => {
-    const selectedFlags = allFlags.filter((f) => selectedIds.includes(f.id));
-    const targetWorkspaces = selectedFlags.filter((f) => f.workspaceId && f.status !== "suspended");
+    const selectedFlags = allFlags.filter((f: any) => selectedIds.includes(f.id));
+    const targetWorkspaces = selectedFlags.filter((f: any) => f.workspaceId && f.status !== "suspended");
     
     if (targetWorkspaces.length === 0) {
       toast.error("No active real workspaces selected for suspension.");
@@ -148,9 +148,9 @@ export default function AdminFlaggedAccountsPage() {
   };
 
   // Compute stat counters
-  const highRiskCount = allFlags.filter((f) => f.risk.toLowerCase().includes("high")).length;
-  const mediumRiskCount = allFlags.filter((f) => f.risk.toLowerCase().includes("medium")).length;
-  const lowRiskCount = allFlags.filter((f) => f.risk.toLowerCase().includes("low")).length;
+  const highRiskCount = allFlags.filter((f: any) => f.risk.toLowerCase().includes("high")).length;
+  const mediumRiskCount = allFlags.filter((f: any) => f.risk.toLowerCase().includes("medium")).length;
+  const lowRiskCount = allFlags.filter((f: any) => f.risk.toLowerCase().includes("low")).length;
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto">
@@ -288,7 +288,7 @@ export default function AdminFlaggedAccountsPage() {
                       className="rounded text-indigo-600 focus:ring-indigo-500 h-3.5 w-3.5"
                       checked={
                         filteredFlags.length > 0 &&
-                        filteredFlags.every((f) => selectedIds.includes(f.id))
+                        filteredFlags.every((f: any) => selectedIds.includes(f.id))
                       }
                       onChange={handleSelectAll}
                     />
@@ -309,7 +309,7 @@ export default function AdminFlaggedAccountsPage() {
                       </td>
                     </tr>
                   ) : (
-                    filteredFlags.map((item) => {
+                    filteredFlags.map((item: any) => {
                       const isSuspended = item.status === "suspended";
                       const isRowSelected = selectedIds.includes(item.id);
 

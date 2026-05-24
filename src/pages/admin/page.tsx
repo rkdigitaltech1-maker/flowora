@@ -358,7 +358,7 @@ export default function AdminDashboard() {
               </div>
             ) : (
               <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                {activeFlags.map((item) => {
+                {activeFlags.map((item: any) => {
                   const isSuspended = item.status === "suspended";
                   return (
                     <motion.div
