@@ -94,20 +94,14 @@ function WelcomeModal({ name, onClose }: { name: string; onClose: () => void }) 
 }
 
 function startMetaOAuth() {
-  const appId = (import.meta.env.VITE_META_APP_ID as string | undefined) ?? "3486992541476144";
-  if (!appId) {
-    toast.error("Add VITE_META_APP_ID in .env, restart dev server, then connect Instagram.");
-    return;
-  }
-  const redirectUri = (import.meta.env.VITE_META_REDIRECT_URI as string | undefined) ?? `${window.location.origin}/auth/meta/callback`;
-  const graphVersion = (import.meta.env.VITE_META_GRAPH_VERSION as string | undefined) ?? "v23.0";
-  const scopes = ["instagram_basic", "instagram_manage_comments", "instagram_manage_messages", "instagram_content_publish"];
+  // Use exact URL format from Meta's embed URL (copied from Step 3 in Meta Developer Console)
+  const redirectUri = "https://flowora-roan.vercel.app/auth/meta/callback";
   const url = new URL("https://www.instagram.com/oauth/authorize");
-  url.searchParams.set("client_id", appId);
+  url.searchParams.set("force_reauth", "true");
+  url.searchParams.set("client_id", "3486992541476144");
   url.searchParams.set("redirect_uri", redirectUri);
-  url.searchParams.set("scope", scopes.join(","));
   url.searchParams.set("response_type", "code");
-  url.searchParams.set("state", crypto.randomUUID());
+  url.searchParams.set("scope", "instagram_basic,instagram_manage_comments,instagram_manage_messages,instagram_content_publish");
   window.location.href = url.toString();
 }
 

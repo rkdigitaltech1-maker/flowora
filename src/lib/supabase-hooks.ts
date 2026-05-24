@@ -1208,8 +1208,9 @@ export function useSettings() {
     }
     const redirectUri = (import.meta.env.VITE_META_REDIRECT_URI as string | undefined) ?? `${window.location.origin}/auth/meta/callback`;
     const url = new URL("https://www.instagram.com/oauth/authorize");
-    url.searchParams.set("client_id", appId);
-    url.searchParams.set("redirect_uri", redirectUri);
+    url.searchParams.set("force_reauth", "true");
+    url.searchParams.set("client_id", "3486992541476144");
+    url.searchParams.set("redirect_uri", "https://flowora-roan.vercel.app/auth/meta/callback");
     url.searchParams.set("scope", ["instagram_basic", "instagram_manage_comments", "instagram_manage_messages", "instagram_content_publish"].join(","));
     url.searchParams.set("response_type", "code");
     url.searchParams.set("state", args.state);
