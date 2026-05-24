@@ -284,7 +284,7 @@ function InstagramAccountCard({ account }: { account: any }) {
       (import.meta.env.VITE_META_REDIRECT_URI as string | undefined) ??
       `${window.location.origin}/auth/meta/callback`;
 
-    const url = new URL("https://api.instagram.com/oauth/authorize");
+    const url = new URL("https://www.instagram.com/oauth/authorize");
     url.searchParams.set("client_id", appId);
     url.searchParams.set("redirect_uri", redirectUri);
     url.searchParams.set("scope", "instagram_basic,instagram_manage_comments,instagram_manage_messages,instagram_content_publish");
