@@ -1256,11 +1256,7 @@ export async function exchangeMetaCode(args: { code: string; state: string }) {
     workspaceId = "demo-workspace-id";
   }
 
-  const appId = import.meta.env.VITE_META_APP_ID ?? "3486992541476144";
-  const appSecret = import.meta.env.VITE_META_APP_SECRET;
-  const redirectUri = import.meta.env.VITE_META_REDIRECT_URI || `${window.location.origin}/auth/meta/callback`;
-
-  const isMock = !appId || workspaceId === "demo-workspace-id";
+  const isMock = workspaceId === "demo-workspace-id";
 
   if (isMock) {
     const mockAccountId = `acc-${Date.now()}`;
@@ -1304,59 +1300,36 @@ export async function exchangeMetaCode(args: { code: string; state: string }) {
   }
 
   try {
-    // Use Instagram API for token exchange (Instagram Business Login)
-    const tokenUrl = `https://api.instagram.com/oauth/access_token`;
-    const tokenParams = new URLSearchParams({
-      client_id: appId,
-      client_secret: appSecret || "",
-      grant_type: "authorization_code",
-      redirect_uri: redirectUri,
-      code: args.code,
-    });
-
-    const tokenResponse = await fetch(tokenUrl, {
+    // Use serverless API route to exchange code (avoids CORS issues)
+    const redirectUri = import.meta.env.VITE_META_REDIRECT_URI || `${window.location.origin}/auth/meta/callback`;
+    
+    const apiResponse = await fetch("/api/instagram/exchange", {
       method: "POST",
-      body: tokenParams,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        code: args.code,
+        redirect_uri: redirectUri,
+      }),
     });
-    const tokenData: any = await tokenResponse.json();
 
-    if (!tokenData.access_token) {
-      throw new Error(tokenData.error_message || "Failed to exchange code for token");
+    const tokenData = await apiResponse.json();
+
+    if (!apiResponse.ok || !tokenData.access_token) {
+      throw new Error(tokenData.error || "Failed to exchange code for token");
     }
 
-    const shortLivedToken = tokenData.access_token;
+    const longLivedToken = tokenData.access_token;
     const instagramUserId = tokenData.user_id;
-    let longLivedToken = shortLivedToken;
-    let expiresIn = 3600; // Short-lived tokens last 1 hour
-
-    // Exchange for long-lived token using Instagram Graph API
-    if (appSecret) {
-      const longTokenUrl = `https://graph.instagram.com/access_token`;
-      const longTokenParams = new URLSearchParams({
-        grant_type: "ig_exchange_token",
-        client_secret: appSecret,
-        access_token: shortLivedToken,
-      });
-
-      const longTokenResponse = await fetch(`${longTokenUrl}?${longTokenParams}`);
-      const longTokenData: any = await longTokenResponse.json();
-      if (longTokenData.access_token) {
-        longLivedToken = longTokenData.access_token;
-        expiresIn = longTokenData.expires_in || 5184000; // ~60 days
-      }
-    }
-
-    // Get Instagram user profile
-    const profileUrl = `https://graph.instagram.com/v23.0/me?fields=user_id,username,account_type,name&access_token=${longLivedToken}`;
-    const profileResponse = await fetch(profileUrl);
-    const profileData: any = await profileResponse.json();
+    const expiresIn = tokenData.expires_in || 5184000;
 
     const pages = [{
       pageId: instagramUserId,
-      pageName: profileData.name || profileData.username,
+      pageName: tokenData.name || tokenData.username,
       pageAccessToken: longLivedToken,
       instagramBusinessAccountId: instagramUserId,
-      instagramUsername: profileData.username,
+      instagramUsername: tokenData.username,
     }];
 
     const tokenExpiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
