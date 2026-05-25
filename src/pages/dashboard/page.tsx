@@ -96,12 +96,13 @@ function WelcomeModal({ name, onClose }: { name: string; onClose: () => void }) 
 function startMetaOAuth() {
   // Use exact URL format from Meta's embed URL (copied from Step 3 in Meta Developer Console)
   const redirectUri = "https://flowora-roan.vercel.app/auth/meta/callback";
-  const url = new URL("https://www.facebook.com/dialog/oauth");
-  url.searchParams.set("force_reauth", "true");
+  const url = new URL("https://www.instagram.com/oauth/authorize");
+  url.searchParams.set("enable_fb_login", "0");
+  url.searchParams.set("force_authentication", "1");
   url.searchParams.set("client_id", "3486992541476144");
   url.searchParams.set("redirect_uri", redirectUri);
   url.searchParams.set("response_type", "code");
-  url.searchParams.set("scope", "instagram_basic,instagram_manage_comments,instagram_manage_messages,instagram_content_publish");
+  url.searchParams.set("scope", "instagram_business_basic,instagram_business_manage_comments,instagram_business_manage_messages,instagram_business_content_publish");
   window.location.href = url.toString();
 }
 

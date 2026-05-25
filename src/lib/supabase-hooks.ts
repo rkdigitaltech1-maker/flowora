@@ -1207,11 +1207,12 @@ export function useSettings() {
       throw new Error("Missing VITE_META_APP_ID environment variable.");
     }
     const redirectUri = (import.meta.env.VITE_META_REDIRECT_URI as string | undefined) ?? `${window.location.origin}/auth/meta/callback`;
-    const url = new URL("https://www.facebook.com/dialog/oauth");
-    url.searchParams.set("force_reauth", "true");
-    url.searchParams.set("client_id", "3486992541476144");
-    url.searchParams.set("redirect_uri", "https://flowora-roan.vercel.app/auth/meta/callback");
-    url.searchParams.set("scope", ["instagram_basic", "instagram_manage_comments", "instagram_manage_messages", "instagram_content_publish"].join(","));
+    const url = new URL("https://www.instagram.com/oauth/authorize");
+    url.searchParams.set("enable_fb_login", "0");
+    url.searchParams.set("force_authentication", "1");
+    url.searchParams.set("client_id", appId);
+    url.searchParams.set("redirect_uri", redirectUri);
+    url.searchParams.set("scope", ["instagram_business_basic", "instagram_business_manage_comments", "instagram_business_manage_messages", "instagram_business_content_publish"].join(","));
     url.searchParams.set("response_type", "code");
     url.searchParams.set("state", args.state);
     return url.toString();
@@ -1303,64 +1304,60 @@ export async function exchangeMetaCode(args: { code: string; state: string }) {
   }
 
   try {
-    const tokenUrl = `https://graph.facebook.com/v23.0/oauth/access_token`;
+    // Use Instagram API for token exchange (Instagram Business Login)
+    const tokenUrl = `https://api.instagram.com/oauth/access_token`;
     const tokenParams = new URLSearchParams({
       client_id: appId,
       client_secret: appSecret || "",
+      grant_type: "authorization_code",
       redirect_uri: redirectUri,
       code: args.code,
     });
 
-    const tokenResponse = await fetch(`${tokenUrl}?${tokenParams}`);
+    const tokenResponse = await fetch(tokenUrl, {
+      method: "POST",
+      body: tokenParams,
+    });
     const tokenData: any = await tokenResponse.json();
 
     if (!tokenData.access_token) {
-      throw new Error(tokenData.error?.message || "Failed to exchange code for token");
+      throw new Error(tokenData.error_message || "Failed to exchange code for token");
     }
 
     const shortLivedToken = tokenData.access_token;
+    const instagramUserId = tokenData.user_id;
     let longLivedToken = shortLivedToken;
-    let expiresIn = tokenData.expires_in || 5184000;
+    let expiresIn = 3600; // Short-lived tokens last 1 hour
 
+    // Exchange for long-lived token using Instagram Graph API
     if (appSecret) {
-      const longTokenUrl = `https://graph.facebook.com/v23.0/oauth/access_token`;
+      const longTokenUrl = `https://graph.instagram.com/access_token`;
       const longTokenParams = new URLSearchParams({
-        grant_type: "fb_exchange_token",
-        client_id: appId,
+        grant_type: "ig_exchange_token",
         client_secret: appSecret,
-        fb_exchange_token: shortLivedToken,
+        access_token: shortLivedToken,
       });
 
       const longTokenResponse = await fetch(`${longTokenUrl}?${longTokenParams}`);
       const longTokenData: any = await longTokenResponse.json();
       if (longTokenData.access_token) {
         longLivedToken = longTokenData.access_token;
-        expiresIn = longTokenData.expires_in || 5184000;
+        expiresIn = longTokenData.expires_in || 5184000; // ~60 days
       }
     }
 
-    const pagesUrl = `https://graph.facebook.com/v23.0/me/accounts`;
-    const pagesResponse = await fetch(`${pagesUrl}?access_token=${longLivedToken}`);
-    const pagesData: any = await pagesResponse.json();
+    // Get Instagram user profile
+    const profileUrl = `https://graph.instagram.com/v23.0/me?fields=user_id,username,account_type,name&access_token=${longLivedToken}`;
+    const profileResponse = await fetch(profileUrl);
+    const profileData: any = await profileResponse.json();
 
-    if (!pagesData.data) {
-      throw new Error("No Facebook pages found. You need a Facebook Page connected to an Instagram Business account.");
-    }
-
-    const pages = [];
-    for (const page of pagesData.data) {
-      const igUrl = `https://graph.facebook.com/v23.0/${page.id}?fields=instagram_business_account&access_token=${longLivedToken}`;
-      const igResponse = await fetch(igUrl);
-      const igData: any = await igResponse.json();
-
-      pages.push({
-        pageId: page.id,
-        pageName: page.name,
-        pageAccessToken: page.access_token,
-        instagramBusinessAccountId: igData.instagram_business_account?.id || null,
-        instagramUsername: null,
-      });
-    }
+    const pages = [{
+      pageId: instagramUserId,
+      pageName: profileData.name || profileData.username,
+      pageAccessToken: longLivedToken,
+      instagramBusinessAccountId: instagramUserId,
+      instagramUsername: profileData.username,
+    }];
 
     const tokenExpiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
     const accountId = crypto.randomUUID();
