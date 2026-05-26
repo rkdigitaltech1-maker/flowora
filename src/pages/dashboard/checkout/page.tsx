@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Label } from "@/components/ui/label.tsx";
 import { toast } from "sonner";
+import { PLANS, formatPrice, getAnnualSavingsPercent, type Currency, type BillingInterval } from "@/lib/pricing.ts";
+import { usePricing } from "@/hooks/use-pricing.ts";
 
 // Custom Google Pay Icon
 const GooglePayIcon = () => (
@@ -33,9 +35,12 @@ const FAQS = [
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
+  const { currency, setCurrency, billingInterval: pricingInterval, setBillingInterval: setPricingInterval } = usePricing();
+  const proPlan = PLANS.find(p => p.id === "pro")!;
+  const savingsPercent = getAnnualSavingsPercent(proPlan, currency);
 
   // Checkout State
-  const [billingInterval, setBillingInterval] = useState<"monthly" | "yearly">("yearly");
+  const [billingInterval, setBillingInterval] = useState<"monthly" | "yearly">(pricingInterval === "annual" ? "yearly" : "monthly");
   const [promoCode, setPromoCode] = useState("");
   const [appliedDiscount, setAppliedDiscount] = useState<number>(0); // Percentage
   const [promoApplied, setPromoApplied] = useState(false);
@@ -52,10 +57,11 @@ export default function CheckoutPage() {
   const [processing, setProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // Price calculations
-  const baseMonthly = 39;
-  const baseYearly = 29; // Billed annually as 29 * 12 = 348
-  const basePrice = billingInterval === "monthly" ? baseMonthly : baseYearly;
+  // Price calculations using pricing.ts
+  const baseMonthly = proPlan.pricing[currency].monthly;
+  const baseAnnual = proPlan.pricing[currency].annual;
+  const basePrice = billingInterval === "monthly" ? baseMonthly : baseAnnual;
+  const currSymbol = currency === "INR" ? "₹" : "$";
   
   const discountMultiplier = 1 - (appliedDiscount / 100);
   const subtotal = basePrice * (billingInterval === "yearly" ? 12 : 1);
@@ -177,7 +183,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between font-medium">
                 <span className="text-slate-400">Total Billed:</span>
-                <span className="text-slate-900 font-bold">${total.toFixed(2)}</span>
+                <span className="text-slate-900 font-bold">{currSymbol}{total.toFixed(2)}</span>
               </div>
               <div className="flex justify-between font-medium">
                 <span className="text-slate-400">Status:</span>
@@ -199,7 +205,7 @@ export default function CheckoutPage() {
           <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <h3 className="font-bold text-slate-900 text-base">Select your billing cycle</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Switch to annual billing to save 25% on your subscription.</p>
+              <p className="text-xs text-slate-500 mt-0.5">Switch to annual billing to save {savingsPercent}% on your subscription.</p>
             </div>
             
             {/* Interval Toggle Tabs */}
@@ -208,14 +214,33 @@ export default function CheckoutPage() {
                 onClick={() => setBillingInterval("monthly")}
                 className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${billingInterval === "monthly" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"}`}
               >
-                Monthly ($39)
+                Monthly ({currSymbol}{baseMonthly}{currency === "INR" ? "" : "/mo"})
               </button>
               <button
                 onClick={() => setBillingInterval("yearly")}
                 className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${billingInterval === "yearly" ? "bg-white text-[#6d48ff] shadow-sm" : "text-slate-500 hover:text-slate-800"}`}
               >
-                Yearly ($29/mo)
-                <span className="bg-[#6d48ff]/10 text-[#6d48ff] text-[9px] px-1.5 py-0.5 rounded font-black uppercase tracking-wider">Save 25%</span>
+                Yearly ({currSymbol}{baseAnnual}/mo)
+                <span className="bg-[#6d48ff]/10 text-[#6d48ff] text-[9px] px-1.5 py-0.5 rounded font-black uppercase tracking-wider">Save {savingsPercent}%</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Currency Toggle */}
+          <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-700">Currency</span>
+            <div className="bg-slate-100 p-1 rounded-lg flex gap-1 border border-slate-200 select-none">
+              <button
+                onClick={() => setCurrency("USD")}
+                className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${currency === "USD" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"}`}
+              >
+                🇺🇸 USD ($)
+              </button>
+              <button
+                onClick={() => setCurrency("INR")}
+                className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${currency === "INR" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"}`}
+              >
+                🇮🇳 INR (₹)
               </button>
             </div>
           </div>
@@ -366,7 +391,7 @@ export default function CheckoutPage() {
                     </span>
                   ) : (
                     <span className="flex items-center gap-1">
-                      <Lock className="h-4 w-4" /> Upgrade to Flowora Pro · ${total.toFixed(2)}
+                      <Lock className="h-4 w-4" /> Upgrade to Flowora Pro · {currSymbol}{total.toFixed(2)}
                     </span>
                   )}
                 </Button>
@@ -422,11 +447,11 @@ export default function CheckoutPage() {
               <div>
                 <p className="font-bold text-slate-800 text-sm">Flowora Pro</p>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  {billingInterval === "yearly" ? "Billed annually ($29/mo)" : "Billed monthly ($39/mo)"}
+                  {billingInterval === "yearly" ? `Billed annually (${currSymbol}${baseAnnual}/mo)` : `Billed monthly (${currSymbol}${baseMonthly}/mo)`}
                 </p>
               </div>
               <span className="font-bold text-sm text-slate-800">
-                ${(basePrice * (billingInterval === "yearly" ? 12 : 1)).toFixed(2)}
+                {currSymbol}{(basePrice * (billingInterval === "yearly" ? 12 : 1)).toFixed(2)}
               </span>
             </div>
 
@@ -437,7 +462,7 @@ export default function CheckoutPage() {
                   <Percent className="h-3.5 w-3.5" /> Promo (CREATOR50): 50% Off
                 </span>
                 <div className="flex items-center gap-2">
-                  <span>-${(subtotal * (appliedDiscount / 100)).toFixed(2)}</span>
+                  <span>-{currSymbol}{(subtotal * (appliedDiscount / 100)).toFixed(2)}</span>
                   <button onClick={handleRemovePromo} className="text-slate-400 hover:text-red-500 cursor-pointer">×</button>
                 </div>
               </div>
@@ -447,15 +472,15 @@ export default function CheckoutPage() {
             <div className="border-t border-slate-100 pt-3 space-y-2 text-xs">
               <div className="flex justify-between text-slate-400 font-medium">
                 <span>Subtotal</span>
-                <span className="text-slate-700 font-semibold">${discountedSubtotal.toFixed(2)}</span>
+                <span className="text-slate-700 font-semibold">{currSymbol}{discountedSubtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-slate-400 font-medium">
                 <span>GST / Taxes (8%)</span>
-                <span className="text-slate-700 font-semibold">${tax.toFixed(2)}</span>
+                <span className="text-slate-700 font-semibold">{currSymbol}{tax.toFixed(2)}</span>
               </div>
               <div className="flex justify-between items-center text-sm font-black border-t border-slate-100 pt-3">
                 <span className="text-slate-900">Total Charged Today</span>
-                <span className="text-[#6d48ff] text-base">${total.toFixed(2)}</span>
+                <span className="text-[#6d48ff] text-base">{currSymbol}{total.toFixed(2)}</span>
               </div>
             </div>
 
