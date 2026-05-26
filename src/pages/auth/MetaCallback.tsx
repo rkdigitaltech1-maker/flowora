@@ -34,6 +34,15 @@ export default function MetaCallback() {
         setTimeout(() => {
           const onboardingDone = localStorage.getItem("cs_onboarding_done");
           if (!onboardingDone) {
+            // Signal onboarding to skip Step 1 and show congrats
+            localStorage.setItem("flowora_ig_just_connected", "true");
+            localStorage.setItem("flowora_ig_just_connected_show_congrats", result.username || "@connected");
+            // Auto-tick the checklist item
+            try {
+              const existing = JSON.parse(localStorage.getItem("cs_checklist_done") ?? "{}");
+              existing.connect_ig = true;
+              localStorage.setItem("cs_checklist_done", JSON.stringify(existing));
+            } catch {}
             navigate("/onboarding", { replace: true });
           } else {
             navigate("/dashboard/settings", { replace: true });

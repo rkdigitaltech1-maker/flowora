@@ -100,9 +100,28 @@ const WORKFLOW_TEMPLATES = [
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const [step, setStep] = useState<Step>(1);
+  // Check if returning from Instagram OAuth (state param in URL or accounts already exist)
+  const [step, setStep] = useState<Step>(() => {
+    // If we just came back from Meta OAuth callback, skip step 1
+    const justConnected = localStorage.getItem("flowora_ig_just_connected");
+    if (justConnected) {
+      localStorage.removeItem("flowora_ig_just_connected");
+      return 2 as Step;
+    }
+    return 1 as Step;
+  });
   const [done, setDone] = useState(false);
   const [showToast, setShowToast] = useState(true);
+
+  // Show congrats if just connected
+  useEffect(() => {
+    const justConnected = localStorage.getItem("flowora_ig_just_connected_show_congrats");
+    if (justConnected) {
+      localStorage.removeItem("flowora_ig_just_connected_show_congrats");
+      setShowCongrats(true);
+      setConnectedUsername(justConnected);
+    }
+  }, []);
 
   // Personalization states
   const [profileType, setProfileType] = useState<string>("creator");
@@ -755,9 +774,9 @@ export default function OnboardingPage() {
                 toast.success("Instagram connected! Let's continue setup.");
                 next();
               }}
-              className="w-full h-12 bg-gradient-to-r from-[#6d48ff] to-[#9b59ff] hover:from-[#5a38e0] hover:to-[#8b49ef] text-white font-extrabold rounded-2xl shadow-lg shadow-violet-500/20 text-sm transition-all"
+              className="w-full h-12 bg-[#6d48ff] hover:bg-[#5a38e0] text-white font-extrabold rounded-2xl shadow-lg shadow-violet-500/20 text-sm transition-all"
             >
-              Next
+              Next →
             </Button>
 
             {/* Terms */}
