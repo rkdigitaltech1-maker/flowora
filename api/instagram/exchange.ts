@@ -12,8 +12,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: "Missing code or redirect_uri" });
   }
 
-  const appId = process.env.VITE_META_APP_ID || "3486992541476144";
-  const appSecret = process.env.VITE_META_APP_SECRET;
+  const appId = process.env.META_APP_ID || process.env.VITE_META_APP_ID;
+  const appSecret = process.env.META_APP_SECRET || process.env.VITE_META_APP_SECRET;
+
+  if (!appId) {
+    return res.status(500).json({ error: "Instagram app ID not configured" });
+  }
 
   if (!appSecret) {
     return res.status(500).json({ error: "Instagram app secret not configured" });
