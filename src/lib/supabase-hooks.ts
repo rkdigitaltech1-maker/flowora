@@ -1202,7 +1202,7 @@ export function useSettings() {
   };
 
   const createOAuthUrl = async (args: { state: string }) => {
-    const appId = (import.meta.env.VITE_META_APP_ID as string | undefined) ?? "3486992541476144";
+    const appId = import.meta.env.VITE_META_APP_ID;
     if (!appId) {
       throw new Error("Missing VITE_META_APP_ID environment variable.");
     }
