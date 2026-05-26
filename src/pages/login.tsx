@@ -57,7 +57,7 @@ export default function LoginPage() {
       // Returning users who haven't completed onboarding go there first
       const onboardingDone = localStorage.getItem("cs_onboarding_done");
       if (!onboardingDone) {
-        navigate("/onboarding");
+        navigate("/welcome");
       } else {
         navigate("/dashboard");
       }
@@ -123,7 +123,7 @@ export default function LoginPage() {
           if (sessionData?.session) {
             toast.success("Signed in with Google!");
             const onboardingDone = localStorage.getItem("cs_onboarding_done");
-            navigate(onboardingDone ? "/dashboard" : "/onboarding");
+            navigate(onboardingDone ? "/dashboard" : "/welcome");
           } else {
             setGoogleLoading(false);
           }

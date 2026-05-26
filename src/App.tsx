@@ -20,6 +20,7 @@ import AdminSettingsPage from "./pages/admin/settings/page.tsx";
 import AdminLoginPage from "./pages/admin/login.tsx";
 import AdminAuthProvider from "./components/providers/admin-auth-provider.tsx";
 import LoginPage from "./pages/login.tsx";
+import WelcomePage from "./pages/welcome.tsx";
 import OnboardingPage from "./pages/onboarding/page.tsx";
 import AboutPage from "./pages/about.tsx";
 import CareersPage from "./pages/careers.tsx";
@@ -61,6 +62,7 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/auth/meta/callback" element={<MetaCallback />} />
+            <Route path="/welcome" element={<WelcomePage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
 
             {/* Admin Login (outside admin layout) */}
