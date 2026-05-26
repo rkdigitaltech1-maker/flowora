@@ -127,48 +127,48 @@ const _d = [
 
 const Ud = [
   {
-    name: "Starter",
-    price: 29,
-    description: "Perfect for growing creators",
+    name: "Free",
+    priceUSD: 0,
+    priceINR: 0,
+    description: "Perfect for creators just getting started",
     features: [
-      "Auto-reply to comments",
-      "Story automation",
-      "Up to 1,000 DMs/month",
-      "Basic analytics",
-      "Email support"
+      "1 connected Instagram account",
+      "Up to 1,000 DMs / month",
+      "Up to 10 active campaigns",
+      "Comment Auto-DM automation",
+      "Lead capture & contact CRM",
+      "7-day analytics dashboard",
+      "Real-time activity feed",
+      "Community support"
     ],
-    gradient: "from-blue-500 to-cyan-500",
+    gradient: "from-gray-500 to-gray-700",
     popular: false
   },
   {
     name: "Pro",
-    price: 79,
-    description: "For serious content creators",
+    priceUSD: 4.99,
+    priceINR: 399,
+    monthlyUSD: 5.99,
+    monthlyINR: 499,
+    description: "Full automation suite",
     features: [
-      "Everything in Starter",
-      "Unlimited DMs",
-      "Email capture forms",
-      "Advanced analytics",
-      "Priority support",
-      "Custom workflows"
+      "10 connected Instagram accounts",
+      "Unlimited DMs per month",
+      "Unlimited campaigns",
+      "Unlimited lead collection",
+      "All automations: Comment, Story DM, Ask-for-Follow & Lead Gen",
+      "Re-trigger old commenters & followers",
+      "Email & phone collection in DM",
+      "Story Mention Auto-DM",
+      "Advanced analytics (7d / 30d / 90d)",
+      "Per-campaign performance reports",
+      "CSV export of leads & contacts",
+      "Webhook auto-retry & reliability",
+      "Priority email + chat support",
+      "7-day money-back guarantee"
     ],
     gradient: "from-purple-600 to-pink-600",
     popular: true
-  },
-  {
-    name: "Enterprise",
-    price: 199,
-    description: "For agencies and brands",
-    features: [
-      "Everything in Pro",
-      "Multiple accounts",
-      "White-label option",
-      "Dedicated account manager",
-      "Custom integrations",
-      "API access"
-    ],
-    gradient: "from-gray-800 to-gray-900",
-    popular: false
   }
 ];
 
@@ -394,6 +394,7 @@ export default function Index() {
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
   const [demoPlaying, setDemoPlaying] = useState(false);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
+  const [pricingCurrency, setPricingCurrency] = useState<"USD" | "INR">("USD");
 
   // Redirect handling for active login sessions
   useEffect(() => {
@@ -2116,8 +2117,24 @@ export default function Index() {
               Start with a 14-day free trial. No credit card required. Cancel anytime.
             </p>
 
+            {/* Currency Toggle */}
+            <div className="flex items-center justify-center gap-2 pt-4">
+              <button
+                onClick={() => setPricingCurrency("INR")}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${pricingCurrency === "INR" ? "bg-purple-600 text-white shadow-sm" : "bg-gray-100 text-gray-500 hover:text-gray-700"}`}
+              >
+                ₹ INR
+              </button>
+              <button
+                onClick={() => setPricingCurrency("USD")}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${pricingCurrency === "USD" ? "bg-purple-600 text-white shadow-sm" : "bg-gray-100 text-gray-500 hover:text-gray-700"}`}
+              >
+                $ USD
+              </button>
+            </div>
+
             {/* Monthly / Yearly Toggle */}
-            <div className="flex items-center justify-center gap-3 pt-6">
+            <div className="flex items-center justify-center gap-3 pt-4">
               <span className={`text-xs font-bold ${billingCycle === "monthly" ? "text-slate-950" : "text-gray-400"}`}>Monthly</span>
               <button
                 onClick={() => setBillingCycle(billingCycle === "monthly" ? "yearly" : "monthly")}
@@ -2132,16 +2149,22 @@ export default function Index() {
               <span className={`text-xs font-bold flex items-center gap-1.5 ${billingCycle === "yearly" ? "text-purple-600" : "text-gray-400"}`}>
                 Yearly
                 <span className="bg-green-100 border border-green-200 text-green-700 font-extrabold text-[9px] px-2 py-0.5 rounded-full">
-                  Save 20%
+                  Save {pricingCurrency === "INR" ? "20%" : "17%"}
                 </span>
               </span>
             </div>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {Ud.map((plan, i) => {
-              // Calculate pricing details based on billing cycle
-              const price = billingCycle === "yearly" ? Math.floor(plan.price * 0.8) : plan.price;
+              // Calculate pricing based on currency and billing cycle
+              const price = plan.name === "Free" ? 0 :
+                pricingCurrency === "INR"
+                  ? (billingCycle === "yearly" ? plan.priceINR : plan.monthlyINR)
+                  : (billingCycle === "yearly" ? plan.priceUSD : plan.monthlyUSD);
+              const currencySymbol = pricingCurrency === "INR" ? "₹" : "$";
+              const annualTotal = plan.name === "Free" ? 0 :
+                pricingCurrency === "INR" ? (plan.priceINR! * 12) : (plan.priceUSD! * 12);
               return (
                 <motion.div
                   key={i}
@@ -2180,10 +2203,15 @@ export default function Index() {
 
                     <div className="flex items-baseline gap-1 pt-2">
                       <span className="text-5xl font-black bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                        ${price}
+                        {plan.name === "Free" ? "Free" : `${currencySymbol}${price}`}
                       </span>
-                      <span className="text-xs font-bold text-gray-400">/ month</span>
+                      {plan.name !== "Free" && <span className="text-xs font-bold text-gray-400">/ month</span>}
                     </div>
+                    {plan.name !== "Free" && billingCycle === "yearly" && (
+                      <p className="text-[11px] text-gray-400 font-medium mt-1">
+                        Billed as {currencySymbol}{annualTotal.toLocaleString()} per year
+                      </p>
+                    )}
 
                     <hr className="border-gray-100" />
 
