@@ -28,22 +28,17 @@ export default function MetaCallback() {
     exchangeCode({ code, state: effectiveState })
       .then((result) => {
         setAccountId(result.accountId);
-        if (result.pages && result.pages.length > 0) {
-          setPages(result.pages);
-          setStatus("needs_page");
-        } else {
-          setStatus("done");
-          toast.success("Instagram account connected!");
-          // Auto-redirect to onboarding or dashboard
-          setTimeout(() => {
-            const onboardingDone = localStorage.getItem("cs_onboarding_done");
-            if (!onboardingDone) {
-              navigate("/onboarding", { replace: true });
-            } else {
-              navigate("/dashboard/settings", { replace: true });
-            }
-          }, 1500);
-        }
+        // Skip page selector — go directly to onboarding/dashboard
+        setStatus("done");
+        toast.success("Instagram account connected!");
+        setTimeout(() => {
+          const onboardingDone = localStorage.getItem("cs_onboarding_done");
+          if (!onboardingDone) {
+            navigate("/onboarding", { replace: true });
+          } else {
+            navigate("/dashboard/settings", { replace: true });
+          }
+        }, 1500);
       })
       .catch((err) => {
         setErrorMsg(err.message || "Failed to exchange authorization code");
