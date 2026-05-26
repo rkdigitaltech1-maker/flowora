@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     // Listen for auth state changes (sign-in, sign-out, token refresh)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setSupabaseUser(session?.user ?? null);
       setIsLoading(false);
@@ -44,6 +44,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Mark local storage so legacy checks still pass
         localStorage.setItem("local_auth_authenticated", "true");
         setLocalAuth(true);
+      }
+
+      // If user just signed in and we're still on the login page, redirect them
+      if (event === "SIGNED_IN" && session?.user) {
+        const currentPath = window.location.pathname;
+        if (currentPath === "/login" || currentPath === "/") {
+          const onboardingDone = localStorage.getItem("cs_onboarding_done");
+          window.location.href = onboardingDone ? "/dashboard" : "/welcome";
+        }
       }
     });
 

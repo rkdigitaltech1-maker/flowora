@@ -118,14 +118,27 @@ export default function LoginPage() {
       const timer = setInterval(async () => {
         if (popup.closed) {
           clearInterval(timer);
-          // Check if session was established
+          // Give a short delay for the session to propagate from popup to parent via localStorage
+          await new Promise((resolve) => setTimeout(resolve, 800));
+          
+          // Refresh the session from storage (the popup persisted it)
           const { data: sessionData } = await supabase.auth.getSession();
           if (sessionData?.session) {
             toast.success("Signed in with Google!");
             const onboardingDone = localStorage.getItem("cs_onboarding_done");
-            navigate(onboardingDone ? "/dashboard" : "/welcome");
+            navigate(onboardingDone ? "/dashboard" : "/welcome", { replace: true });
           } else {
-            setGoogleLoading(false);
+            // One more retry after another delay (session propagation can be slow)
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            const { data: retryData } = await supabase.auth.getSession();
+            if (retryData?.session) {
+              toast.success("Signed in with Google!");
+              const onboardingDone = localStorage.getItem("cs_onboarding_done");
+              navigate(onboardingDone ? "/dashboard" : "/welcome", { replace: true });
+            } else {
+              setGoogleLoading(false);
+              toast.error("Sign-in session not detected. Please try again.");
+            }
           }
         }
       }, 500);
