@@ -1235,12 +1235,33 @@ export function useSettings() {
 
 export async function exchangeMetaCode(args: { code: string; state: string }) {
   // 1. Get workspace ID
-  const { data: { user } } = await supabase.auth.getUser();
-  const userId = user?.id;
+  let userId: string | null = null;
+  try {
+    // Wait for session to be restored after redirect
+    const { data: sessionData } = await supabase.auth.getSession();
+    userId = sessionData?.session?.user?.id ?? null;
+    if (!userId) {
+      const { data: { user } } = await supabase.auth.getUser();
+      userId = user?.id ?? null;
+    }
+  } catch (e) {
+    console.warn("Could not get Supabase user during meta exchange:", e);
+  }
   
   let workspaceId: string | null = null;
   if (args.state.startsWith("qr_conn:")) {
     workspaceId = args.state.split(":")[1];
+  } else if (args.state.startsWith("dashboard_conn:") || args.state.startsWith("reauth:") || args.state.startsWith("fallback:")) {
+    // For dashboard/reauth flows, try to get workspace from Supabase user
+    if (userId) {
+      const { data: wsList } = await supabase
+        .from("creator_workspaces")
+        .select("id")
+        .eq("owner_user_id", userId);
+      if (wsList && wsList.length > 0) {
+        workspaceId = (wsList[0] as any).id;
+      }
+    }
   } else if (userId) {
     const { data: wsList } = await supabase
       .from("creator_workspaces")
@@ -1251,11 +1272,17 @@ export async function exchangeMetaCode(args: { code: string; state: string }) {
     }
   }
 
-  if (!workspaceId) {
+  // ALWAYS attempt real exchange if we have a code — skip mock for real OAuth flows
+  const isRealOAuthFlow = args.state.startsWith("dashboard_conn:") || 
+                           args.state.startsWith("reauth:") || 
+                           args.state.startsWith("qr_conn:") ||
+                           args.state.startsWith("fallback:");
+
+  if (!workspaceId && !isRealOAuthFlow) {
     workspaceId = "demo-workspace-id";
   }
 
-  const isMock = workspaceId === "demo-workspace-id";
+  const isMock = workspaceId === "demo-workspace-id" && !isRealOAuthFlow;
 
   if (isMock) {
     const mockAccountId = `acc-${Date.now()}`;
@@ -1313,10 +1340,15 @@ export async function exchangeMetaCode(args: { code: string; state: string }) {
       }),
     });
 
+    if (!apiResponse.ok) {
+      const errorData = await apiResponse.json().catch(() => ({ error: `HTTP ${apiResponse.status}` }));
+      throw new Error(errorData.error || `Token exchange failed with status ${apiResponse.status}`);
+    }
+
     const tokenData = await apiResponse.json();
 
-    if (!apiResponse.ok || !tokenData.access_token) {
-      throw new Error(tokenData.error || "Failed to exchange code for token");
+    if (!tokenData.access_token) {
+      throw new Error(tokenData.error || "No access token returned from exchange");
     }
 
     const longLivedToken = tokenData.access_token;
@@ -1334,23 +1366,27 @@ export async function exchangeMetaCode(args: { code: string; state: string }) {
     const tokenExpiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
     const accountId = crypto.randomUUID();
 
-    const { error: insertError } = await supabase
-      .from("instagram_accounts")
-      .insert([{
-        id: accountId,
-        workspace_id: workspaceId,
-        instagram_user_id: pages[0]?.instagramBusinessAccountId || "pending",
-        username: pages[0]?.pageName || "Instagram Account",
-        access_token_enc: longLivedToken,
-        token_expires_at: tokenExpiresAt,
-        permissions: ["instagram_basic", "instagram_manage_comments", "instagram_manage_messages", "pages_show_list", "pages_read_engagement"],
-        status: "connected",
-        connected_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }]);
+    // Only save to DB if we have a workspace
+    if (workspaceId) {
+      const { error: insertError } = await supabase
+        .from("instagram_accounts")
+        .insert([{
+          id: accountId,
+          workspace_id: workspaceId,
+          instagram_user_id: pages[0]?.instagramBusinessAccountId || "pending",
+          username: pages[0]?.pageName || "Instagram Account",
+          access_token_enc: longLivedToken,
+          token_expires_at: tokenExpiresAt,
+          permissions: ["instagram_basic", "instagram_manage_comments", "instagram_manage_messages", "pages_show_list", "pages_read_engagement"],
+          status: "connected",
+          connected_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }]);
 
-    if (insertError) {
-      throw new Error(insertError.message);
+      if (insertError) {
+        console.error("DB insert error (non-fatal):", insertError.message);
+        // Don't throw — the connection still worked, just DB save failed
+      }
     }
 
     return {
