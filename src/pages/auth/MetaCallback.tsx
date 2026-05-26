@@ -34,6 +34,15 @@ export default function MetaCallback() {
         } else {
           setStatus("done");
           toast.success("Instagram account connected!");
+          // Auto-redirect to onboarding or dashboard
+          setTimeout(() => {
+            const onboardingDone = localStorage.getItem("cs_onboarding_done");
+            if (!onboardingDone) {
+              navigate("/onboarding", { replace: true });
+            } else {
+              navigate("/dashboard/settings", { replace: true });
+            }
+          }, 1500);
         }
       })
       .catch((err) => {
@@ -87,7 +96,18 @@ export default function MetaCallback() {
           <PageSelector
             pages={pages}
             accountId={accountId!}
-            onDone={() => setStatus("done")}
+            onDone={() => {
+              setStatus("done");
+              toast.success("Instagram account connected!");
+              setTimeout(() => {
+                const onboardingDone = localStorage.getItem("cs_onboarding_done");
+                if (!onboardingDone) {
+                  navigate("/onboarding", { replace: true });
+                } else {
+                  navigate("/dashboard/settings", { replace: true });
+                }
+              }, 1500);
+            }}
             onError={(msg) => { setErrorMsg(msg); setStatus("error"); }}
           />
         )}
@@ -96,14 +116,7 @@ export default function MetaCallback() {
           <div className="text-center">
             <CheckCircle2 className="mx-auto h-12 w-12 text-green-500" />
             <h1 className="mt-3 text-xl font-semibold text-slate-950">Instagram connected!</h1>
-            <p className="mt-1 text-sm text-slate-500">Your Instagram account is now connected. You can now set up automation workflows.</p>
-            <button
-              onClick={() => navigate("/dashboard/settings")}
-              className="mt-6 inline-flex items-center gap-2 rounded-lg bg-slate-950 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
-            >
-              Go to settings
-              <ArrowRight className="h-4 w-4" />
-            </button>
+            <p className="mt-1 text-sm text-slate-500">Redirecting you to complete setup...</p>
           </div>
         )}
 
