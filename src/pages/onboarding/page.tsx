@@ -611,14 +611,35 @@ export default function OnboardingPage() {
             {/* Action Buttons */}
             <div className="flex flex-col gap-3">
               <Button
-                onClick={() => {
+                onClick={async () => {
                   setAuthLoading(true);
-                  setTimeout(() => {
-                    setConnectedUsername("@your.instagram");
+                  try {
+                    // Try to open real Instagram OAuth
+                    const appId = import.meta.env.VITE_META_APP_ID;
+                    if (appId) {
+                      const redirectUri = (import.meta.env.VITE_META_REDIRECT_URI as string | undefined) ?? `${window.location.origin}/auth/meta/callback`;
+                      const state = `dashboard_conn:onboarding`;
+                      const url = new URL("https://www.instagram.com/oauth/authorize");
+                      url.searchParams.set("force_reauth", "true");
+                      url.searchParams.set("client_id", appId);
+                      url.searchParams.set("redirect_uri", redirectUri);
+                      url.searchParams.set("scope", "instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments,instagram_business_content_publish,instagram_business_manage_insights");
+                      url.searchParams.set("response_type", "code");
+                      url.searchParams.set("state", state);
+                      window.location.href = url.toString();
+                    } else {
+                      // Fallback: simulate connection for demo/dev
+                      setTimeout(() => {
+                        setConnectedUsername("@your.instagram");
+                        setAuthLoading(false);
+                        setShowAuthModal(false);
+                        setShowCongrats(true);
+                      }, 1500);
+                    }
+                  } catch (err) {
+                    toast.error("Failed to start Instagram connection. Please try again.");
                     setAuthLoading(false);
-                    setShowAuthModal(false);
-                    setShowCongrats(true);
-                  }, 1500);
+                  }
                 }}
                 disabled={authLoading}
                 className="w-full h-12 bg-gradient-to-r from-[#f59e0b] via-[#f97316] to-[#ef4444] hover:opacity-95 text-white font-extrabold rounded-xl shadow-md text-sm flex items-center justify-center gap-2"
