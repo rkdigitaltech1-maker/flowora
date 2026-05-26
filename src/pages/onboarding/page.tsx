@@ -25,6 +25,8 @@ import {
   CreditCard,
   Database,
   HelpCircle,
+  Shield,
+  PartyPopper,
 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
@@ -115,6 +117,8 @@ export default function OnboardingPage() {
   const [connecting, setConnecting] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
+  const [showCongrats, setShowCongrats] = useState(false);
+  const [connectedUsername, setConnectedUsername] = useState("");
 
   // Permission settings states
   const [permComments, setPermComments] = useState(true);
@@ -240,44 +244,44 @@ export default function OnboardingPage() {
                 </Button>
               </div>
             ) : step === 1 ? (
-              /* Step 1: Connect Instagram */
-              <div className="space-y-6 animate-fade-in">
-                <div className="space-y-3">
-                  <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
-                    Let's <span className="animated-gradient-text bg-gradient-to-r from-[#7c3cff] to-[#ec149e] bg-clip-text text-transparent">Kick Things Off!</span>
+              /* Step 1: Connect Instagram to Unlock */
+              <div className="space-y-6 animate-fade-in text-center">
+                {/* Lock Icon */}
+                <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-[#6d48ff]/10 to-indigo-500/10 flex items-center justify-center border border-violet-100">
+                  <Lock className="w-7 h-7 text-[#6d48ff]" />
+                </div>
+
+                <div className="space-y-2">
+                  <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
+                    Connect Instagram to unlock your dashboard
                   </h1>
-                  <p className="text-slate-500 text-sm leading-relaxed font-semibold">
-                    Start with any channel you like — you can connect more later.
+                  <p className="text-slate-500 text-sm leading-relaxed font-medium max-w-sm mx-auto">
+                    Connect Instagram once to activate your checklist, quick actions, and live metrics. Your How section will stay available below.
                   </p>
                 </div>
 
-                {/* Instagram Channel button */}
+                {/* Connect Instagram Button */}
                 <button
                   onClick={handleConnectInstagram}
                   disabled={connecting}
-                  className="w-full flex items-center justify-between p-4.5 rounded-2xl border border-slate-200 bg-white hover:border-[#7c3cff]/40 hover:shadow-md transition-all duration-300 group cursor-pointer"
+                  className="mx-auto flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-gradient-to-r from-[#6d48ff] to-[#9b59ff] text-white font-bold text-sm shadow-lg shadow-violet-500/20 hover:shadow-xl hover:from-[#5a38e0] hover:to-[#8b49ef] hover:scale-[1.02] transition-all duration-200 cursor-pointer"
                 >
-                  <div className="flex items-center gap-3.5">
-                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-tr from-[#f91f7f] via-[#ec149e] to-[#fb923c] text-white shadow-sm">
-                      <InstagramLogo />
-                    </span>
-                    <span className="font-extrabold text-sm text-slate-800">Instagram</span>
-                  </div>
                   {connecting ? (
-                    <span className="h-4.5 w-4.5 rounded-full border-2 border-[#7c3cff]/30 border-t-[#7c3cff] animate-spin" />
+                    <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                   ) : (
-                    <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-[#7c3cff] transition-colors" />
+                    <>
+                      <InstagramLogo />
+                      Connect Instagram
+                    </>
                   )}
                 </button>
 
-                <div className="flex flex-col gap-2 w-full pt-1.5">
-                  <button
-                    onClick={next}
-                    className="text-xs text-slate-450 hover:text-slate-650 font-bold transition-colors text-center cursor-pointer"
-                  >
-                    Skip connection step for now
-                  </button>
-                </div>
+                <button
+                  onClick={next}
+                  className="text-xs text-slate-400 hover:text-slate-600 font-semibold transition-colors text-center cursor-pointer"
+                >
+                  Skip for now →
+                </button>
               </div>
             ) : step === 2 ? (
               /* Step 2: Zorcha Onboarding mock personalization */
@@ -562,142 +566,87 @@ export default function OnboardingPage() {
       {/* SIMULATED INSTAGRAM CONNECTION MODAL */}
       {showAuthModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-[0_32px_96px_rgba(109,72,255,0.16)] max-w-md w-full p-7 sm:p-8 space-y-6 relative">
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-[0_32px_96px_rgba(109,72,255,0.16)] max-w-sm w-full p-7 sm:p-8 space-y-5 relative">
             
-            {/* Close Button */}
+            {/* Back Button */}
             <button
               onClick={() => setShowAuthModal(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-slate-650 transition-colors cursor-pointer"
+              className="flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-700 transition-colors cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              ‹ Back
             </button>
 
-            {/* Branded Connecting Graphics */}
-            <div className="flex items-center justify-center gap-6 pt-2">
-              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-tr from-[#f91f7f] via-[#ec149e] to-[#fb923c] text-white shadow-md">
-                <InstagramLogo />
-              </span>
-              
-              {/* Animated Connection Arrow */}
-              <div className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#7c3cff] animate-ping" />
-                <div className="w-8 h-[2px] bg-gradient-to-r from-[#ec149e]/40 to-[#7c3cff]/40 relative">
-                  <ArrowRight className="h-3.5 w-3.5 text-[#7c3cff] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-                </div>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#ec149e] animate-pulse" />
-              </div>
-
-              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-tr from-[#7c3cff] to-[#ec149e] text-white shadow-md shadow-[#7c3cff]/15">
-                <Zap className="h-6 w-6 fill-white text-white" />
-              </span>
+            {/* Flowora Logo */}
+            <div className="flex items-center justify-center gap-2">
+              <img src="/logo.png" alt="Flowora" className="h-7 w-auto object-contain" />
             </div>
 
             {/* Header Text */}
             <div className="text-center space-y-1.5">
-              <h3 className="text-lg font-black text-slate-900 leading-tight">Requesting Access</h3>
+              <h3 className="text-xl font-black text-slate-900 leading-tight">Connect Instagram Account ✨</h3>
               <p className="text-xs text-slate-500 font-semibold leading-relaxed max-w-xs mx-auto">
-                <strong>Flowora App</strong> wants to connect with your Instagram Business profile <strong>@ramkumaronly</strong>.
+                Only a few steps away to automate your growth!
               </p>
             </div>
 
-            {/* Permission Toggles List */}
-            <div className="space-y-3.5 bg-slate-50/70 border border-slate-100 rounded-2xl p-4.5">
-              
-              {/* Item 1: Profile Info (Required) */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-xs font-black text-slate-800 leading-none">View Profile Profile &amp; Media</h4>
-                  <p className="text-[10px] text-slate-400 mt-1 font-semibold">Required to read handle and verify status.</p>
-                </div>
-                {/* Active switch slider */}
-                <div className="w-9 h-5 rounded-full bg-[#7c3cff]/20 flex items-center p-0.5 opacity-60 cursor-not-allowed">
-                  <div className="w-4 h-4 rounded-full bg-[#7c3cff] translate-x-4" />
-                </div>
+            {/* Meta Verified Badge */}
+            <div className="bg-gradient-to-br from-violet-50 to-indigo-50 border border-violet-100 rounded-2xl p-4 text-center space-y-2.5">
+              <div className="flex items-center justify-center gap-2">
+                <Shield className="w-4 h-4 text-[#7c3cff]" />
+                <span className="text-xs font-black text-[#7c3cff]">We're a Meta-verified business</span>
               </div>
-
-              <hr className="border-slate-100" />
-
-              {/* Item 2: Comments */}
-              <div
-                className="flex items-center justify-between cursor-pointer"
-                onClick={() => setPermComments(!permComments)}
-              >
-                <div>
-                  <h4 className="text-xs font-black text-slate-800 leading-none">Access &amp; Manage Comments</h4>
-                  <p className="text-[10px] text-slate-400 mt-1 font-semibold">Required to listen to keyword comment triggers.</p>
-                </div>
-                <div className={`w-9 h-5 rounded-full transition-colors duration-200 flex items-center p-0.5 ${permComments ? "bg-[#7c3cff]" : "bg-slate-200"}`}>
-                  <div className={`w-4 h-4 rounded-full bg-white transition-transform duration-200 ${permComments ? "translate-x-4" : "translate-x-0"}`} />
-                </div>
+              <p className="text-[10px] text-slate-500 font-medium leading-relaxed max-w-[260px] mx-auto">
+                We only use official Instagram APIs and processes. Your account is secure, and you stay in full control.
+              </p>
+              <div className="flex flex-col gap-1.5 items-start max-w-[220px] mx-auto pt-1">
+                {["Official Meta OAuth login", "Safe and Secure", "Used by 1000+ creators"].map((item) => (
+                  <div key={item} className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    <span className="text-[11px] text-slate-700 font-semibold">{item}</span>
+                  </div>
+                ))}
               </div>
-
-              <hr className="border-slate-100" />
-
-              {/* Item 3: Messages */}
-              <div
-                className="flex items-center justify-between cursor-pointer"
-                onClick={() => setPermDms(!permDms)}
-              >
-                <div>
-                  <h4 className="text-xs font-black text-slate-800 leading-none">Manage Direct Messages</h4>
-                  <p className="text-[10px] text-slate-400 mt-1 font-semibold">Required to send replies with links/storefronts.</p>
-                </div>
-                <div className={`w-9 h-5 rounded-full transition-colors duration-200 flex items-center p-0.5 ${permDms ? "bg-[#7c3cff]" : "bg-slate-200"}`}>
-                  <div className={`w-4 h-4 rounded-full bg-white transition-transform duration-200 ${permDms ? "translate-x-4" : "translate-x-0"}`} />
-                </div>
-              </div>
-
-              <hr className="border-slate-100" />
-
-              {/* Item 4: Analytics */}
-              <div
-                className="flex items-center justify-between cursor-pointer"
-                onClick={() => setPermAnalytics(!permAnalytics)}
-              >
-                <div>
-                  <h4 className="text-xs font-black text-slate-800 leading-none">Read Account Insights</h4>
-                  <p className="text-[10px] text-slate-400 mt-1 font-semibold">Required to synchronize campaign reach &amp; clicks.</p>
-                </div>
-                <div className={`w-9 h-5 rounded-full transition-colors duration-200 flex items-center p-0.5 ${permAnalytics ? "bg-[#7c3cff]" : "bg-slate-200"}`}>
-                  <div className={`w-4 h-4 rounded-full bg-white transition-transform duration-200 ${permAnalytics ? "translate-x-4" : "translate-x-0"}`} />
-                </div>
-              </div>
-
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-3">
               <Button
                 onClick={() => {
                   setAuthLoading(true);
                   setTimeout(() => {
-                    toast.success("Linked Instagram account successfully!");
+                    setConnectedUsername("@your.instagram");
                     setAuthLoading(false);
                     setShowAuthModal(false);
-                    next();
-                  }, 1200);
+                    setShowCongrats(true);
+                  }, 1500);
                 }}
                 disabled={authLoading}
-                className="w-full h-11.5 bg-gradient-to-r from-[#7c3cff] to-[#ec149e] hover:opacity-95 text-white font-extrabold rounded-xl shadow-md shadow-[#7c3cff]/10 text-xs flex items-center justify-center gap-1.5"
+                className="w-full h-12 bg-gradient-to-r from-[#f59e0b] via-[#f97316] to-[#ef4444] hover:opacity-95 text-white font-extrabold rounded-xl shadow-md text-sm flex items-center justify-center gap-2"
               >
                 {authLoading ? (
                   <>
                     <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                    Linking profiles…
+                    Connecting account…
                   </>
                 ) : (
                   <>
-                    Authorize &amp; Continue
+                    <InstagramLogo /> Login with Instagram
                   </>
                 )}
               </Button>
-              <Button
-                variant="outline"
+
+              <p className="text-[10px] text-slate-400 font-medium text-center">
+                By continuing, you agree to Flowora's{" "}
+                <a href="/terms" className="text-[#6d48ff] hover:underline">Terms of Service</a> and{" "}
+                <a href="/privacy" className="text-[#6d48ff] hover:underline">Privacy Policy</a>
+              </p>
+
+              <button
                 onClick={() => setShowAuthModal(false)}
-                className="w-full h-11.5 border-slate-200 hover:bg-slate-50 text-slate-500 font-bold rounded-xl text-xs"
+                className="text-xs text-slate-400 hover:text-slate-600 font-semibold text-center cursor-pointer transition-colors"
               >
-                Cancel
-              </Button>
+                Logout
+              </button>
             </div>
 
           </div>
@@ -714,13 +663,91 @@ export default function OnboardingPage() {
           from { opacity: 0; transform: translateY(32px) scale(0.95); }
           to { opacity: 1; transform: translateY(0) scale(1); }
         }
+        @keyframes sparkle-float {
+          0%, 100% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+          50% { transform: translateY(-12px) rotate(180deg) scale(1.3); opacity: 0.7; }
+        }
+        @keyframes confetti-fall {
+          0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+          20% { opacity: 1; }
+          100% { transform: translateY(40px) rotate(360deg); opacity: 0; }
+        }
         .animate-fade-in {
           animation: fade-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
         .animate-slide-in {
           animation: slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
+        .animate-sparkle {
+          animation: sparkle-float 2s ease-in-out infinite;
+        }
       `}</style>
+
+      {/* CONGRATS MODAL — shows after successful Instagram connection */}
+      {showCongrats && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/50 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-[0_32px_96px_rgba(109,72,255,0.2)] max-w-sm w-full p-8 text-center space-y-5 relative overflow-hidden">
+            
+            {/* Floating sparkles decoration */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              {[
+                { left: "10%", top: "15%", delay: "0s", size: "text-yellow-400" },
+                { left: "80%", top: "10%", delay: "0.3s", size: "text-pink-400" },
+                { left: "20%", top: "75%", delay: "0.6s", size: "text-violet-400" },
+                { left: "75%", top: "80%", delay: "0.9s", size: "text-blue-400" },
+                { left: "50%", top: "5%", delay: "1.2s", size: "text-emerald-400" },
+                { left: "5%", top: "50%", delay: "0.4s", size: "text-orange-400" },
+                { left: "90%", top: "45%", delay: "0.7s", size: "text-rose-400" },
+              ].map((spark, i) => (
+                <Sparkles
+                  key={i}
+                  className={`absolute w-4 h-4 ${spark.size} animate-sparkle`}
+                  style={{ left: spark.left, top: spark.top, animationDelay: spark.delay }}
+                />
+              ))}
+            </div>
+
+            {/* Flowora Logo */}
+            <div className="flex items-center justify-center gap-2">
+              <img src="/logo.png" alt="Flowora" className="h-6 w-auto object-contain" />
+            </div>
+
+            {/* Avatar circle */}
+            <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-violet-100 to-indigo-100 border-4 border-white shadow-xl flex items-center justify-center overflow-hidden">
+              <div className="w-full h-full bg-gradient-to-br from-[#6d48ff] to-[#ec149e] flex items-center justify-center">
+                <CheckCircle2 className="w-10 h-10 text-white" />
+              </div>
+            </div>
+
+            {/* Congrats text */}
+            <div className="space-y-2 relative z-10">
+              <h2 className="text-2xl font-black text-slate-900">Congratulations! 🎉</h2>
+              <p className="text-sm text-slate-500 font-medium">
+                {connectedUsername || "Your Instagram"} is successfully connected!
+              </p>
+            </div>
+
+            {/* Next button */}
+            <Button
+              onClick={() => {
+                setShowCongrats(false);
+                toast.success("Instagram connected! Let's continue setup.");
+                next();
+              }}
+              className="w-full h-12 bg-gradient-to-r from-[#6d48ff] to-[#9b59ff] hover:from-[#5a38e0] hover:to-[#8b49ef] text-white font-extrabold rounded-2xl shadow-lg shadow-violet-500/20 text-sm transition-all"
+            >
+              Next
+            </Button>
+
+            {/* Terms */}
+            <p className="text-[10px] text-slate-400 font-medium">
+              By continuing, you agree to Flowora's{" "}
+              <a href="/terms" className="text-[#6d48ff] hover:underline">Terms of Service</a> and{" "}
+              <a href="/privacy" className="text-[#6d48ff] hover:underline">Privacy Policy</a>
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
