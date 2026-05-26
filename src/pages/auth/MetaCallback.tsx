@@ -20,9 +20,12 @@ export default function MetaCallback() {
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    if (!code || !state) return;
+    if (!code) return;
 
-    exchangeCode({ code, state })
+    // Use state if available, otherwise generate a fallback
+    const effectiveState = state || `fallback:${Date.now()}`;
+
+    exchangeCode({ code, state: effectiveState })
       .then((result) => {
         setAccountId(result.accountId);
         if (result.pages && result.pages.length > 0) {
