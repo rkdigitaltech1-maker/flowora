@@ -10,17 +10,17 @@ import {
   Crown,
   Shield,
   Sparkles,
-  Star,
   Zap,
   Calendar,
   Receipt,
   AlertCircle,
-  Settings,
   IndianRupee,
   DollarSign,
   ChevronRight,
   RefreshCw,
   X,
+  Users,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { toast } from "sonner";
@@ -28,6 +28,7 @@ import { usePricing } from "@/hooks/use-pricing.ts";
 import {
   PLANS,
   formatPrice,
+  formatAnnualTotal,
   getAnnualSavingsPercent,
   generateDemoInvoices,
   getPlanById,
@@ -42,7 +43,7 @@ function useSubscription() {
   const [subscription] = useState({
     plan: "pro" as PlanTier,
     interval: "annual" as BillingInterval,
-    currency: "USD" as Currency,
+    currency: "INR" as Currency,
     status: "active" as "active" | "trialing" | "canceled" | "past_due",
     currentPeriodStart: new Date(2026, 0, 15).toISOString(),
     currentPeriodEnd: new Date(2027, 0, 15).toISOString(),
@@ -70,17 +71,6 @@ function CurrencySelector({
   return (
     <div className="inline-flex items-center gap-1 rounded-lg border border-[#dfdbea] bg-white p-0.5">
       <button
-        onClick={() => onChange("USD")}
-        className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
-          currency === "USD"
-            ? "bg-[#6d48ff] text-white shadow-sm"
-            : "text-[#665d82] hover:text-[#171126]"
-        }`}
-      >
-        <DollarSign className="h-3 w-3" />
-        USD
-      </button>
-      <button
         onClick={() => onChange("INR")}
         className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
           currency === "INR"
@@ -90,6 +80,17 @@ function CurrencySelector({
       >
         <IndianRupee className="h-3 w-3" />
         INR
+      </button>
+      <button
+        onClick={() => onChange("USD")}
+        className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
+          currency === "USD"
+            ? "bg-[#6d48ff] text-white shadow-sm"
+            : "text-[#665d82] hover:text-[#171126]"
+        }`}
+      >
+        <DollarSign className="h-3 w-3" />
+        USD
       </button>
     </div>
   );
@@ -139,17 +140,16 @@ function CurrentPlanCard({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-[#171126]">{plan.name} Plan</h2>
+              <h2 className="text-lg font-bold text-[#171126]">Pro Plan</h2>
               <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${statusColors[subscription.status]}`}>
                 {statusLabels[subscription.status]}
               </span>
             </div>
             <p className="text-sm text-[#82799b]">
-              {formatPrice(price, currency)}/month &middot; Billed {subscription.interval === "annual" ? "annually" : "monthly"}
+              {formatPrice(price, currency)}/month · Billed {subscription.interval === "annual" ? "annually" : "monthly"}
             </p>
           </div>
         </div>
-        <CurrencySelector currency={currency} onChange={() => {}} />
       </div>
 
       {/* Billing Cycle Progress */}
@@ -191,16 +191,7 @@ function CurrentPlanCard({
           variant="outline"
           size="sm"
           className="border-[#dfdbea] text-[#665d82] hover:bg-[#f4f1fb] text-xs"
-          onClick={() => toast.info("Redirecting to plan change...")}
-        >
-          <ArrowUpRight className="h-3.5 w-3.5 mr-1" />
-          Change Plan
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="border-[#dfdbea] text-[#665d82] hover:bg-[#f4f1fb] text-xs"
-          onClick={() => toast.info("Manage billing interval...")}
+          onClick={() => toast.info("Switching billing interval...")}
         >
           <Calendar className="h-3.5 w-3.5 mr-1" />
           Switch to {subscription.interval === "annual" ? "Monthly" : "Annual"}
@@ -219,45 +210,34 @@ function CurrentPlanCard({
   );
 }
 
-function UsageOverview({ currency }: { currency: Currency }) {
-  // Demo usage data
-  const usage = {
-    dmsThisMonth: 847,
-    dmsLimit: 999999,
-    contactsTotal: 2340,
-    contactsLimit: 999999,
-    workflowsCount: 8,
-    workflowsLimit: 999999,
-    productsCount: 6,
-    productsLimit: 999999,
-  };
-
+function UsageOverview() {
+  // Demo usage data for Pro plan (unlimited everything)
   const metrics = [
     {
       label: "DMs this month",
-      used: usage.dmsThisMonth,
-      limit: usage.dmsLimit,
+      used: 847,
+      limit: 999999,
       color: "bg-[#6d48ff]",
+      icon: MessageSquare,
+    },
+    {
+      label: "Leads collected",
+      used: 2340,
+      limit: 999999,
+      color: "bg-emerald-500",
+      icon: Users,
+    },
+    {
+      label: "Instagram accounts",
+      used: 3,
+      limit: 10,
+      color: "bg-cyan-500",
       icon: Zap,
     },
     {
-      label: "Total contacts",
-      used: usage.contactsTotal,
-      limit: usage.contactsLimit,
-      color: "bg-emerald-500",
-      icon: Star,
-    },
-    {
-      label: "Active workflows",
-      used: usage.workflowsCount,
-      limit: usage.workflowsLimit,
-      color: "bg-cyan-500",
-      icon: RefreshCw,
-    },
-    {
-      label: "Products",
-      used: usage.productsCount,
-      limit: usage.productsLimit,
+      label: "Active campaigns",
+      used: 8,
+      limit: 999999,
       color: "bg-rose-500",
       icon: Sparkles,
     },
@@ -280,10 +260,10 @@ function UsageOverview({ currency }: { currency: Currency }) {
           <ChevronRight className="h-3 w-3" />
         </Link>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {metrics.map((m, i) => {
           const Icon = m.icon;
-          const percent = m.limit >= 999999 ? 100 : Math.min((m.used / m.limit) * 100, 100);
+          const percent = m.limit >= 999999 ? 0 : Math.min((m.used / m.limit) * 100, 100);
           return (
             <div key={i} className="rounded-xl border border-[#dfdbea] p-3.5 bg-slate-50/50">
               <div className="flex items-center justify-between mb-1.5">
@@ -307,7 +287,7 @@ function UsageOverview({ currency }: { currency: Currency }) {
                 </div>
               )}
               {m.limit >= 999999 && (
-                <p className="mt-1 text-[10px] font-medium text-emerald-600">Unlimited on your plan</p>
+                <p className="mt-1 text-[10px] font-medium text-emerald-600">Unlimited on Pro</p>
               )}
             </div>
           );
@@ -407,7 +387,7 @@ function InvoiceHistory({ currency }: { currency: Currency }) {
                     day: "numeric",
                     year: "numeric",
                   })}{" "}
-                  &middot; {invoice.plan} ({invoice.interval})
+                  · {invoice.plan} ({invoice.interval})
                 </p>
               </div>
             </div>
@@ -430,14 +410,9 @@ function InvoiceHistory({ currency }: { currency: Currency }) {
   );
 }
 
-function UpgradeBanner({ currency, currentPlan }: { currency: Currency; currentPlan: PlanTier }) {
+function UpgradeBanner({ currency }: { currency: Currency }) {
   const navigate = useNavigate();
-
-  if (currentPlan === "enterprise") return null;
-
-  const nextPlan = currentPlan === "free" ? "starter" : currentPlan === "starter" ? "pro" : "enterprise";
-  const plan = getPlanById(nextPlan);
-  if (!plan) return null;
+  const proPlan = getPlanById("pro")!;
 
   return (
     <motion.div
@@ -451,15 +426,15 @@ function UpgradeBanner({ currency, currentPlan }: { currency: Currency; currentP
             <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="font-bold text-lg">Upgrade to {plan.name}</h3>
+            <h3 className="font-bold text-lg">Upgrade to Pro</h3>
             <p className="text-sm text-violet-200">
-              Get {nextPlan === "pro" ? "unlimited everything" : "more power"} starting at{" "}
-              {formatPrice(plan.pricing[currency].annual, currency)}/mo
+              Unlimited DMs, campaigns & leads starting at{" "}
+              {formatPrice(proPlan.pricing[currency].annual, currency)}/mo
             </p>
           </div>
         </div>
         <Button
-          onClick={() => navigate(`/dashboard/checkout?plan=${nextPlan}&currency=${currency}`)}
+          onClick={() => navigate(`/dashboard/checkout?plan=pro&currency=${currency}`)}
           className="bg-white text-[#6d48ff] hover:bg-violet-50 font-semibold shadow-sm"
         >
           Upgrade Now
@@ -473,7 +448,6 @@ function UpgradeBanner({ currency, currentPlan }: { currency: Currency; currentP
 export default function BillingPage() {
   const { currency, setCurrency } = usePricing();
   const subscription = useSubscription();
-  const navigate = useNavigate();
 
   return (
     <div className="space-y-6 p-1">
@@ -501,10 +475,8 @@ export default function BillingPage() {
         </div>
       </div>
 
-      {/* Upgrade Banner (show if not on enterprise) */}
-      {subscription.plan !== "enterprise" && (
-        <UpgradeBanner currency={currency} currentPlan={subscription.plan} />
-      )}
+      {/* Upgrade Banner (show if on free plan) */}
+      {subscription.plan === "free" && <UpgradeBanner currency={currency} />}
 
       {/* Main Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
@@ -516,7 +488,7 @@ export default function BillingPage() {
       </div>
 
       {/* Usage */}
-      <UsageOverview currency={currency} />
+      <UsageOverview />
 
       {/* Invoices */}
       <InvoiceHistory currency={currency} />
@@ -528,7 +500,7 @@ export default function BillingPage() {
           <h3 className="font-semibold text-[#171126]">Need Help?</h3>
         </div>
         <p className="text-sm text-[#82799b] mb-4">
-          Have questions about billing, need to update your payment info, or want a custom plan?
+          Have questions about billing, need to update your payment info, or want help with your plan?
         </p>
         <div className="flex flex-wrap gap-2">
           <Button

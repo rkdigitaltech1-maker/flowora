@@ -1,11 +1,15 @@
 /**
  * Flowora Pricing Plans & Currency Configuration
- * Supports INR and USD with monthly/annual billing intervals.
+ * Two plans: Free & Pro, with INR/USD support and monthly/annual billing.
+ *
+ * Pricing (from your live pricing page):
+ * - Pro USD: $4.99/mo annual ($59.88/yr), save 17% vs monthly
+ * - Pro INR: ₹399/mo annual (₹4,788/yr), save 20% vs monthly
  */
 
 export type Currency = "INR" | "USD";
 export type BillingInterval = "monthly" | "annual";
-export type PlanTier = "free" | "starter" | "pro" | "enterprise";
+export type PlanTier = "free" | "pro";
 
 export interface PlanFeature {
   text: string;
@@ -21,18 +25,33 @@ export interface PlanPricing {
 export interface Plan {
   id: PlanTier;
   name: string;
+  subtitle: string;
   description: string;
   pricing: Record<Currency, PlanPricing>;
   features: PlanFeature[];
   popular?: boolean;
   cta: string;
   limits: {
+    instagramAccounts: number;
     dmsPerMonth: number;
-    contacts: number;
+    activeCampaigns: number;
+    leadsCollected: number;
     workflows: number;
     products: number;
-    campaigns: number;
   };
+  automations: {
+    commentAutoDM: boolean;
+    storyMentionAutoDM: boolean;
+    emailPhoneCollection: boolean;
+    csvExport: boolean;
+    reTrigger: boolean;
+    askForFollow: boolean;
+    leadGen: boolean;
+    webhookAutoRetry: boolean;
+  };
+  analyticsHistory: string;
+  support: string;
+  moneyBackDays: number | null;
 }
 
 export const CURRENCY_CONFIG: Record<Currency, { symbol: string; code: string; locale: string }> = {
@@ -46,9 +65,21 @@ export function formatPrice(amount: number, currency: Currency): string {
   return new Intl.NumberFormat(config.locale, {
     style: "currency",
     currency: config.code,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: currency === "USD" ? 2 : 0,
+    maximumFractionDigits: currency === "USD" ? 2 : 0,
   }).format(amount);
+}
+
+export function formatAnnualTotal(plan: Plan, currency: Currency): string {
+  const annualPerMonth = plan.pricing[currency].annual;
+  const total = annualPerMonth * 12;
+  const config = CURRENCY_CONFIG[currency];
+  return new Intl.NumberFormat(config.locale, {
+    style: "currency",
+    currency: config.code,
+    minimumFractionDigits: currency === "USD" ? 2 : 0,
+    maximumFractionDigits: currency === "USD" ? 2 : 0,
+  }).format(total);
 }
 
 export function getAnnualSavings(plan: Plan, currency: Currency): number {
@@ -68,124 +99,133 @@ export const PLANS: Plan[] = [
   {
     id: "free",
     name: "Free",
-    description: "Perfect for getting started with automation",
+    subtitle: "FREE",
+    description: "Perfect for creators just getting started.",
     pricing: {
       USD: { monthly: 0, annual: 0 },
       INR: { monthly: 0, annual: 0 },
     },
     features: [
-      { text: "100 DMs per month", included: true },
-      { text: "500 contacts", included: true },
-      { text: "2 active workflows", included: true },
-      { text: "3 products", included: true },
-      { text: "1 campaign", included: true },
-      { text: "Basic analytics", included: true },
+      { text: "1 connected Instagram account", included: true },
+      { text: "Up to 1,000 DMs / month", included: true },
+      { text: "Up to 10 active campaigns", included: true },
+      { text: "Comment Auto-DM automation", included: true },
+      { text: "Lead capture & contact CRM", included: true },
+      { text: "7-day analytics dashboard", included: true },
+      { text: "Real-time activity feed", included: true },
       { text: "Community support", included: true },
-      { text: "Custom branding", included: false },
-      { text: "Priority support", included: false },
-      { text: "API access", included: false },
     ],
-    cta: "Get Started Free",
+    cta: "Start for free",
+    popular: false,
     limits: {
-      dmsPerMonth: 100,
-      contacts: 500,
-      workflows: 2,
-      products: 3,
-      campaigns: 1,
-    },
-  },
-  {
-    id: "starter",
-    name: "Starter",
-    description: "For creators ready to scale their outreach",
-    pricing: {
-      USD: { monthly: 19, annual: 15 },
-      INR: { monthly: 1499, annual: 1199 },
-    },
-    features: [
-      { text: "1,000 DMs per month", included: true },
-      { text: "2,500 contacts", included: true },
-      { text: "5 active workflows", included: true },
-      { text: "10 products", included: true },
-      { text: "5 campaigns", included: true },
-      { text: "Advanced analytics", included: true },
-      { text: "Email support", included: true },
-      { text: "Custom branding", included: true },
-      { text: "Priority support", included: false },
-      { text: "API access", included: false },
-    ],
-    cta: "Start 14-day Trial",
-    limits: {
+      instagramAccounts: 1,
       dmsPerMonth: 1000,
-      contacts: 2500,
-      workflows: 5,
-      products: 10,
-      campaigns: 5,
+      activeCampaigns: 10,
+      leadsCollected: 999999,
+      workflows: 2,
+      products: 5,
     },
+    automations: {
+      commentAutoDM: true,
+      storyMentionAutoDM: false,
+      emailPhoneCollection: false,
+      csvExport: false,
+      reTrigger: false,
+      askForFollow: false,
+      leadGen: false,
+      webhookAutoRetry: false,
+    },
+    analyticsHistory: "7 days",
+    support: "Email",
+    moneyBackDays: null,
   },
   {
     id: "pro",
-    name: "Pro",
-    description: "For serious creators who want unlimited growth",
+    name: "Full automation suite",
+    subtitle: "PRO",
+    description: "Everything you need to automate and grow.",
     popular: true,
     pricing: {
-      USD: { monthly: 39, annual: 29 },
-      INR: { monthly: 2999, annual: 2399 },
+      USD: { monthly: 5.99, annual: 4.99 },
+      INR: { monthly: 499, annual: 399 },
     },
     features: [
-      { text: "Unlimited DMs", included: true, highlight: true },
-      { text: "Unlimited contacts", included: true, highlight: true },
-      { text: "Unlimited workflows", included: true, highlight: true },
-      { text: "Unlimited products", included: true },
-      { text: "Unlimited campaigns", included: true },
-      { text: "Advanced analytics + exports", included: true },
-      { text: "Priority chat support", included: true },
-      { text: "Custom branding", included: true },
-      { text: "API access", included: true },
-      { text: "Webhook integrations", included: true },
+      { text: "10 connected Instagram accounts", included: true, highlight: true },
+      { text: "Unlimited DMs per month", included: true, highlight: true },
+      { text: "Unlimited campaigns", included: true, highlight: true },
+      { text: "Unlimited lead collection", included: true, highlight: true },
+      { text: "All automations: Comment, Story DM, Ask-for-Follow & Lead Gen", included: true },
+      { text: "Re-trigger old commenters & followers", included: true },
+      { text: "Email & phone collection in DM", included: true },
+      { text: "Story Mention Auto-DM", included: true },
+      { text: "Advanced analytics (7d / 30d / 90d)", included: true },
+      { text: "Per-campaign performance reports", included: true },
+      { text: "CSV export of leads & contacts", included: true },
+      { text: "Webhook auto-retry & reliability", included: true },
+      { text: "Priority email + chat support", included: true },
+      { text: "7-day money-back guarantee", included: true },
     ],
-    cta: "Start 14-day Trial",
+    cta: "Get Started",
     limits: {
+      instagramAccounts: 10,
       dmsPerMonth: 999999,
-      contacts: 999999,
+      activeCampaigns: 999999,
+      leadsCollected: 999999,
       workflows: 999999,
       products: 999999,
-      campaigns: 999999,
     },
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    description: "For agencies and large creator teams",
-    pricing: {
-      USD: { monthly: 99, annual: 79 },
-      INR: { monthly: 7999, annual: 6499 },
+    automations: {
+      commentAutoDM: true,
+      storyMentionAutoDM: true,
+      emailPhoneCollection: true,
+      csvExport: true,
+      reTrigger: true,
+      askForFollow: true,
+      leadGen: true,
+      webhookAutoRetry: true,
     },
-    features: [
-      { text: "Everything in Pro", included: true, highlight: true },
-      { text: "Multi-workspace management", included: true },
-      { text: "Team collaboration (5 seats)", included: true },
-      { text: "Dedicated account manager", included: true },
-      { text: "Custom onboarding", included: true },
-      { text: "SLA guarantee (99.9%)", included: true },
-      { text: "White-label options", included: true },
-      { text: "Advanced security & audit logs", included: true },
-      { text: "Custom integrations", included: true },
-      { text: "Phone support", included: true },
-    ],
-    cta: "Contact Sales",
-    limits: {
-      dmsPerMonth: 999999,
-      contacts: 999999,
-      workflows: 999999,
-      products: 999999,
-      campaigns: 999999,
-    },
+    analyticsHistory: "7 / 30 / 90 days",
+    support: "Priority",
+    moneyBackDays: 7,
   },
 ];
 
 export function getPlanById(id: PlanTier): Plan | undefined {
   return PLANS.find((p) => p.id === id);
+}
+
+// Compare plans table data — matches your comparison screenshot structure
+// Uses dynamic values based on currency for the pricing row
+export interface CompareFeature {
+  name: string;
+  free: string;
+  pro: string;
+}
+
+export function getCompareFeatures(currency: Currency): CompareFeature[] {
+  const proPriceLabel = currency === "INR" ? "₹399 /mo" : "$4.99 /mo";
+  const freePriceLabel = currency === "INR" ? "₹0 /mo" : "$0 /mo";
+
+  return [
+    { name: "Pricing", free: freePriceLabel, pro: proPriceLabel },
+    { name: "Automations", free: "Unlimited", pro: "Unlimited" },
+    { name: "DM Send Limit / mo", free: "1,000", pro: "Unlimited" },
+    { name: "Leads collected", free: "Unlimited", pro: "Unlimited" },
+    { name: "Instagram accounts", free: "1", pro: "10" },
+    { name: "Active campaigns", free: "10", pro: "Unlimited" },
+    { name: "Workflows", free: "2", pro: "Unlimited" },
+    { name: "Products / Storefront", free: "5", pro: "Unlimited" },
+    { name: "Comment Auto-DM", free: "✓", pro: "✓" },
+    { name: "Story Mention Auto-DM", free: "✗", pro: "✓" },
+    { name: "Email collection in DM", free: "✗", pro: "✓" },
+    { name: "CSV export", free: "✗", pro: "✓" },
+    { name: "Analytics history", free: "7 days", pro: "7 / 30 / 90 days" },
+    { name: "Re-trigger", free: "✗", pro: "✓" },
+    { name: "Ask For Follow", free: "✗", pro: "✓" },
+    { name: "Lead Gen", free: "✗", pro: "✓" },
+    { name: "Webhook auto-retry", free: "✗", pro: "✓" },
+    { name: "Support", free: "Email", pro: "Priority" },
+  ];
 }
 
 // Simulated invoice data for billing page
@@ -202,7 +242,7 @@ export interface Invoice {
 
 export function generateDemoInvoices(currency: Currency): Invoice[] {
   const now = new Date();
-  const amounts = currency === "USD" ? [29, 29, 29, 39, 39] : [2399, 2399, 2399, 2999, 2999];
+  const amount = currency === "USD" ? 59.88 : 4788;
 
   return Array.from({ length: 5 }, (_, i) => {
     const date = new Date(now);
@@ -210,10 +250,10 @@ export function generateDemoInvoices(currency: Currency): Invoice[] {
     return {
       id: `INV-${2026}${String(date.getMonth() + 1).padStart(2, "0")}-${1000 + i}`,
       date: date.toISOString(),
-      amount: amounts[i],
+      amount,
       currency,
-      status: i === 0 ? "paid" : "paid",
-      plan: i < 3 ? "Pro" : "Pro",
+      status: "paid" as const,
+      plan: "Pro",
       interval: "annual" as BillingInterval,
       downloadUrl: `#invoice-${i}`,
     };
