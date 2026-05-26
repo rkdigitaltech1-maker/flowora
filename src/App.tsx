@@ -41,7 +41,9 @@ import AutomationHealthPage from "./pages/dashboard/automation-health/page.tsx";
 import LearnPage from "./pages/dashboard/learn/page.tsx";
 import ReferPage from "./pages/dashboard/refer/page.tsx";
 import CheckoutPage from "./pages/dashboard/checkout/page.tsx";
+import BillingPage from "./pages/dashboard/billing/page.tsx";
 import StripePlayground from "./pages/dashboard/stripe-playground.tsx";
+import PricingPage from "./pages/pricing.tsx";
 
 
 export default function App() {
@@ -59,6 +61,7 @@ export default function App() {
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/gdpr" element={<GdprPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/auth/meta/callback" element={<MetaCallback />} />
@@ -84,6 +87,7 @@ export default function App() {
               <Route path="learn" element={<LearnPage />} />
               <Route path="refer" element={<ReferPage />} />
               <Route path="checkout" element={<CheckoutPage />} />
+              <Route path="billing" element={<BillingPage />} />
               <Route path="stripe-playground" element={<StripePlayground />} />
 
             </Route>
