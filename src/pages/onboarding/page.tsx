@@ -673,7 +673,7 @@ export default function OnboardingPage() {
             <h4 className="text-xs font-black text-slate-800 leading-tight">Hi Creator,</h4>
             <p className="text-[11px] text-slate-500 leading-normal font-semibold font-sans">
               If you face any issues connecting your workspace - please{" "}
-              <a href="mailto:support@flowora.com" className="text-[#7c3cff] hover:underline font-bold">click here</a> to solve this.
+              <a href="mailto:support@flowora.tech" className="text-[#7c3cff] hover:underline font-bold">click here</a> to solve this.
             </p>
             <p className="text-[9px] font-bold text-slate-400 pt-0.5">Flowora • Just now</p>
           </div>

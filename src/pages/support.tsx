@@ -93,7 +93,7 @@ export default function SupportPage() {
               Our 24/7 technical customer support team is ready to help you resolve API connection, dashboard, or workflow challenges.
             </p>
           </div>
-          <a href="mailto:support@flowora.com" className="shrink-0 relative z-10">
+          <a href="mailto:support@flowora.tech" className="shrink-0 relative z-10">
             <Button className="h-11 px-6 rounded-xl bg-gradient-to-r from-[#7c3cff] to-[#ec149e] hover:opacity-90 text-white font-extrabold text-xs cursor-pointer flex items-center gap-1.5">
               <Mail className="h-4 w-4" /> Email Developer Support
             </Button>

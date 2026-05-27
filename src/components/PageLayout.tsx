@@ -221,10 +221,12 @@ export function PageLayout({ children }: PageLayoutProps) {
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="grid md:grid-cols-12 gap-10 pb-12 border-b border-gray-200/80">
             <div className="md:col-span-4 space-y-4">
-              <p className="text-sm text-gray-500">
-                Operated by <span className="font-bold text-gray-800">Growthlinker Pvt Ltd</span>
+              <Link to="/" className="inline-block">
+                <img src="/logo.png" alt="Flowora Logo" className="h-8 w-auto object-contain" />
+              </Link>
+              <p className="text-sm text-gray-500 max-w-xs leading-relaxed">
+                The #1 Instagram automation platform trusted by 60,000+ creators worldwide.
               </p>
-              <p className="text-sm text-gray-500">Jamshedpur, Jharkhand, India</p>
             </div>
 
             <div className="md:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-8">
@@ -252,7 +254,7 @@ export function PageLayout({ children }: PageLayoutProps) {
                 <h4 className="text-sm font-bold text-gray-800">Contact</h4>
                 <ul className="space-y-2.5 text-sm text-gray-500">
                   <li><Link to="/contact" className="hover:text-gray-900 transition-colors">Contact us</Link></li>
-                  <li><a href="mailto:support@flowora.com" className="hover:text-gray-900 transition-colors">support@flowora.com</a></li>
+                  <li><a href="mailto:support@flowora.tech" className="hover:text-gray-900 transition-colors">support@flowora.tech</a></li>
                 </ul>
               </div>
             </div>
@@ -260,7 +262,7 @@ export function PageLayout({ children }: PageLayoutProps) {
 
           {/* Bottom bar */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 text-xs text-gray-400">
-            <p>&copy; {new Date().getFullYear()} Growthlinker Pvt Ltd. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Flowora. All rights reserved.</p>
             <div className="flex items-center gap-6">
               <span className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
