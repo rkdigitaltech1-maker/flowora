@@ -528,14 +528,112 @@ export default function OnboardingPage() {
         </div>
 
         {/* RIGHT COLUMN: GRAPHICS */}
-        <div className="lg:col-span-6 relative overflow-hidden bg-slate-50 min-h-[350px] lg:min-h-full rounded-b-[32px] lg:rounded-b-none lg:rounded-r-[32px]">
-          <img
-            src="/excited_creator.png"
-            alt="Excited Creator Onboarding"
-            className="w-full h-full object-cover select-none pointer-events-none"
-          />
-          {/* Subtle gradient overlay to tie into design */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+        <div className="lg:col-span-6 relative overflow-hidden bg-gradient-to-br from-violet-50 via-indigo-50 to-purple-50 min-h-[350px] lg:min-h-full rounded-b-[32px] lg:rounded-b-none lg:rounded-r-[32px] flex items-center justify-center p-8">
+          {/* Custom SVG Illustration - Creator connecting social media */}
+          <div className="w-full max-w-[380px] mx-auto select-none pointer-events-none">
+            <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto drop-shadow-xl">
+              {/* Background circle */}
+              <circle cx="200" cy="200" r="160" fill="url(#bgGradient)" opacity="0.15" />
+              <circle cx="200" cy="200" r="120" fill="url(#bgGradient2)" opacity="0.1" />
+              
+              {/* Phone device */}
+              <rect x="145" y="80" width="110" height="220" rx="20" fill="white" stroke="#e2e8f0" strokeWidth="2" />
+              <rect x="155" y="100" width="90" height="180" rx="4" fill="#f8fafc" />
+              
+              {/* Phone notch */}
+              <rect x="180" y="86" width="40" height="6" rx="3" fill="#e2e8f0" />
+              
+              {/* Phone screen content - profile mockup */}
+              <circle cx="200" cy="135" r="18" fill="url(#avatarGradient)" />
+              <rect x="180" y="160" width="40" height="4" rx="2" fill="#cbd5e1" />
+              <rect x="170" y="170" width="60" height="3" rx="1.5" fill="#e2e8f0" />
+              
+              {/* Stats bars on phone */}
+              <rect x="165" y="185" width="25" height="35" rx="4" fill="url(#stat1Gradient)" opacity="0.8" />
+              <rect x="195" y="195" width="25" height="25" rx="4" fill="url(#stat2Gradient)" opacity="0.8" />
+              <rect x="225" y="190" width="25" height="30" rx="4" fill="url(#stat3Gradient)" opacity="0.8" />
+              
+              {/* Chat bubbles on phone */}
+              <rect x="162" y="230" width="55" height="14" rx="7" fill="#7c3cff" opacity="0.9" />
+              <rect x="185" y="248" width="50" height="14" rx="7" fill="#e2e8f0" />
+              
+              {/* Floating elements - notification badges */}
+              <circle cx="270" cy="120" r="22" fill="white" stroke="#e2e8f0" strokeWidth="1.5" className="animate-sparkle" />
+              <path d="M262 120 L268 120 L268 114 C268 111.8 269.8 110 272 110 C274.2 110 276 111.8 276 114 L276 120 L278 120" stroke="#7c3cff" strokeWidth="2" strokeLinecap="round" />
+              <circle cx="270" cy="126" r="2" fill="#7c3cff" />
+              
+              {/* Floating heart */}
+              <circle cx="130" cy="140" r="18" fill="white" stroke="#e2e8f0" strokeWidth="1.5" />
+              <path d="M123 140 C123 136 126 134 130 137 C134 134 137 136 137 140 C137 144 130 148 130 148 C130 148 123 144 123 140Z" fill="#ec149e" />
+              
+              {/* Floating message icon */}
+              <circle cx="290" cy="220" r="20" fill="white" stroke="#e2e8f0" strokeWidth="1.5" />
+              <rect x="278" y="212" width="24" height="16" rx="4" fill="#7c3cff" opacity="0.9" />
+              <path d="M282 228 L286 224" stroke="#7c3cff" strokeWidth="2" strokeLinecap="round" />
+              
+              {/* Floating chart icon */}
+              <circle cx="120" cy="240" r="18" fill="white" stroke="#e2e8f0" strokeWidth="1.5" />
+              <rect x="112" y="244" width="4" height="10" rx="2" fill="#0d9488" />
+              <rect x="118" y="238" width="4" height="16" rx="2" fill="#7c3cff" />
+              <rect x="124" y="241" width="4" height="13" rx="2" fill="#ec149e" />
+              
+              {/* Connection lines (dashed) */}
+              <path d="M255 130 L248 120" stroke="#7c3cff" strokeWidth="1" strokeDasharray="3 3" opacity="0.4" />
+              <path d="M148 150 L155 145" stroke="#ec149e" strokeWidth="1" strokeDasharray="3 3" opacity="0.4" />
+              <path d="M270 200 L255 195" stroke="#7c3cff" strokeWidth="1" strokeDasharray="3 3" opacity="0.4" />
+              <path d="M138 230 L155 225" stroke="#0d9488" strokeWidth="1" strokeDasharray="3 3" opacity="0.4" />
+              
+              {/* Sparkle decorations */}
+              <path d="M310 160 L313 155 L316 160 L313 165Z" fill="#f59e0b" opacity="0.7" />
+              <path d="M100 180 L102 176 L104 180 L102 184Z" fill="#ec149e" opacity="0.6" />
+              <path d="M320 270 L322 267 L324 270 L322 273Z" fill="#7c3cff" opacity="0.5" />
+              <path d="M90 290 L92 287 L94 290 L92 293Z" fill="#0d9488" opacity="0.6" />
+              
+              {/* Bottom text area */}
+              <rect x="140" y="320" width="120" height="40" rx="12" fill="white" stroke="#e2e8f0" strokeWidth="1.5" />
+              <circle cx="160" cy="340" r="8" fill="url(#avatarGradient)" />
+              <rect x="172" y="335" width="50" height="4" rx="2" fill="#cbd5e1" />
+              <rect x="172" y="343" width="35" height="3" rx="1.5" fill="#e2e8f0" />
+              <circle cx="245" cy="340" r="6" fill="#10b981" opacity="0.8" />
+              <path d="M242 340 L244 342 L248 338" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              
+              {/* Gradients */}
+              <defs>
+                <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#7c3cff" />
+                  <stop offset="100%" stopColor="#ec149e" />
+                </linearGradient>
+                <linearGradient id="bgGradient2" x1="100%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#6d48ff" />
+                  <stop offset="100%" stopColor="#0d9488" />
+                </linearGradient>
+                <linearGradient id="avatarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#7c3cff" />
+                  <stop offset="100%" stopColor="#ec149e" />
+                </linearGradient>
+                <linearGradient id="stat1Gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#7c3cff" />
+                  <stop offset="100%" stopColor="#6d48ff" />
+                </linearGradient>
+                <linearGradient id="stat2Gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#ec149e" />
+                  <stop offset="100%" stopColor="#f472b6" />
+                </linearGradient>
+                <linearGradient id="stat3Gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#0d9488" />
+                  <stop offset="100%" stopColor="#14b8a6" />
+                </linearGradient>
+              </defs>
+            </svg>
+            
+            {/* Text below illustration */}
+            <div className="text-center mt-6 space-y-2">
+              <h3 className="text-lg font-black text-slate-800">Automate Your Growth</h3>
+              <p className="text-xs text-slate-500 font-semibold max-w-[260px] mx-auto leading-relaxed">
+                Connect your Instagram, set up automations, and watch your engagement grow on autopilot.
+              </p>
+            </div>
+          </div>
           
           {/* Skip all overlay button */}
           {!done && (
