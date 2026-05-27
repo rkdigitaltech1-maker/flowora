@@ -73,8 +73,12 @@ export default function App() {
             <Route path="/welcome" element={<WelcomePage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
 
-            {/* Admin Login (outside admin layout) */}
-            <Route path="/admin/login" element={<AdminLoginPage />} />
+            {/* Hidden Admin Login (secret path - /admin shows 404) */}
+            <Route path="/_sys/ctrl-panel/login" element={<AdminLoginPage />} />
+
+            {/* Old /admin/* paths now show 404 to hide the admin panel */}
+            <Route path="/admin" element={<NotFound />} />
+            <Route path="/admin/*" element={<NotFound />} />
 
             {/* Dashboard */}
             <Route path="/dashboard" element={<DashboardLayout />}>
@@ -98,8 +102,8 @@ export default function App() {
 
             </Route>
 
-            {/* Admin Panel */}
-            <Route path="/admin" element={<AdminLayout />}>
+            {/* Admin Panel (hidden secret URL) */}
+            <Route path="/_sys/ctrl-panel" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
               <Route path="creators" element={<AdminCreatorsPage />} />
               <Route path="flagged" element={<AdminFlaggedAccountsPage />} />

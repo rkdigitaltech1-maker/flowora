@@ -31,18 +31,18 @@ const NAV_SECTIONS: NavSection[] = [
   {
     heading: "Admin Tools",
     items: [
-      { label: "Overview", icon: <LayoutDashboard size={16} />, href: "/admin" },
-      { label: "Creators", icon: <Users size={16} />, href: "/admin/creators" },
-      { label: "Flagged Accounts", icon: <AlertOctagon size={16} />, href: "/admin/flagged" },
-      { label: "Settings", icon: <Settings size={16} />, href: "/admin/settings" },
+      { label: "Overview", icon: <LayoutDashboard size={16} />, href: "/_sys/ctrl-panel" },
+      { label: "Creators", icon: <Users size={16} />, href: "/_sys/ctrl-panel/creators" },
+      { label: "Flagged Accounts", icon: <AlertOctagon size={16} />, href: "/_sys/ctrl-panel/flagged" },
+      { label: "Settings", icon: <Settings size={16} />, href: "/_sys/ctrl-panel/settings" },
     ],
   },
   {
     heading: "Operations",
     items: [
-      { label: "Digital Products", icon: <Package size={16} />, href: "/admin/products" },
-      { label: "Automations", icon: <GitBranch size={16} />, href: "/admin/campaigns" },
-      { label: "Support", icon: <HeadphonesIcon size={16} />, href: "/admin/support" },
+      { label: "Digital Products", icon: <Package size={16} />, href: "/_sys/ctrl-panel/products" },
+      { label: "Automations", icon: <GitBranch size={16} />, href: "/_sys/ctrl-panel/campaigns" },
+      { label: "Support", icon: <HeadphonesIcon size={16} />, href: "/_sys/ctrl-panel/support" },
     ],
   },
 ];
@@ -101,7 +101,7 @@ function SidebarItem({ item, onNav }: { item: NavItem; onNav?: () => void }) {
   return (
     <NavLink
       to={item.href!}
-      end={item.href === "/admin"}
+      end={item.href === "/_sys/ctrl-panel"}
       onClick={onNav}
       className={({ isActive }) =>
         cn(
@@ -238,7 +238,7 @@ function AdminLayoutInner() {
               <DropdownMenuItem onClick={() => navigate("/dashboard")}>
                 <Globe size={14} className="mr-2" /> Go to App
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { logout(); navigate("/admin/login"); }} className="text-red-600">
+              <DropdownMenuItem onClick={() => { logout(); navigate("/_sys/ctrl-panel/login"); }} className="text-red-600">
                 <LogOut size={14} className="mr-2" /> Sign out
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -258,7 +258,7 @@ export default function AdminLayout() {
   const { isAuthenticated } = useAdminAuth();
 
   if (!isAuthenticated) {
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/_sys/ctrl-panel/login" replace />;
   }
 
   return <AdminLayoutInner />;

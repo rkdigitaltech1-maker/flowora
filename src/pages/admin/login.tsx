@@ -28,7 +28,7 @@ export default function AdminLoginPage() {
     const result = await login(username, password);
     setLoading(false);
     if (result.success) {
-      navigate("/admin");
+      navigate("/_sys/ctrl-panel");
     } else {
       setError(result.error ?? "Invalid username or password. Please try again.");
     }

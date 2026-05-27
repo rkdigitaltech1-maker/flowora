@@ -30,7 +30,7 @@ const InstagramIcon = () => (
 
 export default function LoginPage() {
   const { isAuthenticated: isUserAuthenticated } = useAuth();
-  const { login: adminLogin, isAuthenticated: isAdminAuthenticated } = useAdminAuth();
+  const { isAuthenticated: isAdminAuthenticated } = useAdminAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -62,7 +62,7 @@ export default function LoginPage() {
         navigate("/dashboard");
       }
     } else if (isAdminAuthenticated) {
-      navigate("/admin");
+      navigate("/_sys/ctrl-panel");
     }
   }, [isUserAuthenticated, isAdminAuthenticated, navigate]);
 
@@ -161,18 +161,6 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Admin demo account (bypasses Supabase, uses existing session logic)
-      if (email === "admin@flowora.com" && password === "admin_demo_2026") {
-        const result = await adminLogin("admin", "admin");
-        if (result.success) {
-          toast.success("Logged in as Administrator");
-          navigate("/admin");
-        } else {
-          toast.error(result.error || "Admin login failed.");
-        }
-        return;
-      }
-
       // Creator demo account (bypasses Supabase, runs local auth)
       if (email === "aisha@createwith.co" && password === "creator_demo_2026") {
         localStorage.setItem("local_auth_authenticated", "true");
