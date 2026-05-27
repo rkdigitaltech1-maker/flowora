@@ -131,13 +131,13 @@ export function PageLayout({ children }: PageLayoutProps) {
 
           {/* Desktop Links */}
           <div className="hidden md:flex items-center gap-8">
-            {["Features", "How It Works", "Testimonials", "Pricing", "FAQ"].map((n) => {
-              const isPricing = n === "Pricing";
-              const hash = n.toLowerCase().replace(/ /g, "-");
+            {["Features", "How It Works", "Pricing", "Affiliate"].map((n) => {
+              const isPage = n === "Pricing" || n === "Affiliate";
+              const href = n === "Pricing" ? "/pricing" : n === "Affiliate" ? "/affiliate" : `/#${n.toLowerCase().replace(/ /g, "-")}`;
               return (
                 <a
                   key={n}
-                  href={isPricing ? "/pricing" : `/#${hash}`}
+                  href={href}
                   className="text-gray-600 hover:text-gray-900 font-semibold relative group transition-colors text-sm"
                 >
                   {n}
@@ -171,14 +171,19 @@ export function PageLayout({ children }: PageLayoutProps) {
         {/* Mobile menu panel */}
         {mobileMenuOpen && (
           <div className="md:hidden bg-white border-t border-slate-100 px-6 pb-6 space-y-4 pt-4 shadow-lg animate-fade-in">
-            {["Features", "How It Works", "Testimonials", "Pricing", "FAQ"].map((n) => {
-              const isPricing = n === "Pricing";
-              const hash = n.toLowerCase().replace(/ /g, "-");
+            {["Features", "How It Works", "Pricing", "Affiliate"].map((n) => {
+              const href = n === "Pricing" ? "/pricing" : n === "Affiliate" ? "/affiliate" : `/#${n.toLowerCase().replace(/ /g, "-")}`;
               return (
                 <a
                   key={n}
-                  href={isPricing ? "/pricing" : `/#${hash}`}
+                  href={href}
                   onClick={() => setMobileMenuOpen(false)}
+                  className="block text-sm font-semibold text-slate-600 hover:text-slate-950 transition-colors"
+                >
+                  {n}
+                </a>
+              );
+            })}
                   className="block text-sm font-semibold text-slate-600 hover:text-slate-950 transition-colors"
                 >
                   {n}
@@ -236,6 +241,7 @@ export function PageLayout({ children }: PageLayoutProps) {
                   <li><a href="/#features" className="hover:text-gray-900 transition-colors">Features</a></li>
                   <li><a href="/pricing" className="hover:text-gray-900 transition-colors">Pricing</a></li>
                   <li><a href="/#how-it-works" className="hover:text-gray-900 transition-colors">How it works</a></li>
+                  <li><Link to="/affiliate" className="hover:text-gray-900 transition-colors">Affiliate Program</Link></li>
                   <li><a href="/#faq" className="hover:text-gray-900 transition-colors">FAQ</a></li>
                   <li><Link to="/about" className="hover:text-gray-900 transition-colors">About us</Link></li>
                 </ul>
