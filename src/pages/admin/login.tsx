@@ -98,18 +98,22 @@ export default function AdminLoginPage() {
           
           {/* Logo & Brand Header */}
           <div className="flex flex-col items-center mb-10">
-            {/* Flowora Logo */}
+            {/* Flowora Logo + Name */}
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
-              className="relative mb-5"
+              className="relative mb-5 flex flex-col items-center gap-3"
             >
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 flex items-center justify-center shadow-xl shadow-violet-600/30 ring-2 ring-white/10">
-                <img src="/flowora-favicon.svg" alt="Flowora" className="w-9 h-9" />
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 flex items-center justify-center shadow-xl shadow-violet-600/30 ring-2 ring-white/10">
+                <img src="/flowora-favicon.svg" alt="Flowora" className="w-8 h-8" />
+              </div>
+              {/* Brand name */}
+              <div className="flex items-center gap-2">
+                <img src="/logo.png" alt="Flowora" className="h-6 w-auto brightness-0 invert opacity-90" />
               </div>
               {/* Glow behind logo */}
-              <div className="absolute inset-0 w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 blur-xl opacity-40 -z-10" />
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 blur-xl opacity-40 -z-10" />
             </motion.div>
 
             <motion.div
