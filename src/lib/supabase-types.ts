@@ -154,7 +154,6 @@ export interface Database {
         Insert: Omit<Database["public"]["Tables"]["workflows"]["Row"], "id" | "created_at" | "updated_at">;
         Update: Partial<Database["public"]["Tables"]["workflows"]["Insert"]>;
       };
-    };
       // ── Affiliate Module Tables ──
       affiliates: {
         Row: {

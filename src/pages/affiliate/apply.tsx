@@ -4,7 +4,7 @@ import { PageLayout } from "@/components/PageLayout.tsx";
 import { motion } from "motion/react";
 import {
   ArrowRight, ArrowLeft, CheckCircle2, User, CreditCard,
-  FileText, Rocket, Globe, Mail, Phone, Shield
+  FileText, Rocket, Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { toast } from "sonner";
