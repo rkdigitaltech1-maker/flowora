@@ -210,80 +210,64 @@ export function PageLayout({ children }: PageLayoutProps) {
       </main>
 
       {/* ── FOOTER ── */}
-      <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-300 py-16 px-6 relative overflow-hidden border-t border-gray-800/50">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+      <footer className="bg-gradient-to-b from-[#f8f7fc] to-white text-gray-600 pt-16 pb-6 px-6 relative overflow-hidden border-t border-gray-100">
+        {/* Large watermark brand name background */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 pointer-events-none select-none overflow-hidden w-full flex justify-center">
+          <span className="text-[12rem] sm:text-[16rem] md:text-[20rem] lg:text-[24rem] font-black tracking-tighter bg-gradient-to-b from-blue-100/60 via-purple-100/40 to-transparent bg-clip-text text-transparent leading-none whitespace-nowrap translate-y-[30%]">
+            flowora
+          </span>
+        </div>
 
         <div className="max-w-7xl mx-auto relative z-10">
-          <div className="grid md:grid-cols-12 gap-10 pb-12 border-b border-gray-800">
-            <div className="md:col-span-5 space-y-4">
-              <Link to="/" className="inline-block hover:opacity-80 transition-opacity">
-                <img src="/logo.png" alt="Flowora Logo" className="h-8 w-auto object-contain brightness-0 invert" />
-              </Link>
-              <p className="text-sm text-gray-400 max-w-sm leading-relaxed">
-                The #1 Instagram automation platform trusted by 60,000+ creators worldwide.
+          <div className="grid md:grid-cols-12 gap-10 pb-12 border-b border-gray-200/80">
+            <div className="md:col-span-4 space-y-4">
+              <p className="text-sm text-gray-500">
+                Operated by <span className="font-bold text-gray-800">Growthlinker Pvt Ltd</span>
               </p>
-
-              <div className="flex items-center gap-3 pt-2">
-                {[
-                  { icon: Instagram, url: "#" },
-                  { icon: Twitter, url: "#" },
-                  { icon: Youtube, url: "#" },
-                  { icon: Mail, url: "mailto:support@flowora.com" },
-                ].map((item, n) => (
-                  <motion.a
-                    key={n}
-                    href={item.url}
-                    className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gradient-to-br hover:from-blue-600 hover:to-purple-600 hover:text-white transition-all shadow-lg text-gray-400"
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <item.icon className="w-5 h-5" />
-                  </motion.a>
-                ))}
-              </div>
+              <p className="text-sm text-gray-500">Jamshedpur, Jharkhand, India</p>
             </div>
 
-            <div className="md:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-6">
+            <div className="md:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-8">
               <div className="space-y-3">
-                <h4 className="text-xs font-black uppercase text-gray-200 tracking-wider">Product</h4>
-                <ul className="space-y-2 text-xs font-semibold text-gray-400">
-                  <li><a href="/#features" className="hover:text-white transition-colors">Features</a></li>
-                  <li><a href="/#how-it-works" className="hover:text-white transition-colors">Demo</a></li>
-                  <li><a href="/pricing" className="hover:text-white transition-colors">Pricing</a></li>
+                <h4 className="text-sm font-bold text-gray-800">Product</h4>
+                <ul className="space-y-2.5 text-sm text-gray-500">
+                  <li><a href="/#features" className="hover:text-gray-900 transition-colors">Features</a></li>
+                  <li><a href="/pricing" className="hover:text-gray-900 transition-colors">Pricing</a></li>
+                  <li><a href="/#how-it-works" className="hover:text-gray-900 transition-colors">How it works</a></li>
+                  <li><a href="/#faq" className="hover:text-gray-900 transition-colors">FAQ</a></li>
+                  <li><Link to="/about" className="hover:text-gray-900 transition-colors">About us</Link></li>
                 </ul>
               </div>
               <div className="space-y-3">
-                <h4 className="text-xs font-black uppercase text-gray-200 tracking-wider">Company</h4>
-                <ul className="space-y-2 text-xs font-semibold text-gray-400">
-                  <li><Link to="/about" className="hover:text-white transition-colors">About Us</Link></li>
-                  <li><Link to="/careers" className="hover:text-white transition-colors">Careers</Link></li>
-                  <li><Link to="/blog" className="hover:text-white transition-colors">Blog</Link></li>
+                <h4 className="text-sm font-bold text-gray-800">Legal</h4>
+                <ul className="space-y-2.5 text-sm text-gray-500">
+                  <li><Link to="/privacy" className="hover:text-gray-900 transition-colors">Privacy Policy</Link></li>
+                  <li><Link to="/terms" className="hover:text-gray-900 transition-colors">Terms of Service</Link></li>
+                  <li><Link to="/refund" className="hover:text-gray-900 transition-colors">Refund & Cancellation</Link></li>
+                  <li><Link to="/shipping" className="hover:text-gray-900 transition-colors">Shipping & Delivery</Link></li>
+                  <li><Link to="/cookies" className="hover:text-gray-900 transition-colors">Cookie Policy</Link></li>
                 </ul>
               </div>
               <div className="space-y-3">
-                <h4 className="text-xs font-black uppercase text-gray-200 tracking-wider">Resources</h4>
-                <ul className="space-y-2 text-xs font-semibold text-gray-400">
-                  <li><Link to="/support" className="hover:text-white transition-colors">Support</Link></li>
-                  <li><a href="/#faq" className="hover:text-white transition-colors">FAQs</a></li>
-                  <li><Link to="/safety" className="hover:text-white transition-colors">Safety Guide</Link></li>
-                </ul>
-              </div>
-              <div className="space-y-3">
-                <h4 className="text-xs font-black uppercase text-gray-200 tracking-wider">Legal</h4>
-                <ul className="space-y-2 text-xs font-semibold text-gray-400">
-                  <li><Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                  <li><Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
-                  <li><Link to="/gdpr" className="text-emerald-500 font-bold hover:text-emerald-300 transition-colors">GDPR Compliant</Link></li>
+                <h4 className="text-sm font-bold text-gray-800">Contact</h4>
+                <ul className="space-y-2.5 text-sm text-gray-500">
+                  <li><Link to="/contact" className="hover:text-gray-900 transition-colors">Contact us</Link></li>
+                  <li><a href="mailto:support@flowora.com" className="hover:text-gray-900 transition-colors">support@flowora.com</a></li>
                 </ul>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-12 text-[10px] text-gray-500 font-semibold uppercase tracking-wider">
-            <p>© {new Date().getFullYear()} Flowora. All rights reserved.</p>
-            <p className="text-gray-600 max-w-lg text-center sm:text-right normal-case leading-relaxed">
-              Disclaimer: This site is not affiliated with Meta Platforms, Inc. or Instagram. Official Meta developer parameters are observed.
-            </p>
+          {/* Bottom bar */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 text-xs text-gray-400">
+            <p>&copy; {new Date().getFullYear()} Growthlinker Pvt Ltd. All rights reserved.</p>
+            <div className="flex items-center gap-6">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-emerald-600 font-semibold">All systems operational</span>
+              </span>
+              <span className="text-gray-400">Uses official Meta Graph API &middot; Not affiliated with Meta</span>
+            </div>
           </div>
         </div>
       </footer>
