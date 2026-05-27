@@ -184,12 +184,6 @@ export function PageLayout({ children }: PageLayoutProps) {
                 </a>
               );
             })}
-                  className="block text-sm font-semibold text-slate-600 hover:text-slate-950 transition-colors"
-                >
-                  {n}
-                </a>
-              );
-            })}
             <hr className="border-slate-100" />
             <div className="flex flex-col gap-3">
               <Link
