@@ -42,6 +42,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: "Digital Products", icon: <Package size={16} />, href: "/_sys/ctrl-panel/products" },
       { label: "Automations", icon: <GitBranch size={16} />, href: "/_sys/ctrl-panel/campaigns" },
+      { label: "Affiliates", icon: <Scale size={16} />, href: "/_sys/ctrl-panel/affiliates" },
       { label: "Support", icon: <HeadphonesIcon size={16} />, href: "/_sys/ctrl-panel/support" },
     ],
   },

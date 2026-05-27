@@ -19,6 +19,7 @@ import AdminSupportPage from "./pages/admin/support/page.tsx";
 import AdminSettingsPage from "./pages/admin/settings/page.tsx";
 import AdminLoginPage from "./pages/admin/login.tsx";
 import AdminAuthProvider from "./components/providers/admin-auth-provider.tsx";
+import AdminAffiliatesPage from "./pages/admin/affiliates/page.tsx";
 import LoginPage from "./pages/login.tsx";
 import WelcomePage from "./pages/welcome.tsx";
 import OnboardingPage from "./pages/onboarding/page.tsx";
@@ -48,6 +49,12 @@ import BillingPage from "./pages/dashboard/billing/page.tsx";
 import StripePlayground from "./pages/dashboard/stripe-playground.tsx";
 import PricingPage from "./pages/pricing.tsx";
 
+// Affiliate Module
+import AffiliatePage from "./pages/affiliate.tsx";
+import AffiliateApplyPage from "./pages/affiliate/apply.tsx";
+import AffiliateDashboardPage from "./pages/dashboard/affiliate/page.tsx";
+import ReferralRedirectPage from "./pages/ref.tsx";
+
 
 export default function App() {
   return (
@@ -68,6 +75,12 @@ export default function App() {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/login" element={<LoginPage />} />
+
+            {/* Affiliate Module - Public Routes */}
+            <Route path="/affiliate" element={<AffiliatePage />} />
+            <Route path="/affiliate/apply" element={<AffiliateApplyPage />} />
+            <Route path="/ref/:code" element={<ReferralRedirectPage />} />
+
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/auth/meta/callback" element={<MetaCallback />} />
             <Route path="/welcome" element={<WelcomePage />} />
@@ -96,6 +109,7 @@ export default function App() {
               <Route path="contacts" element={<LeadsPage />} />
               <Route path="learn" element={<LearnPage />} />
               <Route path="refer" element={<ReferPage />} />
+              <Route path="affiliate" element={<AffiliateDashboardPage />} />
               <Route path="checkout" element={<CheckoutPage />} />
               <Route path="billing" element={<BillingPage />} />
               <Route path="stripe-playground" element={<StripePlayground />} />
@@ -109,6 +123,7 @@ export default function App() {
               <Route path="flagged" element={<AdminFlaggedAccountsPage />} />
               <Route path="products" element={<AdminProductsPage />} />
               <Route path="campaigns" element={<AdminCampaignsPage />} />
+              <Route path="affiliates" element={<AdminAffiliatesPage />} />
               <Route path="support" element={<AdminSupportPage />} />
               <Route path="settings" element={<AdminSettingsPage />} />
             </Route>
