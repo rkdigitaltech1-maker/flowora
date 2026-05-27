@@ -1090,7 +1090,7 @@ export function useSettings() {
     const wid = workspace.id;
 
     if (wid === "demo-workspace-id") {
-      setAccounts([{ _id: "ig-demo", id: "ig-demo", username: "aisha.creates", status: "connected", instagramUserId: "1234567890", tokenExpiresAt: new Date(Date.now() + 60*86400000).toISOString() }]);
+      setAccounts([{ _id: "ig-demo", id: "ig-demo", username: "Instagram Account", status: "connected", instagramUserId: "278165493246", tokenExpiresAt: new Date(Date.now() + 60*86400000).toISOString() }]);
       setUsage({
         plan: workspace.plan || "free",
         dmsThisMonth: 420,
@@ -1179,7 +1179,52 @@ export function useSettings() {
   };
 
   const refreshToken = async (args: { accountId: string }) => {
-    toast.success("Refreshing connected token...");
+    if (workspace?.id === "demo-workspace-id") {
+      // In demo mode, simulate a token refresh by extending expiry
+      setAccounts((prev) =>
+        prev.map((a) =>
+          a._id === args.accountId
+            ? { ...a, tokenExpiresAt: new Date(Date.now() + 60 * 86400000).toISOString() }
+            : a
+        )
+      );
+      toast.success("Token refreshed! New expiry: 60 days from now.");
+      return;
+    }
+    // For real accounts, call the Instagram Long-Lived Token refresh
+    try {
+      const account = accounts.find((a) => a._id === args.accountId);
+      if (!account) throw new Error("Account not found");
+      
+      const { data: accData } = await supabase
+        .from("instagram_accounts")
+        .select("access_token")
+        .eq("id", args.accountId)
+        .single();
+      
+      if (!accData?.access_token) throw new Error("No access token found");
+      
+      const response = await fetch(
+        `https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=${accData.access_token}`
+      );
+      const data = await response.json();
+      
+      if (data.access_token) {
+        const newExpiry = new Date(Date.now() + (data.expires_in || 5184000) * 1000).toISOString();
+        await supabase
+          .from("instagram_accounts")
+          .update({ access_token: data.access_token, token_expires_at: newExpiry })
+          .eq("id", args.accountId);
+        
+        toast.success("Token refreshed successfully!");
+        fetchSettingsData();
+      } else {
+        throw new Error(data.error?.message || "Failed to refresh token");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to refresh token. Try reconnecting.");
+      throw err;
+    }
   };
 
   const validatePermissions = async (args: { accountId: string }) => {
@@ -1193,7 +1238,15 @@ export function useSettings() {
   const simulateUpgrade = async (args: { plan: string }) => {
     if (workspace?.id === "demo-workspace-id") {
       workspace.plan = args.plan;
-      fetchSettingsData();
+      // Force re-compute usage with new plan
+      const plan = args.plan;
+      const limits = {
+        dmsPerMonth: (plan === "pro" || plan === "pro_annual" || plan === "enterprise") ? 999999 : 1000,
+        contacts: (plan === "pro" || plan === "pro_annual" || plan === "enterprise") ? 999999 : 1000,
+        workflows: (plan === "pro" || plan === "pro_annual" || plan === "enterprise") ? 999999 : 10,
+        products: (plan === "pro" || plan === "pro_annual" || plan === "enterprise") ? 999999 : 5,
+      };
+      setUsage((prev: any) => prev ? { ...prev, plan, limits } : prev);
       return;
     }
     await supabase.from("creator_workspaces").update({ plan: args.plan }).eq("id", workspace.id);

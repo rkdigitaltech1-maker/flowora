@@ -321,8 +321,23 @@ function InstagramAccountCard({ account }: { account: any }) {
     });
   };
 
-  const tokenExpiring = account.tokenExpiresAt &&
-    new Date(account.tokenExpiresAt).getTime() - Date.now() < 7 * 86400000;
+  const tokenExpiresTime = account.tokenExpiresAt ? new Date(account.tokenExpiresAt).getTime() : null;
+  const timeUntilExpiry = tokenExpiresTime ? tokenExpiresTime - Date.now() : null;
+  const tokenExpired = timeUntilExpiry !== null && timeUntilExpiry <= 0;
+  const tokenExpiring = timeUntilExpiry !== null && !tokenExpired && timeUntilExpiry < 7 * 86400000;
+
+  const getTokenExpiryDisplay = () => {
+    if (!account.tokenExpiresAt) return null;
+    const expiryDate = new Date(account.tokenExpiresAt).toLocaleDateString();
+    if (tokenExpired) {
+      return <span className="ml-1 text-red-600 font-medium">(expired — please refresh)</span>;
+    }
+    if (tokenExpiring) {
+      const daysLeft = Math.max(0, Math.ceil((timeUntilExpiry || 0) / 86400000));
+      return <span className="ml-1 text-amber-600 font-medium">({daysLeft === 0 ? "expires today" : `${daysLeft}d left`} — refresh recommended)</span>;
+    }
+    return null;
+  };
 
   return (
     <div className="flex items-center justify-between rounded-xl border border-[#dfdbea] bg-white p-4">
@@ -341,7 +356,7 @@ function InstagramAccountCard({ account }: { account: any }) {
           <p className="text-xs text-[#82799b]">
             ID: {account.instagramUserId?.slice(0, 12)}...
             {account.tokenExpiresAt && ` · Token expires ${new Date(account.tokenExpiresAt).toLocaleDateString()}`}
-            {tokenExpiring && <span className="ml-1 text-yellow-600">(expiring soon)</span>}
+            {getTokenExpiryDisplay()}
           </p>
           {account.errorMessage && (
             <p className="mt-0.5 text-xs text-red-500">{account.errorMessage}</p>
@@ -351,7 +366,7 @@ function InstagramAccountCard({ account }: { account: any }) {
       <div className="flex items-center gap-2">
         {account.status === "connected" && (
           <>
-            <button onClick={handleRefresh} className="rounded-lg p-2 text-[#665d82] hover:bg-[#f4f1fb]" title="Refresh token">
+            <button onClick={handleRefresh} className={`rounded-lg p-2 hover:bg-[#f4f1fb] ${tokenExpired || tokenExpiring ? "text-amber-600 bg-amber-50" : "text-[#665d82]"}`} title="Refresh token">
               <RefreshCw className="h-4 w-4" />
             </button>
             <button onClick={handleValidatePermissions} className="rounded-lg p-2 text-[#665d82] hover:bg-[#f4f1fb]" title="Validate permissions">
