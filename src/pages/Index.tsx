@@ -798,36 +798,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ── BRAND LOGOS MARQUEE TICKER ── */}
-      <section className="relative overflow-hidden py-12 bg-gradient-to-r from-gray-50 to-white border-y border-gray-100">
-        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-gray-50 to-transparent z-10" />
-        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-gray-50 to-transparent z-10" />
-        <div className="flex items-center">
-          <motion.div
-            className="flex gap-12 items-center whitespace-nowrap"
-            animate={{ x: [0, -180 * Re.length] }}
-            transition={{
-              x: {
-                duration: 22,
-                repeat: Infinity,
-                ease: "linear",
-              }
-            }}
-          >
-            {[...Re, ...Re, ...Re].map((brand, idx) => (
-              <div
-                key={idx}
-                className="flex-shrink-0 w-36 h-12 flex items-center justify-center"
-              >
-                <div className={`bg-gradient-to-r ${brand.gradient} rounded-xl py-2 px-5 shadow-sm border border-white/10 flex items-center justify-center`}>
-                  <span className="text-white font-bold text-sm tracking-wide">{brand.name}</span>
-                </div>
-              </div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
       {/* ── CREATORS GRID SECTION ── */}
       <section className="py-20 px-6 bg-gradient-to-b from-white to-blue-50/50">
         <div className="max-w-7xl mx-auto">
@@ -1061,7 +1031,7 @@ export default function Index() {
               <div className="absolute -right-[3px] top-36 w-[3px] h-14 bg-slate-800 rounded-r" />
               
               {/* Internal Phone Screen Container */}
-              <div className="w-full h-full rounded-[35px] overflow-hidden flex flex-col relative pt-7 pb-3 border border-slate-900/5 select-none bg-slate-950">
+              <div className="w-full h-full rounded-[35px] overflow-hidden flex flex-col relative pt-7 pb-3 border border-slate-900/5 select-none bg-white">
                 {/* Dynamic Island Notch */}
                 <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-24 h-6 bg-slate-950 rounded-full z-30 flex items-center justify-between px-3.5 shadow-inner">
                   <div className="w-1.5 h-1.5 rounded-full bg-slate-900" />
@@ -1069,34 +1039,37 @@ export default function Index() {
                 </div>
 
                 {/* Status Bar */}
-                <div className="h-6 flex justify-between items-center px-5 text-[10px] font-bold text-white z-20 select-none pointer-events-none pt-4 mb-2">
+                <div className="h-6 flex justify-between items-center px-5 text-[10px] font-bold text-gray-800 z-20 select-none pointer-events-none pt-4 mb-2">
                   <span>9:41</span>
                   <div className="flex items-center gap-1.5">
-                    <svg className="w-3 h-3 fill-current text-white" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 fill-current text-gray-800" viewBox="0 0 24 24">
                       <path d="M12 3c-1.2 0-2.4.2-3.6.7L9.7 5c.7-.3 1.5-.5 2.3-.5.8 0 1.6.2 2.3.5l1.3-1.3C14.4 3.2 13.2 3 12 3zm0 4c-.7 0-1.4.2-2.1.5l1.3 1.3c.2-.1.5-.2.8-.2s.6.1.8.2l1.3-1.3c-.7-.3-1.4-.5-2.1-.5zm0 4c-.2 0-.4.1-.6.2l1.3 1.3c.1-.1.3-.2.5-.2.2 0 .4.1.5.2l1.3-1.3c-.2-.1-.4-.2-.6-.2zm0 4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" />
                     </svg>
-                    <svg className="w-2.5 h-2.5 fill-current text-white" viewBox="0 0 24 24">
+                    <svg className="w-2.5 h-2.5 fill-current text-gray-800" viewBox="0 0 24 24">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
                     </svg>
-                    <div className="w-4.5 h-2.5 border border-white rounded-sm p-0.5 flex items-center">
-                      <div className="w-full h-full bg-white rounded-2xs" />
+                    <div className="w-4.5 h-2.5 border border-gray-800 rounded-sm p-0.5 flex items-center">
+                      <div className="w-full h-full bg-gray-800 rounded-2xs" />
                     </div>
                   </div>
                 </div>
 
                 {/* Chat Header */}
-                <div className="flex items-center gap-2.5 px-4 pb-2 border-b border-white/10 z-10">
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center overflow-hidden ring-1 ring-white/20">
+                <div className="flex items-center gap-2.5 px-4 pb-2 border-b border-gray-100 z-10">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center overflow-hidden ring-1 ring-gray-200">
                     <img src="/flowora-favicon.svg" alt="Flowora" className="h-full w-full object-cover" />
                   </div>
                   <div>
-                    <h4 className="font-extrabold text-[11px] text-white leading-none">Excited Creator</h4>
-                    <p className="text-[9px] text-gray-400 mt-0.5 font-semibold">Instagram DM</p>
+                    <h4 className="font-extrabold text-[11px] text-gray-900 leading-none flex items-center gap-1">
+                      Excited Creator
+                      <span className="w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center text-[7px] text-white flex-shrink-0">✓</span>
+                    </h4>
+                    <p className="text-[9px] text-green-500 mt-0.5 font-semibold">Instagram DM</p>
                   </div>
                 </div>
 
                 {/* Animated Floating Bubbles */}
-                <div className="flex-1 p-4 pt-3 flex flex-col justify-start space-y-3 overflow-hidden relative">
+                <div className="flex-1 p-4 pt-3 flex flex-col justify-start space-y-3 overflow-hidden relative bg-white">
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={activeTab}
@@ -1149,19 +1122,19 @@ export default function Index() {
                           >
                             {/* Mini profile avatar for Bot bubbles */}
                             {isBot && (
-                              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex-shrink-0 flex items-center justify-center overflow-hidden ring-1 ring-white/20">
+                              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex-shrink-0 flex items-center justify-center overflow-hidden ring-1 ring-gray-200">
                                 <img src="/flowora-favicon.svg" alt="Flowora" className="h-full w-full object-cover" />
                               </div>
                             )}
                             
                             <div className={`p-2.5 rounded-xl text-[10.5px] font-semibold leading-snug shadow-lg ${
                               isBot
-                                ? "bg-slate-800/90 text-white rounded-tl-none border border-white/10"
-                                : "bg-white text-gray-800 rounded-tr-none border border-gray-200 ml-auto"
+                                ? "bg-gray-100 text-gray-800 rounded-tl-none border border-gray-200"
+                                : "bg-blue-600 text-white rounded-tr-none border border-blue-500 ml-auto"
                             }`}>
                               <p>{bubble.content}</p>
                               {bubble.hasButton && (
-                                <div className="mt-2 bg-white/15 border border-white/20 text-white font-bold text-[8.5px] py-1.5 px-3 rounded-md text-center">
+                                <div className="mt-2 bg-white border border-gray-200 text-gray-800 font-bold text-[8.5px] py-1.5 px-3 rounded-md text-center">
                                   {bubble.btnText}
                                 </div>
                               )}
@@ -1174,7 +1147,7 @@ export default function Index() {
                 </div>
 
                 {/* Home Indicator */}
-                <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-24 h-1 bg-white/50 rounded-full z-20 pointer-events-none" />
+                <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-24 h-1 bg-gray-300 rounded-full z-20 pointer-events-none" />
 
               </div>
             </div>
