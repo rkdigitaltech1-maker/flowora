@@ -1517,75 +1517,81 @@ export function useAdminStats() {
       const leads = leadRes.data ?? [];
       const tickets = ticketsRes.data ?? [];
 
-      const totalCreators = 14370 + workspaces.length;
+      // Real stats only - no dummy padding
+      const totalCreators = workspaces.length;
       const activeCreators = workspaces.filter((w: any) => w.status === "active").length;
       const suspendedCreators = workspaces.filter((w: any) => w.status === "suspended").length;
 
-      const realMrr = workspaces.reduce((sum: number, w: any) => {
+      const mrr = workspaces.reduce((sum: number, w: any) => {
         if (w.status === "suspended") return sum;
         const plan = w.plan || "free";
-        if (plan === "creator" || plan === "starter") return sum + 29;
-        if (plan === "pro") return sum + 79;
-        if (plan === "agency" || plan === "enterprise") return sum + 299;
-        return sum;
+        if (plan === "starter") return sum + 399;
+        if (plan === "pro") return sum + 399;
+        if (plan === "agency" || plan === "enterprise") return sum + 999;
+        return sum; // free = 0
       }, 0);
-      const mrr = 84210 + realMrr;
 
       const totalInstagramAccounts = instagrams.length;
       const activeCampaigns = campaigns.filter((c: any) => c.status === "active").length;
+      const totalCampaigns = campaigns.length;
       const totalDeliveries = messageDeliveries.length;
       const totalLeads = leads.length;
+      const totalProducts = products.length;
 
-      const flaggedCount = 23 + suspendedCreators;
+      // Support tickets stats
+      const openTickets = tickets.filter((t: any) => t.status === "open" || t.status === "in_progress").length;
+      const resolvedTickets = tickets.filter((t: any) => t.status === "resolved" || t.status === "closed").length;
 
+      // Flagged = suspended + workspaces with quota issues
+      const flaggedCount = suspendedCreators;
+
+      // Orders & Revenue
       const paidOrders = orders.filter((o: any) => o.status === "paid");
-      const totalRevenue = paidOrders.reduce((sum: number, o: any) => sum + Number(o.amount), 0);
+      const totalRevenue = paidOrders.reduce((sum: number, o: any) => sum + Number(o.amount || 0), 0);
       const totalOrders = paidOrders.length;
 
-      // Chart: dual axis
-      const chartStart = new Date("2026-04-20").getTime();
-      const dailyStats = Array.from({ length: 21 }, (_, i) => {
-        const date = new Date(chartStart + i * 86400000);
+      // Chart: real daily activity from message_deliveries grouped by date
+      const now = new Date();
+      const dailyStats = Array.from({ length: 14 }, (_, i) => {
+        const date = new Date(now.getTime() - (13 - i) * 86400000);
         const dayStr = date.toLocaleDateString("en-US", { month: "short", day: "2-digit" });
+        const dateKey = date.toISOString().slice(0, 10);
         
-        const baseDmSends = 1.0;
-        const waveDmSends = Math.sin(i * 0.45) * 0.3 + Math.cos(i * 0.2) * 0.1;
-        const trendDmSends = i * 0.015;
-        const dmSends = Math.round((baseDmSends + waveDmSends + trendDmSends + (totalDeliveries * 0.0001)) * 100) / 100;
+        const dmSends = messageDeliveries.filter((d: any) => 
+          d.created_at?.startsWith(dateKey)
+        ).length;
         
-        const baseNewCreators = 90;
-        const waveNewCreators = Math.sin((i + 2) * 0.45) * 25 + Math.cos(i * 0.35) * 10;
-        const trendNewCreators = i * 1.8;
-        const newCreators = Math.round(baseNewCreators + waveNewCreators + trendNewCreators + (workspaces.length * 0.2));
+        const newCreators = workspaces.filter((w: any) => 
+          w.created_at?.startsWith(dateKey)
+        ).length;
         
-        return {
-          day: dayStr,
-          dmSends,
-          newCreators,
-        };
+        return { day: dayStr, dmSends, newCreators };
       });
 
+      // Plan distribution - real numbers only
       const planDistribution = {
-        free: 7041 + workspaces.filter((w: any) => w.plan === "free").length,
-        creator: 3912 + workspaces.filter((w: any) => w.plan === "creator" || w.plan === "starter").length,
-        pro: 2184 + workspaces.filter((w: any) => w.plan === "pro").length,
-        agency: 445 + workspaces.filter((w: any) => w.plan === "agency" || w.plan === "enterprise").length,
+        free: workspaces.filter((w: any) => !w.plan || w.plan === "free").length,
+        starter: workspaces.filter((w: any) => w.plan === "starter" || w.plan === "creator").length,
+        pro: workspaces.filter((w: any) => w.plan === "pro").length,
+        enterprise: workspaces.filter((w: any) => w.plan === "agency" || w.plan === "enterprise").length,
       };
 
+      // Product type distribution
       const productTypeDistribution: Record<string, number> = {};
       products.forEach((p: any) => {
-        productTypeDistribution[p.type] = (productTypeDistribution[p.type] ?? 0) + 1;
+        const type = p.type || "other";
+        productTypeDistribution[type] = (productTypeDistribution[type] ?? 0) + 1;
       });
 
+      // Recent orders (last 10)
       const sortedPaidOrders = [...paidOrders]
-        .sort((a: any, b: any) => b.created_at.localeCompare(a.created_at))
-        .slice(0, 5);
+        .sort((a: any, b: any) => (b.created_at || "").localeCompare(a.created_at || ""))
+        .slice(0, 10);
 
       const recentOrders = sortedPaidOrders.map((o: any) => {
         const prod = products.find((p: any) => p.id === o.product_id);
         const ws = workspaces.find((w: any) => w.id === o.workspace_id);
         return {
-          _id: o.id,
           id: o.id,
           amount: o.amount,
           currency: o.currency || "INR",
@@ -1598,52 +1604,19 @@ export function useAdminStats() {
         };
       });
 
-      const flaggedList = [
-        {
-          id: "flag-1",
-          name: "Marcus Okafor",
-          username: "marcus.okafor",
-          risk: "High Risk",
-          reason: "DM quota exceeded — 340% over limit",
-          quota: 340,
-          time: "2 hours ago",
-          workspaceId: workspaces[0]?.id || null,
-          status: workspaces[0]?.status || "active",
-        },
-        {
-          id: "flag-2",
-          name: "Yuki Tanaka",
-          username: "yuki.creates",
-          risk: "High Risk",
-          reason: "Spam keyword detected in automation rule",
-          quota: 98,
-          time: "5 hours ago",
-          workspaceId: workspaces[1]?.id || null,
-          status: workspaces[1]?.status || "active",
-        },
-        {
-          id: "flag-3",
-          name: "Leila Nazari",
-          username: "leila.nazari",
-          risk: "Medium Risk",
-          reason: "Unusual DM send pattern — bot-like behavior",
-          quota: 82,
-          time: "1 day ago",
-          workspaceId: workspaces[2]?.id || null,
-          status: workspaces[2]?.status || "active",
-        },
-        {
-          id: "flag-4",
-          name: "Diego Fernandez",
-          username: "diego.f.creator",
-          risk: "Low Risk",
-          reason: "Multiple failed payment attempts on Pro plan",
-          quota: 42,
-          time: "2 days ago",
-          workspaceId: workspaces[3]?.id || null,
-          status: workspaces[3]?.status || "active",
-        },
-      ];
+      // Flagged list - real suspended/flagged accounts from workspaces
+      const flaggedList = workspaces
+        .filter((w: any) => w.status === "suspended" || w.status === "flagged")
+        .map((w: any, idx: number) => ({
+          id: `flag-${w.id}`,
+          name: w.name || `Workspace ${idx + 1}`,
+          username: w.slug || w.id?.slice(0, 8),
+          risk: w.status === "suspended" ? "High Risk" : "Medium Risk",
+          reason: w.suspension_reason || "Account flagged for review",
+          workspaceId: w.id,
+          status: w.status,
+          createdAt: w.created_at,
+        }));
 
       setStats({
         totalCreators,
@@ -1652,11 +1625,15 @@ export function useAdminStats() {
         mrr,
         totalInstagramAccounts,
         activeCampaigns,
+        totalCampaigns,
         totalDeliveries,
         totalLeads,
+        totalProducts,
         totalRevenue,
         totalOrders,
         flaggedCount,
+        openTickets,
+        resolvedTickets,
         dailyStats,
         planDistribution,
         productTypeDistribution,

@@ -5,27 +5,22 @@ import { Input } from "@/components/ui/input.tsx";
 import { Badge } from "@/components/ui/badge.tsx";
 import { toast } from "sonner";
 import {
-  Settings, Save, CheckCircle2, XCircle, Globe, Shield, ShieldCheck, Mail, HelpCircle
+  Settings, Save, CheckCircle2, Globe, Shield, ShieldCheck, Mail, Key, Database, Server
 } from "lucide-react";
 
 export default function AdminSettingsPage() {
-  const [platformTitle, setPlatformTitle] = useState("Creator DM & Commerce");
-  const [supportEmail, setSupportEmail] = useState("support@creatordm.com");
-  const [betaInstagram, setBetaInstagram] = useState(true);
-  const [betaCommerce, setBetaCommerce] = useState(true);
-  const [betaAI, setBetaAI] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const handleSave = () => {
     setSaving(true);
     setTimeout(() => {
       setSaving(false);
-      toast.success("Platform settings saved successfully");
+      toast.success("Settings saved successfully");
     }, 800);
   };
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="max-w-4xl space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/30 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400">
@@ -33,127 +28,144 @@ export default function AdminSettingsPage() {
         </div>
         <div>
           <h1 className="text-2xl font-extrabold text-slate-800 dark:text-white tracking-tight">Platform Settings</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Manage global parameters, integration status, and feature flags.</p>
+          <p className="text-sm text-muted-foreground mt-0.5">System configuration and integrations status.</p>
         </div>
       </div>
 
-      {/* System configuration card */}
+      {/* Integration Status */}
       <Card className="border-0 shadow-md bg-white dark:bg-slate-900">
         <CardHeader>
-          <CardTitle className="text-base font-bold">General Configuration</CardTitle>
-          <CardDescription>Configure branding and communication details for the SaaS platform.</CardDescription>
+          <CardTitle className="text-base font-bold flex items-center gap-2">
+            <Server className="w-4 h-4 text-blue-500" />
+            Integration Status
+          </CardTitle>
+          <CardDescription>Current connection status of all platform integrations.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <StatusItem label="Supabase Database" status="connected" />
+            <StatusItem label="Meta/Instagram API" status="connected" />
+            <StatusItem label="Google OAuth" status="connected" />
+            <StatusItem label="Stripe Payments" status="pending" />
+            <StatusItem label="Email Service (Resend)" status="pending" />
+            <StatusItem label="Webhook Delivery" status="connected" />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Security Settings */}
+      <Card className="border-0 shadow-md bg-white dark:bg-slate-900">
+        <CardHeader>
+          <CardTitle className="text-base font-bold flex items-center gap-2">
+            <Shield className="w-4 h-4 text-red-500" />
+            Security Configuration
+          </CardTitle>
+          <CardDescription>Admin access and security parameters.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Platform Title</label>
-              <Input
-                value={platformTitle}
-                onChange={(e) => setPlatformTitle(e.target.value)}
-                placeholder="e.g. Creator DM"
-              />
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Admin Panel URL</label>
+              <Input value="/_sys/ctrl-panel" disabled className="font-mono text-xs bg-slate-50" />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Support Contact Email</label>
-              <Input
-                type="email"
-                value={supportEmail}
-                onChange={(e) => setSupportEmail(e.target.value)}
-                placeholder="e.g. support@company.com"
-              />
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Session Storage</label>
+              <Input value="sessionStorage (browser tab only)" disabled className="text-xs bg-slate-50" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Auth Method</label>
+              <Input value="Username + Password (hashed)" disabled className="text-xs bg-slate-50" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">/admin Route</label>
+              <div className="flex items-center gap-2">
+                <Input value="Returns 404 (hidden)" disabled className="text-xs bg-slate-50" />
+                <Badge className="bg-green-100 text-green-700 text-[9px]">Secure</Badge>
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Feature flags & toggles */}
+      {/* Platform Info */}
       <Card className="border-0 shadow-md bg-white dark:bg-slate-900">
         <CardHeader>
-          <CardTitle className="text-base font-bold">Feature Gates & Toggles</CardTitle>
-          <CardDescription>Enable or disable major subsystems globally across all workspaces.</CardDescription>
+          <CardTitle className="text-base font-bold flex items-center gap-2">
+            <Database className="w-4 h-4 text-purple-500" />
+            Platform Information
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-3.5">
-            {[
-              {
-                id: "insta",
-                title: "Instagram DM Automations",
-                desc: "Allow creators to link Meta accounts and configure auto-replies.",
-                checked: betaInstagram,
-                onChange: setBetaInstagram,
-              },
-              {
-                id: "commerce",
-                title: "Digital Commerce Checkout",
-                desc: "Enable checkout payment pages, product licensing, and digital downloads.",
-                checked: betaCommerce,
-                onChange: setBetaCommerce,
-              },
-              {
-                id: "ai",
-                title: "AI Auto-responder (Beta)",
-                desc: "Expose AI prompt configuration and dynamic messaging answers to users.",
-                checked: betaAI,
-                onChange: setBetaAI,
-              },
-            ].map((f) => (
-              <div key={f.id} className="flex items-start justify-between gap-4 p-3 bg-slate-50/50 dark:bg-slate-800/20 rounded-xl border border-slate-100 dark:border-slate-800/40">
-                <div className="space-y-0.5">
-                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{f.title}</p>
-                  <p className="text-xs text-slate-400 max-w-md">{f.desc}</p>
-                </div>
-                <button
-                  onClick={() => f.onChange(!f.checked)}
-                  className={`w-10 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors ${
-                    f.checked ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-700"
-                  }`}
-                >
-                  <div
-                    className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
-                      f.checked ? "translate-x-4" : "translate-x-0"
-                    }`}
-                  />
-                </button>
-              </div>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Platform Name</label>
+              <Input value="Flowora" disabled className="text-xs bg-slate-50" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Domain</label>
+              <Input value="www.flowora.tech" disabled className="text-xs bg-slate-50" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Supabase Project</label>
+              <Input value="dbksekhsnerhkmqoxcrq" disabled className="font-mono text-xs bg-slate-50" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Hosting</label>
+              <Input value="Vercel (Auto-deploy on push)" disabled className="text-xs bg-slate-50" />
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Integration connections status */}
+      {/* Feature Flags */}
       <Card className="border-0 shadow-md bg-white dark:bg-slate-900">
         <CardHeader>
-          <CardTitle className="text-base font-bold">External Integrations</CardTitle>
-          <CardDescription>Verify link status and API connection health of third-party backends.</CardDescription>
+          <CardTitle className="text-base font-bold flex items-center gap-2">
+            <Key className="w-4 h-4 text-amber-500" />
+            Feature Flags
+          </CardTitle>
+          <CardDescription>Toggle features across the platform.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2">
-          {[
-            { name: "Meta Graph API (Instagram)", desc: "Webhooks and message sending endpoints", ok: true },
-            { name: "Stripe Payment Gateway", desc: "Digital product checkout and client billing payouts", ok: true },
-            { name: "Supabase Postgres Backend", desc: "Database, auth, storage, and realtime services", ok: true },
-          ].map((item, idx) => (
-            <div key={idx} className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800 last:border-0">
-              <div>
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{item.name}</p>
-                <p className="text-xs text-slate-400">{item.desc}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge className="bg-emerald-500/10 text-emerald-600 border border-emerald-200 dark:border-emerald-800/40 text-[10px] gap-1 font-semibold">
-                  <CheckCircle2 size={11} /> Connected
-                </Badge>
-              </div>
-            </div>
-          ))}
+        <CardContent>
+          <div className="space-y-3">
+            <FeatureFlag label="Instagram DM Automation" enabled={true} />
+            <FeatureFlag label="Story Reply Automation" enabled={true} />
+            <FeatureFlag label="Lead Collection Forms" enabled={true} />
+            <FeatureFlag label="Digital Product Store" enabled={true} />
+            <FeatureFlag label="AI-Powered Replies" enabled={false} />
+            <FeatureFlag label="Multi-Account Support" enabled={true} />
+            <FeatureFlag label="Stripe Checkout" enabled={false} />
+          </div>
         </CardContent>
       </Card>
+    </div>
+  );
+}
 
-      {/* Save Button */}
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={saving} className="gap-2 px-6">
-          <Save size={14} />
-          {saving ? "Saving Changes..." : "Save Settings"}
-        </Button>
-      </div>
+function StatusItem({ label, status }: { label: string; status: "connected" | "pending" | "error" }) {
+  const config = {
+    connected: { badge: "Connected", cls: "bg-green-100 text-green-700", icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
+    pending: { badge: "Not Configured", cls: "bg-amber-100 text-amber-700", icon: <Globe className="w-3.5 h-3.5" /> },
+    error: { badge: "Error", cls: "bg-red-100 text-red-700", icon: <Shield className="w-3.5 h-3.5" /> },
+  };
+  const c = config[status];
+  return (
+    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{label}</span>
+      <Badge className={`${c.cls} text-[9px] gap-1`}>
+        {c.icon} {c.badge}
+      </Badge>
+    </div>
+  );
+}
+
+function FeatureFlag({ label, enabled }: { label: string; enabled: boolean }) {
+  return (
+    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{label}</span>
+      <Badge className={`text-[9px] ${enabled ? "bg-green-100 text-green-700" : "bg-slate-200 text-slate-500"}`}>
+        {enabled ? "Enabled" : "Disabled"}
+      </Badge>
     </div>
   );
 }
