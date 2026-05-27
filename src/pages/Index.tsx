@@ -69,14 +69,6 @@ const simulatorPresets = {
 };
 
 // Data arrays from Figma reverse engineering
-const Re = [
-  { name: "Nike", gradient: "from-gray-800 to-gray-600" },
-  { name: "Adidas", gradient: "from-blue-600 to-blue-800" },
-  { name: "Puma", gradient: "from-orange-500 to-red-600" },
-  { name: "Reebok", gradient: "from-purple-600 to-pink-600" },
-  { name: "Under Armour", gradient: "from-green-600 to-teal-600" },
-  { name: "New Balance", gradient: "from-indigo-600 to-purple-600" }
-];
 
 const Id = [
   { name: "Priya Patel", niche: "Fitness Coach", followers: "125K", avatar: 1, avatarImage: "/creator_indian_1.png" },
@@ -798,35 +790,7 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ── BRAND LOGOS MARQUEE TICKER ── */}
-      <section className="relative overflow-hidden py-12 bg-gradient-to-r from-gray-50 to-white border-y border-gray-100">
-        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-gray-50 to-transparent z-10" />
-        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-gray-50 to-transparent z-10" />
-        <div className="flex items-center">
-          <motion.div
-            className="flex gap-12 items-center whitespace-nowrap"
-            animate={{ x: [0, -180 * Re.length] }}
-            transition={{
-              x: {
-                duration: 22,
-                repeat: Infinity,
-                ease: "linear",
-              }
-            }}
-          >
-            {[...Re, ...Re, ...Re].map((brand, idx) => (
-              <div
-                key={idx}
-                className="flex-shrink-0 w-36 h-12 flex items-center justify-center"
-              >
-                <div className={`bg-gradient-to-r ${brand.gradient} rounded-xl py-2 px-5 shadow-sm border border-white/10 flex items-center justify-center`}>
-                  <span className="text-white font-bold text-sm tracking-wide">{brand.name}</span>
-                </div>
-              </div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
+
 
       {/* ── CREATORS GRID SECTION ── */}
       <section className="py-20 px-6 bg-gradient-to-b from-white to-blue-50/50">
