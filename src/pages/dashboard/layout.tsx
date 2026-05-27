@@ -54,7 +54,7 @@ const navGroups = [
       { label: "Products", href: "/dashboard/products", icon: Package },
       { label: "Contacts", href: "/dashboard/contacts", icon: Users, badge: "12" },
       { label: "Orders", href: "/dashboard/orders", icon: CreditCard },
-      { label: "Refer and Earn", href: "/dashboard/refer", icon: Gift },
+      { label: "Affiliate", href: "/dashboard/affiliate", icon: Gift },
     ]
   }
 ];
