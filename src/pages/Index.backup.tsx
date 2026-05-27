@@ -903,54 +903,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ── FLOWING CREATOR MARQUEE ── */}
-      <section className="py-10 border-y border-gray-100 bg-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6">
-          <p className="text-center text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-6">
-            Trusted by 60,000+ Creators Worldwide
-          </p>
-          <div className="relative">
-            {/* Fade edges */}
-            <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
-            {/* Scrolling strip */}
-            <div className="flex animate-flowora-marquee gap-5 items-center">
-              {[...Id, ...Id, ...Id].map((creator, i) => (
-                <div key={i} className="flex items-center gap-2.5 bg-white rounded-full pl-1.5 pr-5 py-1.5 shadow-sm border border-gray-100 shrink-0 hover:shadow-md hover:border-purple-200/50 transition-all">
-                  <img src={creator.avatarImage} alt={creator.name} className="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm" />
-                  <div>
-                    <p className="text-xs font-bold text-gray-800 leading-tight">{creator.name}</p>
-                    <p className="text-[10px] text-gray-500">{creator.followers} followers</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-        {/* Meta Verified badge below marquee */}
-        <div className="flex justify-center mt-6">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200/50 text-purple-700 px-5 py-2.5 rounded-full shadow-sm">
-            <ShieldCheck className="w-4 h-4 text-purple-500" />
-            <span className="text-sm font-semibold">Meta Verified Partner</span>
-            <span className="text-gray-300 mx-1">·</span>
-            <span className="text-sm font-semibold text-gray-600">Trusted by 60K+ Creators</span>
-          </div>
-        </div>
-        <style>{`
-          @keyframes flowora-marquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-33.33%); }
-          }
-          .animate-flowora-marquee {
-            animation: flowora-marquee 25s linear infinite;
-            width: max-content;
-          }
-          .animate-flowora-marquee:hover {
-            animation-play-state: paused;
-          }
-        `}</style>
-      </section>
-
       {/* ── FEATURES GRID ── */}
       <section id="features" className="py-20 px-6 relative overflow-hidden bg-gray-50/50">
         <div className="absolute top-1/4 left-0 w-96 h-96 bg-purple-300/10 rounded-full blur-3xl pointer-events-none" />
