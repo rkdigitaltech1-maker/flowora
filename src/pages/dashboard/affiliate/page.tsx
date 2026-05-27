@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { motion } from "motion/react";
 import { toast } from "sonner";
 import {
-  Copy, ExternalLink, TrendingUp, Users, DollarSign, Eye,
-  MousePointerClick, UserPlus, ArrowUpRight, Download, Calendar,
-  Wallet, CreditCard, Clock, CheckCircle2, XCircle, Filter,
-  BarChart3, Share2, Link2, QrCode, Gift, FileText, Bell
+  Copy, TrendingUp, Users, DollarSign,
+  MousePointerClick, UserPlus, Download,
+  Wallet, Clock, CheckCircle2,
+  BarChart3, Share2, Link2, QrCode, FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 

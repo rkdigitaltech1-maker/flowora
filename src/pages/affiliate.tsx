@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 import {
   ArrowRight, DollarSign, Users, TrendingUp, Gift, Clock,
   CheckCircle2, ChevronDown, ChevronUp, Repeat, CreditCard,
-  Globe, Youtube, Instagram, Mail, Share2, Shield, Zap,
+  Globe, Video, Camera, Mail, Share2, Shield, Zap,
   Percent, Calendar, Award, BarChart3, Wallet, FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
@@ -123,8 +123,8 @@ const faqs = [
 
 
 const promotionChannels = [
-  { icon: Instagram, label: "Instagram", color: "text-pink-500" },
-  { icon: Youtube, label: "YouTube", color: "text-red-500" },
+  { icon: Camera, label: "Instagram", color: "text-pink-500" },
+  { icon: Video, label: "YouTube", color: "text-red-500" },
   { icon: Mail, label: "Email", color: "text-blue-500" },
   { icon: Globe, label: "Blog/Website", color: "text-emerald-500" },
 ];
