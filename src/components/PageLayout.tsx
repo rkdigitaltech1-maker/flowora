@@ -245,8 +245,7 @@ export function PageLayout({ children }: PageLayoutProps) {
                 <ul className="space-y-2.5 text-sm text-gray-500">
                   <li><Link to="/privacy" className="hover:text-gray-900 transition-colors">Privacy Policy</Link></li>
                   <li><Link to="/terms" className="hover:text-gray-900 transition-colors">Terms of Service</Link></li>
-                  <li><Link to="/refund" className="hover:text-gray-900 transition-colors">Refund & Cancellation</Link></li>
-                  <li><Link to="/shipping" className="hover:text-gray-900 transition-colors">Shipping & Delivery</Link></li>
+                  <li><Link to="/gdpr" className="hover:text-gray-900 transition-colors">GDPR Compliance</Link></li>
                   <li><Link to="/cookies" className="hover:text-gray-900 transition-colors">Cookie Policy</Link></li>
                 </ul>
               </div>

@@ -13,17 +13,8 @@ export function usePricing() {
     const stored = localStorage.getItem(CURRENCY_STORAGE_KEY);
     if (stored === "INR" || stored === "USD") return stored;
 
-    // Auto-detect based on timezone
-    try {
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      if (tz.startsWith("Asia/Kolkata") || tz.startsWith("Asia/Calcutta")) {
-        return "INR";
-      }
-    } catch {
-      // Fallback
-    }
-
-    return "USD";
+    // Default to INR (primary market is India)
+    return "INR";
   });
 
   const [billingInterval, setBillingInterval] = useState<BillingInterval>("annual");

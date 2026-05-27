@@ -28,6 +28,7 @@ import {
   GraduationCap,
   MapPin,
   Check,
+  X,
   Tag,
   Video,
   Image
@@ -290,6 +291,70 @@ const kd = [
   }
 ];
 
+// Social proof notification data
+const socialProofNotifications = [
+  { name: "Priya", location: "Mumbai", action: "just started their free trial", time: "2 min ago" },
+  { name: "Aarav", location: "Delhi", action: "upgraded to Pro plan", time: "5 min ago" },
+  { name: "Ananya", location: "Bangalore", action: "captured 150 leads today", time: "8 min ago" },
+  { name: "Kabir", location: "Pune", action: "just started their free trial", time: "11 min ago" },
+  { name: "Rohan", location: "Hyderabad", action: "automated 500 DMs this week", time: "15 min ago" },
+  { name: "Diya", location: "Chennai", action: "upgraded to Pro plan", time: "18 min ago" },
+];
+
+// Floating social proof toast
+function SocialProofToast() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    // Show notification after 5 seconds, then cycle every 8 seconds
+    const initialDelay = setTimeout(() => {
+      setVisible(true);
+    }, 5000);
+
+    const interval = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setCurrentIndex((prev) => (prev + 1) % socialProofNotifications.length);
+        setVisible(true);
+      }, 500);
+    }, 8000);
+
+    return () => {
+      clearTimeout(initialDelay);
+      clearInterval(interval);
+    };
+  }, []);
+
+  const notification = socialProofNotifications[currentIndex];
+
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          initial={{ opacity: 0, y: 50, x: 0 }}
+          animate={{ opacity: 1, y: 0, x: 0 }}
+          exit={{ opacity: 0, y: 50 }}
+          transition={{ type: "spring", stiffness: 200, damping: 20 }}
+          className="fixed bottom-6 left-6 z-50 bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 max-w-[300px] hidden md:flex items-center gap-3"
+        >
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+            {notification.name[0]}
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-bold text-slate-900 truncate">
+              {notification.name} from {notification.location}
+            </p>
+            <p className="text-[10px] text-gray-500 font-semibold truncate">{notification.action}</p>
+            <p className="text-[9px] text-gray-400 font-medium mt-0.5">{notification.time}</p>
+          </div>
+          <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse flex-shrink-0" />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 // Floating particles overlay for CTA
 function FloatingParticles() {
   const particles = Array.from({ length: 25 });
@@ -394,7 +459,7 @@ export default function Index() {
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
   const [demoPlaying, setDemoPlaying] = useState(false);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
-  const [pricingCurrency, setPricingCurrency] = useState<"USD" | "INR">("USD");
+  const [pricingCurrency, setPricingCurrency] = useState<"USD" | "INR">("INR");
 
   // Redirect handling for active login sessions
   useEffect(() => {
@@ -442,6 +507,9 @@ export default function Index() {
 
   return (
     <PageLayout>
+      {/* Social Proof Toast Notification */}
+      <SocialProofToast />
+
       {/* ── HERO SECTION ── */}
       <section className="relative pt-32 pb-20 px-6 overflow-hidden bg-white">
         {/* Blurry decorative background blobs */}
@@ -1016,18 +1084,19 @@ export default function Index() {
                   </div>
                 </div>
 
-                {/* Creator Background Image */}
-                <img
-                  src="/excited_creator.png"
-                  alt="Excited Creator"
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-                
-                {/* Dark overlay for text contrast */}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-slate-950/60 pointer-events-none" />
+                {/* Chat Header */}
+                <div className="flex items-center gap-2.5 px-4 pb-2 border-b border-white/10 z-10">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center overflow-hidden ring-1 ring-white/20">
+                    <img src="/flowora-favicon.svg" alt="Flowora" className="h-full w-full object-cover" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-[11px] text-white leading-none">Excited Creator</h4>
+                    <p className="text-[9px] text-gray-400 mt-0.5 font-semibold">Instagram DM</p>
+                  </div>
+                </div>
 
                 {/* Animated Floating Bubbles */}
-                <div className="absolute inset-0 p-5 pt-12 flex flex-col justify-start space-y-3 pointer-events-none">
+                <div className="flex-1 p-4 pt-3 flex flex-col justify-start space-y-3 overflow-hidden relative">
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={activeTab}
@@ -1047,25 +1116,25 @@ export default function Index() {
                         // Dynamic layout positioning based on the index and total bubbles
                         let positionClass = "";
                         if (totalBubbles === 2) {
-                          if (bIdx === 0) positionClass = "absolute right-2.5 top-6 w-[75%]";
-                          else positionClass = "absolute left-2.5 top-[32%] w-[82%]";
+                          if (bIdx === 0) positionClass = "absolute right-0 top-6 w-[80%]";
+                          else positionClass = "absolute left-0 top-[36%] w-[85%]";
                         } else if (totalBubbles === 3) {
                           if (bIdx === 0) {
-                            positionClass = isBot ? "absolute left-2.5 top-6 w-[82%]" : "absolute right-2.5 top-6 w-[75%]";
+                            positionClass = isBot ? "absolute left-0 top-4 w-[85%]" : "absolute right-0 top-4 w-[75%]";
                           } else if (bIdx === 1) {
-                            positionClass = isBot ? "absolute left-2.5 top-[38%] w-[82%]" : "absolute right-2.5 top-[38%] w-[75%]";
+                            positionClass = isBot ? "absolute left-0 top-[36%] w-[85%]" : "absolute right-0 top-[36%] w-[75%]";
                           } else {
-                            positionClass = "absolute left-2.5 bottom-6 w-[82%]";
+                            positionClass = isBot ? "absolute left-0 bottom-6 w-[85%]" : "absolute right-0 bottom-6 w-[75%]";
                           }
                         } else { // 4 bubbles
                           if (bIdx === 0) {
-                            positionClass = isBot ? "absolute left-2.5 top-4 w-[82%]" : "absolute right-2.5 top-4 w-[75%]";
+                            positionClass = isBot ? "absolute left-0 top-2 w-[85%]" : "absolute right-0 top-2 w-[75%]";
                           } else if (bIdx === 1) {
-                            positionClass = isBot ? "absolute left-2.5 top-[24%] w-[82%]" : "absolute right-2.5 top-[24%] w-[75%]";
+                            positionClass = isBot ? "absolute left-0 top-[22%] w-[85%]" : "absolute right-0 top-[22%] w-[75%]";
                           } else if (bIdx === 2) {
-                            positionClass = isBot ? "absolute left-2.5 top-[52%] w-[82%]" : "absolute right-2.5 top-[52%] w-[75%]";
+                            positionClass = isBot ? "absolute left-0 top-[48%] w-[85%]" : "absolute right-0 top-[48%] w-[75%]";
                           } else {
-                            positionClass = isBot ? "absolute left-2.5 bottom-6 w-[82%]" : "absolute right-2.5 bottom-6 w-[75%]";
+                            positionClass = isBot ? "absolute left-0 bottom-4 w-[85%]" : "absolute right-0 bottom-4 w-[75%]";
                           }
                         }
 
@@ -1080,19 +1149,19 @@ export default function Index() {
                           >
                             {/* Mini profile avatar for Bot bubbles */}
                             {isBot && (
-                              <div className="w-6 h-6 rounded-full bg-white flex-shrink-0 flex items-center justify-center overflow-hidden ring-1 ring-white/20">
+                              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex-shrink-0 flex items-center justify-center overflow-hidden ring-1 ring-white/20">
                                 <img src="/flowora-favicon.svg" alt="Flowora" className="h-full w-full object-cover" />
                               </div>
                             )}
                             
                             <div className={`p-2.5 rounded-xl text-[10.5px] font-semibold leading-snug shadow-lg ${
                               isBot
-                                ? "bg-slate-950/90 text-white rounded-tl-none border border-white/10"
-                                : "bg-white text-gray-800 rounded-tr-none border border-gray-150 ml-auto"
+                                ? "bg-slate-800/90 text-white rounded-tl-none border border-white/10"
+                                : "bg-white text-gray-800 rounded-tr-none border border-gray-200 ml-auto"
                             }`}>
                               <p>{bubble.content}</p>
                               {bubble.hasButton && (
-                                <div className="mt-2 bg-white/15 border border-white/20 hover:bg-white/25 transition-all text-white font-bold text-[8.5px] py-1 px-2.5 rounded-md text-center cursor-pointer">
+                                <div className="mt-2 bg-white/15 border border-white/20 text-white font-bold text-[8.5px] py-1.5 px-3 rounded-md text-center">
                                   {bubble.btnText}
                                 </div>
                               )}
@@ -2307,6 +2376,118 @@ export default function Index() {
         </div>
       </section>
 
+      {/* ── WHY FLOWORA vs. MANUAL WORK ── */}
+      <section className="py-20 px-6 bg-white relative overflow-hidden">
+        <div className="absolute top-1/3 right-0 w-96 h-96 bg-emerald-200/10 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="max-w-5xl mx-auto relative z-10">
+          <div className="text-center mb-14 space-y-4">
+            <h2 className="text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
+              Stop Wasting Hours on{" "}
+              <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent line-through decoration-red-300">
+                Manual Work
+              </span>
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              See how Flowora transforms your Instagram workflow from exhausting to effortless.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Without Flowora */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="rounded-3xl border-2 border-red-100 bg-gradient-to-br from-red-50/50 to-white p-8"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
+                  <X className="w-5 h-5 text-red-500" />
+                </div>
+                <h3 className="text-lg font-extrabold text-slate-900">Without Flowora</h3>
+              </div>
+              <ul className="space-y-3.5">
+                {[
+                  "3+ hours daily replying to DMs manually",
+                  "Missed comments = missed revenue",
+                  "No lead capture from engagement",
+                  "Can't scale beyond personal effort",
+                  "Followers leave without converting",
+                  "Zero analytics on DM performance",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm font-medium text-gray-600">
+                    <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <X className="w-3 h-3 text-red-500" />
+                    </div>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            {/* With Flowora */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="rounded-3xl border-2 border-emerald-100 bg-gradient-to-br from-emerald-50/50 to-white p-8 shadow-lg shadow-emerald-100/50"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                  <Check className="w-5 h-5 text-emerald-600" />
+                </div>
+                <h3 className="text-lg font-extrabold text-slate-900">With Flowora</h3>
+              </div>
+              <ul className="space-y-3.5">
+                {[
+                  "100% automated replies 24/7 in seconds",
+                  "Every comment triggers a personalized DM",
+                  "Capture emails & phone numbers on autopilot",
+                  "Scale to unlimited followers effortlessly",
+                  "Convert followers into buyers instantly",
+                  "Full analytics: open rates, clicks, revenue",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm font-medium text-gray-700">
+                    <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check className="w-3 h-3 text-emerald-600" />
+                    </div>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </div>
+
+          {/* Results highlight */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mt-10 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-6 text-white text-center shadow-xl"
+          >
+            <p className="text-sm font-bold text-emerald-100 uppercase tracking-widest mb-2">Average Results After 30 Days</p>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <p className="text-3xl font-black">300%</p>
+                <p className="text-xs font-semibold text-emerald-200">More Engagement</p>
+              </div>
+              <div>
+                <p className="text-3xl font-black">5x</p>
+                <p className="text-xs font-semibold text-emerald-200">More Leads Captured</p>
+              </div>
+              <div>
+                <p className="text-3xl font-black">10hrs</p>
+                <p className="text-xs font-semibold text-emerald-200">Saved Per Week</p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* ── LIMITED TIME CTA PANEL ── */}
       <section className="py-20 px-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600" />
@@ -2381,6 +2562,8 @@ export default function Index() {
           {[
             { label: "Meta Verified Partner", color: "text-blue-400" },
             { label: "GDPR Compliant", color: "text-emerald-400" },
+            { label: "SSL Encrypted", color: "text-yellow-400" },
+            { label: "7-Day Money-Back", color: "text-pink-400" },
           ].map((badge, index) => (
             <motion.div
               key={badge.label}

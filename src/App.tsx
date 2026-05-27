@@ -30,6 +30,8 @@ import SafetyPage from "./pages/safety.tsx";
 import PrivacyPage from "./pages/privacy.tsx";
 import TermsPage from "./pages/terms.tsx";
 import GdprPage from "./pages/gdpr.tsx";
+import CookiesPage from "./pages/cookies.tsx";
+import ContactPage from "./pages/contact.tsx";
 
 // Creator Dashboard pages
 import WorkflowsPage from "./pages/dashboard/workflows/page.tsx";
@@ -62,6 +64,8 @@ export default function App() {
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/gdpr" element={<GdprPage />} />
+            <Route path="/cookies" element={<CookiesPage />} />
+            <Route path="/contact" element={<ContactPage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
