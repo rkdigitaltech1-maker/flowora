@@ -38,6 +38,7 @@ import CampaignsPage from "./pages/dashboard/campaigns/page.tsx";
 import LeadsPage from "./pages/dashboard/leads/page.tsx";
 import ProductsPage from "./pages/dashboard/products/page.tsx";
 import AutomationHealthPage from "./pages/dashboard/automation-health/page.tsx";
+import CreateAutomationPage from "./pages/dashboard/automations/create/page.tsx";
 import LearnPage from "./pages/dashboard/learn/page.tsx";
 import ReferPage from "./pages/dashboard/refer/page.tsx";
 import CheckoutPage from "./pages/dashboard/checkout/page.tsx";
@@ -81,6 +82,7 @@ export default function App() {
               <Route path="workflows" element={<WorkflowsPage />} />
               <Route path="workflows/:workflowId" element={<WorkflowBuilderPage />} />
               <Route path="automations" element={<AutomationHealthPage />} />
+              <Route path="automations/create" element={<CreateAutomationPage />} />
               <Route path="campaigns" element={<CampaignsPage />} />
               <Route path="products" element={<ProductsPage />} />
               <Route path="contacts" element={<LeadsPage />} />

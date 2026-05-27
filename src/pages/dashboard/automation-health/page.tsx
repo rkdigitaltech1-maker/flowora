@@ -130,7 +130,19 @@ export default function AutomationHealthPage() {
   };
 
   const handleConfigure = (trigger: string) => {
-    navigate(`/dashboard/workflows?create=true&trigger=${trigger}`);
+    // Map trigger types to automation type keys
+    const triggerToType: Record<string, string> = {
+      instagram_comment: "comment",
+      instagram_story_reply: "story",
+      webhook: "live",
+      instagram_dm: "dm",
+      follow_gate: "follow_gate",
+      re_trigger: "re_trigger",
+      data_capture: "data_capture",
+      ai_replies: "ai_replies",
+    };
+    const automationType = triggerToType[trigger] || "comment";
+    navigate(`/dashboard/automations/create?type=${automationType}`);
   };
 
   if (loading) {
