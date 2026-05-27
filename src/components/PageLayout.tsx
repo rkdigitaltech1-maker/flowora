@@ -131,12 +131,13 @@ export function PageLayout({ children }: PageLayoutProps) {
 
           {/* Desktop Links */}
           <div className="hidden md:flex items-center gap-8">
-            {["Features", "How It Works", "Testimonials", "FAQ"].map((n) => {
+            {["Features", "How It Works", "Testimonials", "Pricing", "FAQ"].map((n) => {
+              const isPricing = n === "Pricing";
               const hash = n.toLowerCase().replace(/ /g, "-");
               return (
                 <a
                   key={n}
-                  href={`/#${hash}`}
+                  href={isPricing ? "/pricing" : `/#${hash}`}
                   className="text-gray-600 hover:text-gray-900 font-semibold relative group transition-colors text-sm"
                 >
                   {n}
@@ -170,12 +171,13 @@ export function PageLayout({ children }: PageLayoutProps) {
         {/* Mobile menu panel */}
         {mobileMenuOpen && (
           <div className="md:hidden bg-white border-t border-slate-100 px-6 pb-6 space-y-4 pt-4 shadow-lg animate-fade-in">
-            {["Features", "How It Works", "Testimonials", "FAQ"].map((n) => {
+            {["Features", "How It Works", "Testimonials", "Pricing", "FAQ"].map((n) => {
+              const isPricing = n === "Pricing";
               const hash = n.toLowerCase().replace(/ /g, "-");
               return (
                 <a
                   key={n}
-                  href={`/#${hash}`}
+                  href={isPricing ? "/pricing" : `/#${hash}`}
                   onClick={() => setMobileMenuOpen(false)}
                   className="block text-sm font-semibold text-slate-600 hover:text-slate-950 transition-colors"
                 >
@@ -247,7 +249,7 @@ export function PageLayout({ children }: PageLayoutProps) {
                 <ul className="space-y-2 text-xs font-semibold text-gray-400">
                   <li><a href="/#features" className="hover:text-white transition-colors">Features</a></li>
                   <li><a href="/#how-it-works" className="hover:text-white transition-colors">Demo</a></li>
-                  <li><a href="/#pricing" className="hover:text-white transition-colors">Pricing</a></li>
+                  <li><a href="/pricing" className="hover:text-white transition-colors">Pricing</a></li>
                 </ul>
               </div>
               <div className="space-y-3">
