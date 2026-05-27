@@ -2388,112 +2388,205 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ── WHY FLOWORA vs. MANUAL WORK ── */}
-      <section className="py-20 px-6 bg-white relative overflow-hidden">
-        <div className="absolute top-1/3 right-0 w-96 h-96 bg-emerald-200/10 rounded-full blur-3xl pointer-events-none" />
-        
-        <div className="max-w-5xl mx-auto relative z-10">
-          <div className="text-center mb-14 space-y-4">
-            <h2 className="text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
-              Stop Wasting Hours on{" "}
-              <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent line-through decoration-red-300">
-                Manual Work
+      {/* ── PAIN POINTS → FLOWORA SOLUTION ── */}
+      <section className="py-24 px-6 bg-white relative overflow-hidden">
+        <div className="absolute top-1/3 right-0 w-96 h-96 bg-purple-200/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-1/4 left-0 w-80 h-80 bg-blue-200/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-6xl mx-auto relative z-10">
+          {/* Header */}
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-4xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight">
+              Your Instagram is a{" "}
+              <span className="relative inline-block">
+                <span className="bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent">Goldmine</span>
+                <motion.div
+                  initial={{ width: 0 }}
+                  whileInView={{ width: "100%" }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8, delay: 0.5 }}
+                  className="absolute -bottom-1 left-0 h-1 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full"
+                />
               </span>
+              .
+              <br />
+              Stop Letting it{" "}
+              <span className="relative inline-block">
+                <span className="bg-gradient-to-r from-red-500 to-rose-500 bg-clip-text text-transparent">Leak Revenue</span>
+                <motion.div
+                  initial={{ width: 0 }}
+                  whileInView={{ width: "100%" }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8, delay: 0.8 }}
+                  className="absolute -bottom-1 left-0 h-1 bg-gradient-to-r from-red-500 to-rose-500 rounded-full"
+                />
+              </span>
+              .
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              See how Flowora transforms your Instagram workflow from exhausting to effortless.
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Most creators think they have a <strong className="text-slate-900">traffic problem</strong>. The truth? You have a <strong className="text-slate-900">conversion gap</strong>. See why manual DMs are costing you more than just your time.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Without Flowora */}
+          {/* 3 Pain Point Cards */}
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Card 1: The 5-Minute Gold Standard */}
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="rounded-3xl border-2 border-red-100 bg-gradient-to-br from-red-50/50 to-white p-8"
+              className="rounded-3xl border-2 border-cyan-200/60 bg-white p-7 shadow-sm hover:shadow-xl hover:border-cyan-300 transition-all"
             >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
-                  <X className="w-5 h-5 text-red-500" />
-                </div>
-                <h3 className="text-lg font-extrabold text-slate-900">Without Flowora</h3>
+              <div className="text-5xl lg:text-6xl font-black bg-gradient-to-br from-cyan-500 to-blue-600 bg-clip-text text-transparent mb-4">
+                21x
               </div>
-              <ul className="space-y-3.5">
-                {[
-                  "3+ hours daily replying to DMs manually",
-                  "Missed comments = missed revenue",
-                  "No lead capture from engagement",
-                  "Can't scale beyond personal effort",
-                  "Followers leave without converting",
-                  "Zero analytics on DM performance",
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm font-medium text-gray-600">
-                    <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <X className="w-3 h-3 text-red-500" />
-                    </div>
-                    {item}
-                  </li>
-                ))}
-              </ul>
+              <h3 className="text-lg font-extrabold text-slate-900 mb-4 uppercase tracking-wide">
+                The 5-Minute Gold Standard
+              </h3>
+
+              <div className="space-y-4">
+                <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                  <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <TrendingUp className="w-3 h-3" /> The Data
+                  </p>
+                  <p className="text-sm text-gray-700 font-medium leading-relaxed">
+                    You are 21x more likely to qualify a lead if you respond within 5 minutes.
+                  </p>
+                </div>
+
+                <div className="bg-red-50 border border-red-100 rounded-xl p-4">
+                  <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <X className="w-3 h-3" /> The Problem
+                  </p>
+                  <p className="text-sm text-gray-700 font-medium leading-relaxed">
+                    After just 30 minutes of silence, your lead has already moved on to a competitor or scrolled past your offer.
+                  </p>
+                </div>
+
+                <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
+                  <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <Check className="w-3 h-3" /> Flowora Solution
+                  </p>
+                  <p className="text-sm text-gray-700 font-medium leading-relaxed">
+                    We cut your response time from "whenever I check my phone" to <strong className="text-emerald-700">0.5 seconds</strong>. Every time.
+                  </p>
+                </div>
+              </div>
             </motion.div>
 
-            {/* With Flowora */}
+            {/* Card 2: Kill the Link-in-Bio Friction */}
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="rounded-3xl border-2 border-emerald-100 bg-gradient-to-br from-emerald-50/50 to-white p-8 shadow-lg shadow-emerald-100/50"
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="rounded-3xl border-2 border-purple-200/60 bg-white p-7 shadow-sm hover:shadow-xl hover:border-purple-300 transition-all"
             >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-                  <Check className="w-5 h-5 text-emerald-600" />
-                </div>
-                <h3 className="text-lg font-extrabold text-slate-900">With Flowora</h3>
+              <div className="text-5xl lg:text-6xl font-black bg-gradient-to-br from-purple-500 to-pink-600 bg-clip-text text-transparent mb-4">
+                60%
               </div>
-              <ul className="space-y-3.5">
-                {[
-                  "100% automated replies 24/7 in seconds",
-                  "Every comment triggers a personalized DM",
-                  "Capture emails & phone numbers on autopilot",
-                  "Scale to unlimited followers effortlessly",
-                  "Convert followers into buyers instantly",
-                  "Full analytics: open rates, clicks, revenue",
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm font-medium text-gray-700">
-                    <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Check className="w-3 h-3 text-emerald-600" />
-                    </div>
-                    {item}
-                  </li>
-                ))}
-              </ul>
+              <h3 className="text-lg font-extrabold text-slate-900 mb-4 uppercase tracking-wide">
+                Kill the "Link-in-Bio" Friction
+              </h3>
+
+              <div className="space-y-4">
+                <div className="bg-purple-50 border border-purple-100 rounded-xl p-4">
+                  <p className="text-[10px] font-bold text-purple-600 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <TrendingUp className="w-3 h-3" /> The Data
+                  </p>
+                  <p className="text-sm text-gray-700 font-medium leading-relaxed">
+                    60% of customers abandon a purchase when there are too many steps in the process.
+                  </p>
+                </div>
+
+                <div className="bg-red-50 border border-red-100 rounded-xl p-4">
+                  <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <X className="w-3 h-3" /> The Problem
+                  </p>
+                  <p className="text-sm text-gray-700 font-medium leading-relaxed">
+                    Asking a follower to "Exit Reel → View Profile → Click Link → Find Product" is a sales suicide mission.
+                  </p>
+                </div>
+
+                <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
+                  <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <Check className="w-3 h-3" /> Flowora Solution
+                  </p>
+                  <p className="text-sm text-gray-700 font-medium leading-relaxed">
+                    Deliver the exact product link directly to their DM the moment they comment. <strong className="text-emerald-700">Zero friction, maximum conversion.</strong>
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Card 3: Close the Insight Gap */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="rounded-3xl border-2 border-teal-200/60 bg-white p-7 shadow-sm hover:shadow-xl hover:border-teal-300 transition-all"
+            >
+              <div className="text-5xl lg:text-6xl font-black bg-gradient-to-br from-teal-500 to-emerald-600 bg-clip-text text-transparent mb-4">
+                90%
+              </div>
+              <h3 className="text-lg font-extrabold text-slate-900 mb-4 uppercase tracking-wide">
+                Close the Insight Gap
+              </h3>
+
+              <div className="space-y-4">
+                <div className="bg-teal-50 border border-teal-100 rounded-xl p-4">
+                  <p className="text-[10px] font-bold text-teal-600 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <TrendingUp className="w-3 h-3" /> The Data
+                  </p>
+                  <p className="text-sm text-gray-700 font-medium leading-relaxed">
+                    90% of brands have zero data on why their followers don't buy.
+                  </p>
+                </div>
+
+                <div className="bg-red-50 border border-red-100 rounded-xl p-4">
+                  <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <X className="w-3 h-3" /> The Problem
+                  </p>
+                  <p className="text-sm text-gray-700 font-medium leading-relaxed">
+                    Without automated surveys, you're flying blind. You don't know if your price is too high, your offer is confusing, or your timing is off.
+                  </p>
+                </div>
+
+                <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
+                  <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <Check className="w-3 h-3" /> Flowora Solution
+                  </p>
+                  <p className="text-sm text-gray-700 font-medium leading-relaxed">
+                    Our automated micro-surveys qualify leads and gather market research <strong className="text-emerald-700">while you sleep</strong>. Stop guessing, start knowing.
+                  </p>
+                </div>
+              </div>
             </motion.div>
           </div>
 
-          {/* Results highlight */}
+          {/* Bottom CTA strip */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-10 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-6 text-white text-center shadow-xl"
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="mt-12 bg-gradient-to-r from-[#6d48ff] to-purple-600 rounded-2xl p-8 text-white text-center shadow-xl"
           >
-            <p className="text-sm font-bold text-emerald-100 uppercase tracking-widest mb-2">Average Results After 30 Days</p>
+            <p className="text-sm font-bold text-purple-200 uppercase tracking-widest mb-2">Average Results After 30 Days with Flowora</p>
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <p className="text-3xl font-black">300%</p>
-                <p className="text-xs font-semibold text-emerald-200">More Engagement</p>
+                <p className="text-xs font-semibold text-purple-200">More Engagement</p>
               </div>
               <div>
                 <p className="text-3xl font-black">5x</p>
-                <p className="text-xs font-semibold text-emerald-200">More Leads Captured</p>
+                <p className="text-xs font-semibold text-purple-200">More Leads Captured</p>
               </div>
               <div>
                 <p className="text-3xl font-black">10hrs</p>
-                <p className="text-xs font-semibold text-emerald-200">Saved Per Week</p>
+                <p className="text-xs font-semibold text-purple-200">Saved Per Week</p>
               </div>
             </div>
           </motion.div>
