@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label.tsx";
 import { toast } from "sonner";
 import { PLANS, getAnnualSavingsPercent, type Currency } from "@/lib/pricing.ts";
 import { usePricing } from "@/hooks/use-pricing.ts";
+import { processPayment } from "@/lib/razorpay.ts";
 
 const FAQS = [
   { q: "Can I cancel my subscription anytime?", a: "Yes, you can cancel in one click from your account billing settings. You will retain access to Pro features until the end of your billing cycle." },
@@ -81,17 +82,47 @@ export default function CheckoutPage() {
 
     setProcessing(true);
 
-    // In production: This would call Razorpay's createOrder API and open Razorpay checkout modal
-    // For now, simulate Razorpay payment flow
-    setTimeout(() => {
-      setProcessing(false);
-      setSuccess(true);
-      toast.success("Payment completed successfully! Welcome to Pro.");
-      setTimeout(() => {
+    try {
+      // Calculate amount in smallest currency unit (paise for INR, cents for USD)
+      const amountInSmallestUnit = Math.round(total * (currency === "INR" ? 100 : 100));
+
+      const result = await processPayment({
+        orderParams: {
+          amount: amountInSmallestUnit,
+          currency,
+          planId: "pro",
+          billingInterval: billingInterval === "yearly" ? "yearly" : "monthly",
+          promoCode: promoApplied ? promoCode.trim().toUpperCase() : undefined,
+          discountPercent: appliedDiscount || undefined,
+        },
+        customerName: billedTo.trim(),
+        customerPhone: phone.trim(),
+      });
+
+      if (result.success) {
+        // Payment verified server-side, subscription is now active
+        setProcessing(false);
+        setSuccess(true);
+        toast.success("Payment completed successfully! Welcome to Flowora Pro.");
+
+        // Update local state to reflect Pro status
         localStorage.setItem("cs_is_pro", "true");
-        navigate("/dashboard");
-      }, 3500);
-    }, 2800);
+
+        setTimeout(() => {
+          navigate("/dashboard");
+          // Reload to refresh subscription context from server
+          window.location.reload();
+        }, 3500);
+      }
+    } catch (error: any) {
+      setProcessing(false);
+
+      if (error.message?.includes("cancelled")) {
+        toast.info("Payment was cancelled. You can try again whenever you're ready.");
+      } else {
+        toast.error(error.message || "Payment failed. Please try again.");
+      }
+    }
   };
 
   return (
