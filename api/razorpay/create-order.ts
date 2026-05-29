@@ -4,28 +4,26 @@ import { createClient } from "@supabase/supabase-js";
 /**
  * POST /api/razorpay/create-order
  *
- * Creates a Razorpay order server-side with validated pricing.
- * Prevents frontend amount tampering by computing price on the server.
+ * Creates a Razorpay Subscription using the Subscriptions API.
+ * Uses pre-created plan IDs from Razorpay Dashboard.
  *
- * Required env vars (set in Vercel Dashboard → Settings → Environment Variables):
+ * Flow:
+ *   1. Validates user session
+ *   2. Maps billing_interval to Razorpay plan_id
+ *   3. Creates a subscription via Razorpay Subscriptions API
+ *   4. Returns subscription_id for the frontend to open checkout
+ *
+ * Required env vars:
  *   - RAZORPAY_KEY_ID
  *   - RAZORPAY_KEY_SECRET
- *   - VITE_SUPABASE_URL (or SUPABASE_URL)
+ *   - SUPABASE_URL (or VITE_SUPABASE_URL)
  *   - SUPABASE_SERVICE_ROLE_KEY
  */
 
-// Server-side plan pricing (in smallest currency unit: paise/cents)
-const PLAN_PRICES: Record<string, Record<string, { monthly: number; annual: number }>> = {
-  pro: {
-    INR: { monthly: 49900, annual: 478800 }, // ₹499/mo or ₹4,788/yr (₹399/mo × 12)
-    USD: { monthly: 599, annual: 5988 },     // $5.99/mo or $59.88/yr ($4.99/mo × 12)
-  },
-};
-
-// Valid promo codes (server-side validation)
-const VALID_PROMOS: Record<string, number> = {
-  CREATOR50: 50,
-  LAUNCH20: 20,
+// Map billing intervals to your Razorpay plan IDs
+const RAZORPAY_PLAN_IDS: Record<string, string> = {
+  monthly: "plan_SvAD1ggJGNLSfH",   // Pro Monthly ₹589/mo
+  yearly: "plan_SvAE7qhjB6LnlE",    // Pro Yearly ₹5,650/yr
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -46,7 +44,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Validate environment
     const razorpayKeyId = process.env.RAZORPAY_KEY_ID;
     const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET;
-    const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!razorpayKeyId || !razorpayKeySecret) {
@@ -74,97 +72,86 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Parse and validate request body
-    const { currency, plan_id, billing_interval, promo_code, discount_percent } = req.body;
+    const { billing_interval, customer_name, customer_email, customer_phone } = req.body;
 
-    if (!currency || !plan_id || !billing_interval) {
-      return res.status(400).json({ error: "Missing required fields: currency, plan_id, billing_interval" });
-    }
-
-    if (!["INR", "USD"].includes(currency)) {
-      return res.status(400).json({ error: "Invalid currency. Must be INR or USD." });
+    if (!billing_interval) {
+      return res.status(400).json({ error: "Missing required field: billing_interval" });
     }
 
     if (!["monthly", "yearly"].includes(billing_interval)) {
       return res.status(400).json({ error: "Invalid billing interval. Must be monthly or yearly." });
     }
 
-    // Calculate price server-side (prevents frontend tampering)
-    const planPrices = PLAN_PRICES[plan_id]?.[currency];
-    if (!planPrices) {
-      return res.status(400).json({ error: "Invalid plan or currency combination." });
+    // Get the Razorpay plan ID
+    const razorpayPlanId = RAZORPAY_PLAN_IDS[billing_interval];
+    if (!razorpayPlanId) {
+      return res.status(400).json({ error: "No plan configured for this billing interval." });
     }
 
-    let baseAmount = billing_interval === "yearly" ? planPrices.annual : planPrices.monthly;
+    // Auth header for Razorpay API
+    const rzpAuth = `Basic ${Buffer.from(`${razorpayKeyId}:${razorpayKeySecret}`).toString("base64")}`;
 
-    // Validate and apply promo code server-side
-    if (promo_code && discount_percent > 0) {
-      const validDiscount = VALID_PROMOS[promo_code.toUpperCase()];
-      if (validDiscount && validDiscount === discount_percent) {
-        baseAmount = Math.round(baseAmount * (1 - validDiscount / 100));
-      }
-      // If promo code is invalid, silently ignore (don't apply discount)
+    // Create a Razorpay subscription
+    const subscriptionPayload: any = {
+      plan_id: razorpayPlanId,
+      total_count: billing_interval === "yearly" ? 10 : 120, // Max billing cycles
+      quantity: 1,
+      notes: {
+        user_id: user.id,
+        user_email: user.email || customer_email || "",
+        billing_interval: billing_interval,
+        platform: "flowora",
+      },
+    };
+
+    // Add customer details if provided
+    if (customer_email || user.email) {
+      subscriptionPayload.customer_notify = 1;
     }
 
-    // Add tax (18% GST for INR, 8% for USD)
-    const taxRate = currency === "INR" ? 0.18 : 0.08;
-    const amountWithTax = Math.round(baseAmount * (1 + taxRate));
-
-    // Create Razorpay order
-    const receipt = `flowora_${user.id.slice(0, 8)}_${Date.now()}`;
-
-    const razorpayResponse = await fetch("https://api.razorpay.com/v1/orders", {
+    const rzpResponse = await fetch("https://api.razorpay.com/v1/subscriptions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Basic ${Buffer.from(`${razorpayKeyId}:${razorpayKeySecret}`).toString("base64")}`,
+        Authorization: rzpAuth,
       },
-      body: JSON.stringify({
-        amount: amountWithTax,
-        currency: currency,
-        receipt: receipt,
-        notes: {
-          user_id: user.id,
-          user_email: user.email || "",
-          plan_id: plan_id,
-          billing_interval: billing_interval,
-          promo_code: promo_code || "",
-        },
-      }),
+      body: JSON.stringify(subscriptionPayload),
     });
 
-    if (!razorpayResponse.ok) {
-      const errorBody = await razorpayResponse.text();
-      console.error("Razorpay order creation failed:", razorpayResponse.status, errorBody);
-      return res.status(500).json({ error: "Failed to create payment order. Please try again." });
+    if (!rzpResponse.ok) {
+      const errorBody = await rzpResponse.text();
+      console.error("Razorpay subscription creation failed:", rzpResponse.status, errorBody);
+      return res.status(500).json({
+        error: "Failed to create subscription. Please try again.",
+        details: process.env.NODE_ENV === "development" ? errorBody : undefined,
+      });
     }
 
-    const order = await razorpayResponse.json();
+    const subscription = await rzpResponse.json();
 
-    // Store order in database for tracking
-    const { error: insertError } = await supabase.from("payment_orders").insert({
-      order_id: order.id,
+    // Log the subscription creation event
+    await supabase.from("subscription_events").insert({
       user_id: user.id,
-      amount: amountWithTax,
-      currency: currency,
-      plan_id: plan_id,
-      billing_interval: billing_interval,
-      promo_code: promo_code || null,
-      discount_percent: discount_percent || 0,
-      status: "created",
-      receipt: receipt,
+      event_type: "created",
+      razorpay_subscription_id: subscription.id,
+      metadata: {
+        plan_id: razorpayPlanId,
+        billing_interval,
+        short_url: subscription.short_url,
+        status: subscription.status,
+      },
       created_at: new Date().toISOString(),
+    }).then(({ error }) => {
+      if (error) console.error("Failed to log subscription event:", error);
     });
 
-    if (insertError) {
-      console.error("Failed to store order in DB:", insertError);
-      // Don't fail the request — the order is still valid in Razorpay
-    }
-
+    // Return the subscription details for the frontend
     return res.status(200).json({
-      order_id: order.id,
-      amount: order.amount,
-      currency: order.currency,
-      receipt: receipt,
+      subscription_id: subscription.id,
+      razorpay_plan_id: razorpayPlanId,
+      short_url: subscription.short_url, // Backup: hosted payment page link
+      status: subscription.status,
+      billing_interval,
     });
   } catch (error: any) {
     console.error("Error in create-order:", error);

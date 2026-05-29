@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label.tsx";
 import { toast } from "sonner";
 import { PLANS, getAnnualSavingsPercent, type Currency } from "@/lib/pricing.ts";
 import { usePricing } from "@/hooks/use-pricing.ts";
-import { processPayment } from "@/lib/razorpay.ts";
+import { processSubscriptionPayment } from "@/lib/razorpay.ts";
 
 const FAQS = [
   { q: "Can I cancel my subscription anytime?", a: "Yes, you can cancel in one click from your account billing settings. You will retain access to Pro features until the end of your billing cycle." },
@@ -83,18 +83,8 @@ export default function CheckoutPage() {
     setProcessing(true);
 
     try {
-      // Calculate amount in smallest currency unit (paise for INR, cents for USD)
-      const amountInSmallestUnit = Math.round(total * (currency === "INR" ? 100 : 100));
-
-      const result = await processPayment({
-        orderParams: {
-          amount: amountInSmallestUnit,
-          currency,
-          planId: "pro",
-          billingInterval: billingInterval === "yearly" ? "yearly" : "monthly",
-          promoCode: promoApplied ? promoCode.trim().toUpperCase() : undefined,
-          discountPercent: appliedDiscount || undefined,
-        },
+      const result = await processSubscriptionPayment({
+        billingInterval: billingInterval === "yearly" ? "yearly" : "monthly",
         customerName: billedTo.trim(),
         customerPhone: phone.trim(),
       });

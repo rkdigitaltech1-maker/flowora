@@ -1,13 +1,12 @@
 /**
- * Razorpay Payment Integration (Client-Side)
+ * Razorpay Subscription Payment Integration (Client-Side)
  *
  * Flow:
- *   1. User clicks "Pay" → calls /api/razorpay/create-order (server validates price)
- *   2. Razorpay checkout modal opens → user pays via UPI/card/netbanking
- *   3. On success → calls /api/razorpay/verify-payment (server verifies HMAC signature)
- *   4. Server updates DB → user gets Pro access
- *
- * The upgrade ONLY happens after server-side signature verification.
+ *   1. User clicks "Pay" → calls /api/razorpay/create-order (creates Razorpay subscription)
+ *   2. Razorpay checkout modal opens with subscription_id
+ *   3. User pays via UPI/card/netbanking
+ *   4. On success → calls /api/razorpay/verify-payment (verifies HMAC signature)
+ *   5. Server activates subscription in DB → user gets Pro access
  */
 
 import { supabase } from "./supabase";
@@ -15,29 +14,10 @@ import { supabase } from "./supabase";
 // Razorpay public key (safe for frontend)
 const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID as string;
 
-export interface RazorpayOrderParams {
-  amount: number; // Amount in smallest currency unit (paise for INR, cents for USD)
-  currency: "INR" | "USD";
-  planId: string;
-  billingInterval: "monthly" | "yearly";
-  promoCode?: string;
-  discountPercent?: number;
-}
-
-export interface RazorpayPaymentResult {
+export interface SubscriptionPaymentResult {
   razorpay_payment_id: string;
-  razorpay_order_id: string;
+  razorpay_subscription_id: string;
   razorpay_signature: string;
-}
-
-export interface RazorpayCheckoutOptions {
-  orderId: string;
-  amount: number;
-  currency: string;
-  customerName: string;
-  customerPhone: string;
-  customerEmail?: string;
-  description?: string;
 }
 
 /**
@@ -53,13 +33,18 @@ async function getAccessToken(): Promise<string> {
 }
 
 /**
- * Create a Razorpay order via our Vercel serverless API.
- * The server creates the order with validated pricing (prevents amount tampering).
+ * Create a Razorpay Subscription via our server API.
+ * The server creates the subscription using pre-configured plan IDs.
  */
-export async function createRazorpayOrder(params: RazorpayOrderParams): Promise<{
-  id: string;
-  amount: number;
-  currency: string;
+export async function createSubscription(params: {
+  billingInterval: "monthly" | "yearly";
+  customerName: string;
+  customerEmail?: string;
+  customerPhone?: string;
+}): Promise<{
+  subscriptionId: string;
+  razorpayPlanId: string;
+  shortUrl: string;
 }> {
   const accessToken = await getAccessToken();
 
@@ -70,40 +55,44 @@ export async function createRazorpayOrder(params: RazorpayOrderParams): Promise<
       Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
-      currency: params.currency,
-      plan_id: params.planId,
       billing_interval: params.billingInterval,
-      promo_code: params.promoCode || null,
-      discount_percent: params.discountPercent || 0,
+      customer_name: params.customerName,
+      customer_email: params.customerEmail || undefined,
+      customer_phone: params.customerPhone || undefined,
     }),
   });
 
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.error || "Failed to create payment order. Please try again.");
+    throw new Error(data.error || "Failed to create subscription. Please try again.");
   }
 
-  if (!data.order_id) {
-    throw new Error("Invalid order response from server.");
+  if (!data.subscription_id) {
+    throw new Error("Invalid response from server. Please try again.");
   }
 
   return {
-    id: data.order_id,
-    amount: data.amount,
-    currency: data.currency,
+    subscriptionId: data.subscription_id,
+    razorpayPlanId: data.razorpay_plan_id,
+    shortUrl: data.short_url || "",
   };
 }
 
 /**
- * Open Razorpay Checkout modal.
- * Returns a promise that resolves with payment details on success,
- * or rejects if the user cancels or payment fails.
+ * Open Razorpay Checkout modal for subscription payment.
+ * Returns a promise that resolves with payment details on success.
  */
-export function openRazorpayCheckout(options: RazorpayCheckoutOptions): Promise<RazorpayPaymentResult> {
+export function openRazorpaySubscriptionCheckout(options: {
+  subscriptionId: string;
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string;
+  description?: string;
+}): Promise<SubscriptionPaymentResult> {
   return new Promise((resolve, reject) => {
     if (!RAZORPAY_KEY_ID) {
-      reject(new Error("Razorpay is not configured. Please set VITE_RAZORPAY_KEY_ID in environment variables."));
+      reject(new Error("Razorpay is not configured. Please set VITE_RAZORPAY_KEY_ID."));
       return;
     }
 
@@ -114,12 +103,10 @@ export function openRazorpayCheckout(options: RazorpayCheckoutOptions): Promise<
 
     const rzpOptions = {
       key: RAZORPAY_KEY_ID,
-      amount: options.amount,
-      currency: options.currency,
+      subscription_id: options.subscriptionId,
       name: "Flowora",
       description: options.description || "Flowora Pro Subscription",
       image: "/logo.png",
-      order_id: options.orderId,
       prefill: {
         name: options.customerName,
         contact: options.customerPhone,
@@ -136,8 +123,8 @@ export function openRazorpayCheckout(options: RazorpayCheckoutOptions): Promise<
         confirm_close: true,
         escape: true,
       },
-      handler: (response: RazorpayPaymentResult) => {
-        if (response.razorpay_payment_id && response.razorpay_order_id && response.razorpay_signature) {
+      handler: (response: SubscriptionPaymentResult) => {
+        if (response.razorpay_payment_id && response.razorpay_subscription_id && response.razorpay_signature) {
           resolve(response);
         } else {
           reject(new Error("Payment response is incomplete. Please contact support."));
@@ -158,12 +145,10 @@ export function openRazorpayCheckout(options: RazorpayCheckoutOptions): Promise<
 }
 
 /**
- * Verify payment on the server and activate the subscription.
- * The server verifies the Razorpay signature (HMAC SHA256) and updates the database.
+ * Verify subscription payment on the server and activate Pro.
  */
-export async function verifyPaymentAndUpgrade(
-  paymentResult: RazorpayPaymentResult,
-  planId: string,
+export async function verifySubscriptionPayment(
+  paymentResult: SubscriptionPaymentResult,
   billingInterval: "monthly" | "yearly"
 ): Promise<{ success: boolean; message: string }> {
   const accessToken = await getAccessToken();
@@ -176,9 +161,8 @@ export async function verifyPaymentAndUpgrade(
     },
     body: JSON.stringify({
       razorpay_payment_id: paymentResult.razorpay_payment_id,
-      razorpay_order_id: paymentResult.razorpay_order_id,
+      razorpay_subscription_id: paymentResult.razorpay_subscription_id,
       razorpay_signature: paymentResult.razorpay_signature,
-      plan_id: planId,
       billing_interval: billingInterval,
     }),
   });
@@ -197,36 +181,38 @@ export async function verifyPaymentAndUpgrade(
 }
 
 /**
- * Full payment flow — orchestrates order creation, Razorpay checkout, and verification.
- *
+ * Full subscription payment flow — orchestrates creation, checkout, and verification.
  * This is the main function called by the checkout page.
  */
-export async function processPayment(params: {
-  orderParams: RazorpayOrderParams;
+export async function processSubscriptionPayment(params: {
+  billingInterval: "monthly" | "yearly";
   customerName: string;
   customerPhone: string;
   customerEmail?: string;
-}): Promise<{ success: boolean; paymentId: string }> {
-  // Step 1: Create order on server (server validates the price)
-  const order = await createRazorpayOrder(params.orderParams);
+}): Promise<{ success: boolean; paymentId: string; subscriptionId: string }> {
+  // Step 1: Create subscription on server
+  const { subscriptionId } = await createSubscription({
+    billingInterval: params.billingInterval,
+    customerName: params.customerName,
+    customerEmail: params.customerEmail,
+    customerPhone: params.customerPhone,
+  });
 
-  // Step 2: Open Razorpay checkout modal and wait for user to pay
-  const paymentResult = await openRazorpayCheckout({
-    orderId: order.id,
-    amount: order.amount,
-    currency: order.currency,
+  // Step 2: Open Razorpay checkout modal for the subscription
+  const paymentResult = await openRazorpaySubscriptionCheckout({
+    subscriptionId,
     customerName: params.customerName,
     customerPhone: params.customerPhone,
     customerEmail: params.customerEmail,
-    description: `Flowora Pro - ${params.orderParams.billingInterval === "yearly" ? "Annual" : "Monthly"} Plan`,
+    description: `Flowora Pro - ${params.billingInterval === "yearly" ? "Annual" : "Monthly"} Plan`,
   });
 
   // Step 3: Verify payment signature server-side and activate subscription
-  const planId = params.orderParams.billingInterval === "yearly" ? "pro_annual" : "pro";
-  await verifyPaymentAndUpgrade(paymentResult, planId, params.orderParams.billingInterval);
+  await verifySubscriptionPayment(paymentResult, params.billingInterval);
 
   return {
     success: true,
     paymentId: paymentResult.razorpay_payment_id,
+    subscriptionId: paymentResult.razorpay_subscription_id,
   };
 }
