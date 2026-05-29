@@ -5,17 +5,12 @@ import crypto from "crypto";
 /**
  * POST /api/razorpay/verify-payment
  *
- * Verifies a Razorpay Subscription payment after checkout.
- * For subscriptions, the signature is:
- *   HMAC_SHA256(razorpay_payment_id + "|" + razorpay_subscription_id, secret)
+ * Verifies Razorpay payment signature (HMAC SHA256) after checkout.
+ * For Orders: signature = HMAC_SHA256(order_id + "|" + payment_id, secret)
  *
- * After verification:
- *   1. Activates the subscription in the database
- *   2. Updates the user's workspace plan
- *   3. Logs the event
+ * After verification, activates the user's Pro subscription.
  *
  * Required env vars:
- *   - RAZORPAY_KEY_ID
  *   - RAZORPAY_KEY_SECRET
  *   - SUPABASE_URL (or VITE_SUPABASE_URL)
  *   - SUPABASE_SERVICE_ROLE_KEY
@@ -36,19 +31,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    // Validate environment
-    const razorpayKeyId = process.env.RAZORPAY_KEY_ID;
     const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET;
     const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!razorpayKeySecret) {
-      console.error("RAZORPAY_KEY_SECRET not configured");
       return res.status(500).json({ success: false, message: "Payment verification not configured." });
     }
 
     if (!supabaseUrl || !supabaseServiceKey) {
-      console.error("Supabase credentials not configured");
       return res.status(500).json({ success: false, message: "Backend not configured." });
     }
 
@@ -69,63 +60,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Parse request body
     const {
       razorpay_payment_id,
-      razorpay_subscription_id,
+      razorpay_order_id,
       razorpay_signature,
       billing_interval,
     } = req.body;
 
-    if (!razorpay_payment_id || !razorpay_subscription_id || !razorpay_signature) {
-      return res.status(400).json({ success: false, message: "Missing payment verification details." });
+    if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+      return res.status(400).json({ success: false, message: "Missing payment details." });
     }
 
     // ===== CRITICAL: Verify the payment signature =====
-    // For subscriptions: HMAC_SHA256(payment_id + "|" + subscription_id, secret)
+    // For Orders: HMAC_SHA256(order_id + "|" + payment_id, secret)
     const expectedSignature = crypto
       .createHmac("sha256", razorpayKeySecret)
-      .update(`${razorpay_payment_id}|${razorpay_subscription_id}`)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest("hex");
 
     if (expectedSignature !== razorpay_signature) {
-      console.error("SUBSCRIPTION SIGNATURE VERIFICATION FAILED!", {
-        subscriptionId: razorpay_subscription_id,
+      console.error("SIGNATURE VERIFICATION FAILED!", {
+        orderId: razorpay_order_id,
         paymentId: razorpay_payment_id,
         userId: user.id,
       });
 
-      // Log failed verification
-      await supabase.from("subscription_events").insert({
-        user_id: user.id,
-        event_type: "signature_failed",
-        razorpay_subscription_id,
-        razorpay_payment_id,
-        metadata: { error: "Signature mismatch" },
-        created_at: new Date().toISOString(),
-      });
-
       return res.status(400).json({
         success: false,
-        message: "Payment signature verification failed. If money was deducted, it will be refunded automatically. Please contact support.",
+        message: "Payment signature verification failed. If money was deducted, it will be refunded. Please contact support.",
       });
     }
 
-    // ===== Signature is VALID — payment is authentic! =====
+    // ===== Signature VALID — payment is authentic! =====
 
-    // Fetch subscription details from Razorpay to get plan info
-    const rzpAuth = `Basic ${Buffer.from(`${razorpayKeyId}:${razorpayKeySecret}`).toString("base64")}`;
-    let subscriptionData: any = null;
-
-    try {
-      const subResponse = await fetch(`https://api.razorpay.com/v1/subscriptions/${razorpay_subscription_id}`, {
-        headers: { Authorization: rzpAuth },
-      });
-      if (subResponse.ok) {
-        subscriptionData = await subResponse.json();
-      }
-    } catch (e) {
-      console.error("Failed to fetch subscription details from Razorpay:", e);
-    }
-
-    // Determine plan based on billing_interval or subscription data
+    // Determine plan and subscription period
     const subscriptionPlan = billing_interval === "yearly" ? "pro_annual" : "pro";
     const periodStart = new Date();
     const periodEnd = new Date();
@@ -135,80 +101,52 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       periodEnd.setMonth(periodEnd.getMonth() + 1);
     }
 
-    // Use Razorpay subscription dates if available
-    if (subscriptionData?.current_start) {
-      periodStart.setTime(subscriptionData.current_start * 1000);
-    }
-    if (subscriptionData?.current_end) {
-      periodEnd.setTime(subscriptionData.current_end * 1000);
-    }
+    // Activate Pro subscription in the database
+    // Try owner_id first, then owner_user_id
+    let updateSuccess = false;
 
-    // Activate the user's Pro subscription in the database
-    const { error: updateError } = await supabase
+    const updateData = {
+      plan: subscriptionPlan,
+      subscription_status: "active",
+      subscription_start: periodStart.toISOString(),
+      subscription_end: periodEnd.toISOString(),
+      razorpay_payment_id: razorpay_payment_id,
+      razorpay_order_id: razorpay_order_id,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { error: err1 } = await supabase
       .from("creator_workspaces")
-      .update({
-        plan: subscriptionPlan,
-        subscription_status: "active",
-        subscription_start: periodStart.toISOString(),
-        subscription_end: periodEnd.toISOString(),
-        razorpay_payment_id: razorpay_payment_id,
-        razorpay_subscription_id: razorpay_subscription_id,
-        razorpay_plan_id: subscriptionData?.plan_id || null,
-        razorpay_customer_id: subscriptionData?.customer_id || null,
-        updated_at: new Date().toISOString(),
-      } as any)
+      .update(updateData as any)
       .eq("owner_id", user.id);
 
-    // Try with owner_user_id if owner_id didn't match
-    if (updateError) {
-      const { error: updateError2 } = await supabase
+    if (!err1) {
+      updateSuccess = true;
+    } else {
+      // Try with owner_user_id
+      const { error: err2 } = await supabase
         .from("creator_workspaces")
-        .update({
-          plan: subscriptionPlan,
-          subscription_status: "active",
-          subscription_start: periodStart.toISOString(),
-          subscription_end: periodEnd.toISOString(),
-          razorpay_payment_id: razorpay_payment_id,
-          razorpay_subscription_id: razorpay_subscription_id,
-          razorpay_plan_id: subscriptionData?.plan_id || null,
-          razorpay_customer_id: subscriptionData?.customer_id || null,
-          updated_at: new Date().toISOString(),
-        } as any)
+        .update(updateData as any)
         .eq("owner_user_id", user.id);
 
-      if (updateError2) {
-        console.error("Failed to update workspace after successful payment:", updateError2);
-        return res.status(500).json({
-          success: false,
-          message: `Payment received but upgrade failed. Please contact support with Payment ID: ${razorpay_payment_id}`,
-        });
+      if (!err2) {
+        updateSuccess = true;
       }
     }
 
-    // Log the successful activation event
-    await supabase.from("subscription_events").insert({
-      user_id: user.id,
-      event_type: "activated",
-      razorpay_subscription_id,
-      razorpay_payment_id,
-      amount: subscriptionData?.amount || null,
-      currency: subscriptionData?.currency || "INR",
-      metadata: {
-        plan: subscriptionPlan,
-        billing_interval,
-        subscription_status: subscriptionData?.status,
-        current_start: subscriptionData?.current_start,
-        current_end: subscriptionData?.current_end,
-      },
-      created_at: new Date().toISOString(),
-    });
+    if (!updateSuccess) {
+      console.error("Failed to update workspace for user:", user.id);
+      return res.status(500).json({
+        success: false,
+        message: `Payment received but upgrade failed. Contact support with Payment ID: ${razorpay_payment_id}`,
+      });
+    }
 
     return res.status(200).json({
       success: true,
       message: "Payment verified! Your Flowora Pro subscription is now active.",
       plan: subscriptionPlan,
       payment_id: razorpay_payment_id,
-      subscription_id: razorpay_subscription_id,
       subscription_end: periodEnd.toISOString(),
     });
   } catch (error: any) {

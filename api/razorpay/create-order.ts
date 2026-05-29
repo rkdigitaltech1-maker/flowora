@@ -4,14 +4,12 @@ import { createClient } from "@supabase/supabase-js";
 /**
  * POST /api/razorpay/create-order
  *
- * Creates a Razorpay Subscription using the Subscriptions API.
- * Uses pre-created plan IDs from Razorpay Dashboard.
+ * Creates a Razorpay Order (one-time payment) using the Orders API.
+ * Amount is calculated server-side based on billing interval to prevent tampering.
  *
- * Flow:
- *   1. Validates user session
- *   2. Maps billing_interval to Razorpay plan_id
- *   3. Creates a subscription via Razorpay Subscriptions API
- *   4. Returns subscription_id for the frontend to open checkout
+ * Plans:
+ *   - Pro Monthly: ₹589/mo (₹499 + 18% GST)
+ *   - Pro Yearly: ₹5,650/yr (₹4,788 + 18% GST)
  *
  * Required env vars:
  *   - RAZORPAY_KEY_ID
@@ -20,10 +18,10 @@ import { createClient } from "@supabase/supabase-js";
  *   - SUPABASE_SERVICE_ROLE_KEY
  */
 
-// Map billing intervals to your Razorpay plan IDs
-const RAZORPAY_PLAN_IDS: Record<string, string> = {
-  monthly: "plan_SvAD1ggJGNLSfH",   // Pro Monthly ₹589/mo
-  yearly: "plan_SvAE7qhjB6LnlE",    // Pro Yearly ₹5,650/yr
+// Fixed plan amounts in paise (server-side, no frontend tampering)
+const PLAN_AMOUNTS: Record<string, number> = {
+  monthly: 58900,   // ₹589.00 (₹499 + 18% GST)
+  yearly: 565000,   // ₹5,650.00 (₹4,788 + 18% GST)
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -82,75 +80,54 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: "Invalid billing interval. Must be monthly or yearly." });
     }
 
-    // Get the Razorpay plan ID
-    const razorpayPlanId = RAZORPAY_PLAN_IDS[billing_interval];
-    if (!razorpayPlanId) {
-      return res.status(400).json({ error: "No plan configured for this billing interval." });
+    // Get amount from server-side pricing (prevents tampering)
+    const amount = PLAN_AMOUNTS[billing_interval];
+    if (!amount) {
+      return res.status(400).json({ error: "Invalid billing interval." });
     }
 
     // Auth header for Razorpay API
     const rzpAuth = `Basic ${Buffer.from(`${razorpayKeyId}:${razorpayKeySecret}`).toString("base64")}`;
 
-    // Create a Razorpay subscription
-    const subscriptionPayload: any = {
-      plan_id: razorpayPlanId,
-      total_count: billing_interval === "yearly" ? 10 : 120, // Max billing cycles
-      quantity: 1,
-      notes: {
-        user_id: user.id,
-        user_email: user.email || customer_email || "",
-        billing_interval: billing_interval,
-        platform: "flowora",
-      },
-    };
+    // Create a Razorpay Order (one-time payment)
+    const receipt = `flowora_${user.id.slice(0, 8)}_${Date.now()}`;
 
-    // Add customer details if provided
-    if (customer_email || user.email) {
-      subscriptionPayload.customer_notify = 1;
-    }
-
-    const rzpResponse = await fetch("https://api.razorpay.com/v1/subscriptions", {
+    const rzpResponse = await fetch("https://api.razorpay.com/v1/orders", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: rzpAuth,
       },
-      body: JSON.stringify(subscriptionPayload),
+      body: JSON.stringify({
+        amount: amount,
+        currency: "INR",
+        receipt: receipt,
+        notes: {
+          user_id: user.id,
+          user_email: user.email || customer_email || "",
+          billing_interval: billing_interval,
+          customer_name: customer_name || "",
+          platform: "flowora",
+        },
+      }),
     });
 
     if (!rzpResponse.ok) {
       const errorBody = await rzpResponse.text();
-      console.error("Razorpay subscription creation failed:", rzpResponse.status, errorBody);
+      console.error("Razorpay order creation failed:", rzpResponse.status, errorBody);
       return res.status(500).json({
-        error: "Failed to create subscription. Please try again.",
-        details: process.env.NODE_ENV === "development" ? errorBody : undefined,
+        error: "Failed to create payment order. Please try again.",
       });
     }
 
-    const subscription = await rzpResponse.json();
+    const order = await rzpResponse.json();
 
-    // Log the subscription creation event
-    await supabase.from("subscription_events").insert({
-      user_id: user.id,
-      event_type: "created",
-      razorpay_subscription_id: subscription.id,
-      metadata: {
-        plan_id: razorpayPlanId,
-        billing_interval,
-        short_url: subscription.short_url,
-        status: subscription.status,
-      },
-      created_at: new Date().toISOString(),
-    }).then(({ error }) => {
-      if (error) console.error("Failed to log subscription event:", error);
-    });
-
-    // Return the subscription details for the frontend
+    // Return the order details for the frontend
     return res.status(200).json({
-      subscription_id: subscription.id,
-      razorpay_plan_id: razorpayPlanId,
-      short_url: subscription.short_url, // Backup: hosted payment page link
-      status: subscription.status,
+      order_id: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      receipt: receipt,
       billing_interval,
     });
   } catch (error: any) {

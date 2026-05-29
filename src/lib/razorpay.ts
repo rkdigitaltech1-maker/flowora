@@ -1,28 +1,27 @@
 /**
- * Razorpay Subscription Payment Integration (Client-Side)
+ * Razorpay Payment Integration (Client-Side)
+ *
+ * Uses Razorpay Orders API (one-time payments).
+ * Amount is determined server-side based on billing interval.
  *
  * Flow:
- *   1. User clicks "Pay" → calls /api/razorpay/create-order (creates Razorpay subscription)
- *   2. Razorpay checkout modal opens with subscription_id
- *   3. User pays via UPI/card/netbanking
- *   4. On success → calls /api/razorpay/verify-payment (verifies HMAC signature)
- *   5. Server activates subscription in DB → user gets Pro access
+ *   1. User clicks "Pay" → server creates Razorpay Order
+ *   2. Frontend opens checkout with order_id
+ *   3. User pays via UPI/Card/Netbanking
+ *   4. On success → server verifies HMAC signature
+ *   5. Server activates Pro in database
  */
 
 import { supabase } from "./supabase";
 
-// Razorpay public key (safe for frontend)
 const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID as string;
 
-export interface SubscriptionPaymentResult {
+interface PaymentResult {
   razorpay_payment_id: string;
-  razorpay_subscription_id: string;
+  razorpay_order_id: string;
   razorpay_signature: string;
 }
 
-/**
- * Get the current user's access token for API calls.
- */
 async function getAccessToken(): Promise<string> {
   const { data: sessionData } = await supabase.auth.getSession();
   const accessToken = sessionData?.session?.access_token;
@@ -33,22 +32,18 @@ async function getAccessToken(): Promise<string> {
 }
 
 /**
- * Create a Razorpay Subscription via our server API.
- * The server creates the subscription using pre-configured plan IDs.
+ * Full payment flow for Flowora Pro subscription.
  */
-export async function createSubscription(params: {
+export async function processSubscriptionPayment(params: {
   billingInterval: "monthly" | "yearly";
   customerName: string;
+  customerPhone: string;
   customerEmail?: string;
-  customerPhone?: string;
-}): Promise<{
-  subscriptionId: string;
-  razorpayPlanId: string;
-  shortUrl: string;
-}> {
+}): Promise<{ success: boolean; paymentId: string }> {
   const accessToken = await getAccessToken();
 
-  const response = await fetch("/api/razorpay/create-order", {
+  // Step 1: Create order on server
+  const orderResponse = await fetch("/api/razorpay/create-order", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -62,98 +57,29 @@ export async function createSubscription(params: {
     }),
   });
 
-  const data = await response.json();
+  const orderData = await orderResponse.json();
 
-  if (!response.ok) {
-    throw new Error(data.error || "Failed to create subscription. Please try again.");
+  if (!orderResponse.ok) {
+    throw new Error(orderData.error || "Failed to create payment order. Please try again.");
   }
 
-  if (!data.subscription_id) {
+  if (!orderData.order_id) {
     throw new Error("Invalid response from server. Please try again.");
   }
 
-  return {
-    subscriptionId: data.subscription_id,
-    razorpayPlanId: data.razorpay_plan_id,
-    shortUrl: data.short_url || "",
-  };
-}
-
-/**
- * Open Razorpay Checkout modal for subscription payment.
- * Returns a promise that resolves with payment details on success.
- */
-export function openRazorpaySubscriptionCheckout(options: {
-  subscriptionId: string;
-  customerName: string;
-  customerPhone: string;
-  customerEmail?: string;
-  description?: string;
-}): Promise<SubscriptionPaymentResult> {
-  return new Promise((resolve, reject) => {
-    if (!RAZORPAY_KEY_ID) {
-      reject(new Error("Razorpay is not configured. Please set VITE_RAZORPAY_KEY_ID."));
-      return;
-    }
-
-    if (!(window as any).Razorpay) {
-      reject(new Error("Razorpay SDK not loaded. Please refresh the page and try again."));
-      return;
-    }
-
-    const rzpOptions = {
-      key: RAZORPAY_KEY_ID,
-      subscription_id: options.subscriptionId,
-      name: "Flowora",
-      description: options.description || "Flowora Pro Subscription",
-      image: "/logo.png",
-      prefill: {
-        name: options.customerName,
-        contact: options.customerPhone,
-        ...(options.customerEmail && { email: options.customerEmail }),
-      },
-      theme: {
-        color: "#6d48ff",
-        backdrop_color: "rgba(15, 10, 30, 0.75)",
-      },
-      modal: {
-        ondismiss: () => {
-          reject(new Error("Payment cancelled by user."));
-        },
-        confirm_close: true,
-        escape: true,
-      },
-      handler: (response: SubscriptionPaymentResult) => {
-        if (response.razorpay_payment_id && response.razorpay_subscription_id && response.razorpay_signature) {
-          resolve(response);
-        } else {
-          reject(new Error("Payment response is incomplete. Please contact support."));
-        }
-      },
-    };
-
-    const rzp = new (window as any).Razorpay(rzpOptions);
-
-    rzp.on("payment.failed", (response: any) => {
-      const errorDesc = response?.error?.description || "Payment failed. Please try again.";
-      const errorCode = response?.error?.code || "UNKNOWN";
-      reject(new Error(`Payment failed (${errorCode}): ${errorDesc}`));
-    });
-
-    rzp.open();
+  // Step 2: Open Razorpay checkout modal
+  const paymentResult = await openRazorpayCheckout({
+    orderId: orderData.order_id,
+    amount: orderData.amount,
+    currency: orderData.currency || "INR",
+    customerName: params.customerName,
+    customerPhone: params.customerPhone,
+    customerEmail: params.customerEmail,
+    billingInterval: params.billingInterval,
   });
-}
 
-/**
- * Verify subscription payment on the server and activate Pro.
- */
-export async function verifySubscriptionPayment(
-  paymentResult: SubscriptionPaymentResult,
-  billingInterval: "monthly" | "yearly"
-): Promise<{ success: boolean; message: string }> {
-  const accessToken = await getAccessToken();
-
-  const response = await fetch("/api/razorpay/verify-payment", {
+  // Step 3: Verify payment on server
+  const verifyResponse = await fetch("/api/razorpay/verify-payment", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -161,58 +87,82 @@ export async function verifySubscriptionPayment(
     },
     body: JSON.stringify({
       razorpay_payment_id: paymentResult.razorpay_payment_id,
-      razorpay_subscription_id: paymentResult.razorpay_subscription_id,
+      razorpay_order_id: paymentResult.razorpay_order_id,
       razorpay_signature: paymentResult.razorpay_signature,
-      billing_interval: billingInterval,
+      billing_interval: params.billingInterval,
     }),
   });
 
-  const data = await response.json();
+  const verifyData = await verifyResponse.json();
 
-  if (!response.ok) {
-    throw new Error(data.message || "Payment verification failed. Please contact support.");
+  if (!verifyResponse.ok || !verifyData.success) {
+    throw new Error(verifyData.message || "Payment verification failed. Please contact support.");
   }
-
-  if (!data.success) {
-    throw new Error(data.message || "Payment could not be verified. Please contact support.");
-  }
-
-  return { success: true, message: data.message || "Subscription activated!" };
-}
-
-/**
- * Full subscription payment flow — orchestrates creation, checkout, and verification.
- * This is the main function called by the checkout page.
- */
-export async function processSubscriptionPayment(params: {
-  billingInterval: "monthly" | "yearly";
-  customerName: string;
-  customerPhone: string;
-  customerEmail?: string;
-}): Promise<{ success: boolean; paymentId: string; subscriptionId: string }> {
-  // Step 1: Create subscription on server
-  const { subscriptionId } = await createSubscription({
-    billingInterval: params.billingInterval,
-    customerName: params.customerName,
-    customerEmail: params.customerEmail,
-    customerPhone: params.customerPhone,
-  });
-
-  // Step 2: Open Razorpay checkout modal for the subscription
-  const paymentResult = await openRazorpaySubscriptionCheckout({
-    subscriptionId,
-    customerName: params.customerName,
-    customerPhone: params.customerPhone,
-    customerEmail: params.customerEmail,
-    description: `Flowora Pro - ${params.billingInterval === "yearly" ? "Annual" : "Monthly"} Plan`,
-  });
-
-  // Step 3: Verify payment signature server-side and activate subscription
-  await verifySubscriptionPayment(paymentResult, params.billingInterval);
 
   return {
     success: true,
     paymentId: paymentResult.razorpay_payment_id,
-    subscriptionId: paymentResult.razorpay_subscription_id,
   };
+}
+
+/**
+ * Opens Razorpay Checkout modal with order_id.
+ */
+function openRazorpayCheckout(options: {
+  orderId: string;
+  amount: number;
+  currency: string;
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string;
+  billingInterval: string;
+}): Promise<PaymentResult> {
+  return new Promise((resolve, reject) => {
+    if (!RAZORPAY_KEY_ID) {
+      reject(new Error("Razorpay is not configured. Please contact support."));
+      return;
+    }
+
+    if (!(window as any).Razorpay) {
+      reject(new Error("Razorpay SDK not loaded. Please refresh the page."));
+      return;
+    }
+
+    const rzp = new (window as any).Razorpay({
+      key: RAZORPAY_KEY_ID,
+      amount: options.amount,
+      currency: options.currency,
+      name: "Flowora",
+      description: `Flowora Pro - ${options.billingInterval === "yearly" ? "Annual" : "Monthly"}`,
+      image: "/logo.png",
+      order_id: options.orderId,
+      prefill: {
+        name: options.customerName,
+        contact: options.customerPhone,
+        ...(options.customerEmail && { email: options.customerEmail }),
+      },
+      theme: {
+        color: "#6d48ff",
+      },
+      handler: (response: PaymentResult) => {
+        if (response.razorpay_payment_id && response.razorpay_order_id && response.razorpay_signature) {
+          resolve(response);
+        } else {
+          reject(new Error("Incomplete payment response. Please contact support."));
+        }
+      },
+      modal: {
+        ondismiss: () => {
+          reject(new Error("Payment cancelled by user."));
+        },
+      },
+    });
+
+    rzp.on("payment.failed", (response: any) => {
+      const desc = response?.error?.description || "Payment failed.";
+      reject(new Error(desc));
+    });
+
+    rzp.open();
+  });
 }
