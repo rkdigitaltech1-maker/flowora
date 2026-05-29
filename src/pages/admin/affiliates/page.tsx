@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import {
   Users, DollarSign, TrendingUp, Eye, CheckCircle2, XCircle,
@@ -10,69 +10,100 @@ import { Button } from "@/components/ui/button.tsx";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
+import { Skeleton } from "@/components/ui/skeleton.tsx";
+import { supabase } from "@/lib/supabase.ts";
 
+// Hook to fetch real affiliate data from Supabase
+function useAdminAffiliates() {
+  const [affiliates, setAffiliates] = useState<any[]>([]);
+  const [pendingPayouts, setPendingPayouts] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-// Mock data for admin affiliate management
-const mockAffiliates = [
-  {
-    id: "aff_001", fullName: "Priya Patel", email: "priya@creator.io", affiliateCode: "priya2026",
-    status: "active", totalReferrals: 47, totalConversions: 12, totalEarnings: 14850, pendingBalance: 4950,
-    paymentMethod: "upi", createdAt: "2025-01-15", channels: ["social_media", "youtube"],
-  },
-  {
-    id: "aff_002", fullName: "Aarav Sharma", email: "aarav@techblog.com", affiliateCode: "aarav_tech",
-    status: "active", totalReferrals: 32, totalConversions: 8, totalEarnings: 9960, pendingBalance: 2490,
-    paymentMethod: "bank_transfer", createdAt: "2025-02-03", channels: ["blog", "email"],
-  },
-  {
-    id: "aff_003", fullName: "Neha Gupta", email: "neha@gmail.com", affiliateCode: "neha_fit",
-    status: "pending", totalReferrals: 0, totalConversions: 0, totalEarnings: 0, pendingBalance: 0,
-    paymentMethod: "upi", createdAt: "2025-05-20", channels: ["social_media"],
-  },
-  {
-    id: "aff_004", fullName: "Vikram Singh", email: "vikram@startup.io", affiliateCode: "vikram99",
-    status: "active", totalReferrals: 89, totalConversions: 23, totalEarnings: 28635, pendingBalance: 7470,
-    paymentMethod: "paypal", createdAt: "2025-01-05", channels: ["youtube", "blog", "paid_ads"],
-  },
-  {
-    id: "aff_005", fullName: "Ananya Iyer", email: "ananya@fashion.co", affiliateCode: "ananya_style",
-    status: "suspended", totalReferrals: 15, totalConversions: 2, totalEarnings: 2490, pendingBalance: 2490,
-    paymentMethod: "bank_transfer", createdAt: "2025-03-12", channels: ["social_media"],
-  },
-  {
-    id: "aff_006", fullName: "Rajesh Kumar", email: "rajesh@marketing.in", affiliateCode: "rajesh_mkt",
-    status: "pending", totalReferrals: 0, totalConversions: 0, totalEarnings: 0, pendingBalance: 0,
-    paymentMethod: "upi", createdAt: "2025-05-25", channels: ["email", "community"],
-  },
-  {
-    id: "aff_007", fullName: "Sanya Mehta", email: "sanya@vlog.com", affiliateCode: "sanya_vlg",
-    status: "active", totalReferrals: 56, totalConversions: 15, totalEarnings: 18675, pendingBalance: 3735,
-    paymentMethod: "upi", createdAt: "2025-01-22", channels: ["youtube", "social_media"],
-  },
-  {
-    id: "aff_008", fullName: "Kabir Mehta", email: "kabir@coach.biz", affiliateCode: "kabir_biz",
-    status: "rejected", totalReferrals: 0, totalConversions: 0, totalEarnings: 0, pendingBalance: 0,
-    paymentMethod: "paypal", createdAt: "2025-04-10", channels: ["paid_ads"],
-  },
-];
+  const fetchAffiliates = useCallback(async () => {
+    try {
+      const [affRes, payoutRes] = await Promise.all([
+        supabase.from("affiliates").select("*").order("created_at", { ascending: false }),
+        supabase.from("affiliate_payouts").select("*").eq("status", "pending").order("created_at", { ascending: false }),
+      ]);
 
+      const affData = affRes.data ?? [];
+      const payoutData = payoutRes.data ?? [];
 
-const mockPendingPayouts = [
-  { id: "po_1", affiliateName: "Priya Patel", email: "priya@creator.io", amount: 4950, method: "UPI", requestedAt: "2025-05-22" },
-  { id: "po_2", affiliateName: "Vikram Singh", email: "vikram@startup.io", amount: 7470, method: "PayPal", requestedAt: "2025-05-23" },
-  { id: "po_3", affiliateName: "Sanya Mehta", email: "sanya@vlog.com", amount: 3735, method: "UPI", requestedAt: "2025-05-24" },
-];
+      setAffiliates(affData.map((a: any) => ({
+        id: a.id,
+        fullName: a.full_name || a.name || "Unknown",
+        email: a.email || "—",
+        affiliateCode: a.affiliate_code || a.code || "—",
+        status: a.status || "pending",
+        totalReferrals: a.total_referrals || 0,
+        totalConversions: a.total_conversions || 0,
+        totalEarnings: a.total_earnings || 0,
+        pendingBalance: a.pending_balance || 0,
+        paymentMethod: a.payment_method || "upi",
+        createdAt: a.created_at,
+        channels: a.channels || [],
+      })));
 
-const programStats = {
-  totalAffiliates: 8,
-  activeAffiliates: 4,
-  pendingApplications: 2,
-  totalRevenue: 74610,
-  totalCommissionsPaid: 42500,
-  pendingPayouts: 16155,
-  totalReferrals: 239,
-  conversionRate: 25.1,
-};
+      setPendingPayouts(payoutData.map((p: any) => ({
+        id: p.id,
+        affiliateName: p.affiliate_name || "Unknown",
+        email: p.affiliate_email || "—",
+        amount: p.amount || 0,
+        method: p.method || "UPI",
+        requestedAt: p.created_at?.slice(0, 10) || "—",
+      })));
+
+      // Compute stats from real data
+      const activeAffiliates = affData.filter((a: any) => a.status === "active").length;
+      const pendingApplications = affData.filter((a: any) => a.status === "pending").length;
+      const totalEarnings = affData.reduce((sum: number, a: any) => sum + (a.total_earnings || 0), 0);
+      const totalCommissionsPaid = affData.reduce((sum: number, a: any) => sum + ((a.total_earnings || 0) - (a.pending_balance || 0)), 0);
+      const pendingPayoutsTotal = affData.reduce((sum: number, a: any) => sum + (a.pending_balance || 0), 0);
+      const totalReferrals = affData.reduce((sum: number, a: any) => sum + (a.total_referrals || 0), 0);
+      const totalConversions = affData.reduce((sum: number, a: any) => sum + (a.total_conversions || 0), 0);
+      const conversionRate = totalReferrals > 0 ? ((totalConversions / totalReferrals) * 100).toFixed(1) : "0";
+
+      setStats({
+        totalAffiliates: affData.length,
+        activeAffiliates,
+        pendingApplications,
+        totalRevenue: totalEarnings,
+        totalCommissionsPaid,
+        pendingPayouts: pendingPayoutsTotal,
+        totalReferrals,
+        conversionRate: parseFloat(conversionRate as string),
+      });
+
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching affiliates:", err);
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchAffiliates(); }, [fetchAffiliates]);
+
+  const updateAffiliateStatus = async (id: string, status: string) => {
+    try {
+      await supabase.from("affiliates").update({ status, updated_at: new Date().toISOString() }).eq("id", id);
+      fetchAffiliates();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update affiliate");
+    }
+  };
+
+  const processPayoutAction = async (id: string) => {
+    try {
+      await supabase.from("affiliate_payouts").update({ status: "processing", updated_at: new Date().toISOString() }).eq("id", id);
+      fetchAffiliates();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to process payout");
+    }
+  };
+
+  return { affiliates, pendingPayouts, stats, loading, updateAffiliateStatus, processPayoutAction, refetch: fetchAffiliates };
+}
 
 type AdminTab = "affiliates" | "payouts" | "settings";
 type StatusFilter = "all" | "active" | "pending" | "suspended" | "rejected";
@@ -99,8 +130,17 @@ export default function AdminAffiliatesPage() {
   const [activeTab, setActiveTab] = useState<AdminTab>("affiliates");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const { affiliates, pendingPayouts, stats: programStats, loading, updateAffiliateStatus, processPayoutAction, refetch } = useAdminAffiliates();
 
-  const filteredAffiliates = mockAffiliates.filter((a) => {
+  const [refreshing, setRefreshing] = useState(false);
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+    toast.success("Affiliates refreshed");
+  };
+
+  const filteredAffiliates = affiliates.filter((a) => {
     const matchesStatus = statusFilter === "all" || a.status === statusFilter;
     const matchesSearch = !searchQuery || 
       a.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -110,18 +150,22 @@ export default function AdminAffiliatesPage() {
   });
 
   const approveAffiliate = (id: string) => {
+    updateAffiliateStatus(id, "active");
     toast.success("Affiliate approved! They will receive an email notification.");
   };
 
   const rejectAffiliate = (id: string) => {
+    updateAffiliateStatus(id, "rejected");
     toast.error("Affiliate application rejected.");
   };
 
   const suspendAffiliate = (id: string) => {
+    updateAffiliateStatus(id, "suspended");
     toast.warning("Affiliate account suspended.");
   };
 
   const processPayout = (id: string) => {
+    processPayoutAction(id);
     toast.success("Payout marked as processing. Complete the transfer and confirm.");
   };
 
@@ -134,59 +178,65 @@ export default function AdminAffiliatesPage() {
           <p className="text-sm text-slate-500 mt-0.5">Manage affiliates, payouts, and program settings</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="text-xs" onClick={handleRefresh} disabled={refreshing}>
+            <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${refreshing ? "animate-spin" : ""}`} />
+            Sync
+          </Button>
           <Button variant="outline" size="sm" className="text-xs">
             <Download className="w-3.5 h-3.5 mr-1.5" />
             Export CSV
-          </Button>
-          <Button variant="outline" size="sm" className="text-xs">
-            <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
-            Sync
           </Button>
         </div>
       </div>
 
 
       {/* Overview Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Users className="w-4 h-4 text-purple-500" />
-            <span className="text-[10px] font-bold text-gray-500 uppercase">Total Affiliates</span>
-          </div>
-          <p className="text-2xl font-black text-slate-900 dark:text-white">{programStats.totalAffiliates}</p>
-          <p className="text-[10px] text-emerald-600 font-bold mt-1">{programStats.activeAffiliates} active</p>
+      {loading ? (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1,2,3,4].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
         </div>
-        <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Clock className="w-4 h-4 text-amber-500" />
-            <span className="text-[10px] font-bold text-gray-500 uppercase">Pending Applications</span>
+      ) : programStats && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="w-4 h-4 text-purple-500" />
+              <span className="text-[10px] font-bold text-gray-500 uppercase">Total Affiliates</span>
+            </div>
+            <p className="text-2xl font-black text-slate-900 dark:text-white">{programStats.totalAffiliates}</p>
+            <p className="text-[10px] text-emerald-600 font-bold mt-1">{programStats.activeAffiliates} active</p>
           </div>
-          <p className="text-2xl font-black text-slate-900 dark:text-white">{programStats.pendingApplications}</p>
-          <p className="text-[10px] text-amber-600 font-bold mt-1">Needs review</p>
-        </div>
-        <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <DollarSign className="w-4 h-4 text-emerald-500" />
-            <span className="text-[10px] font-bold text-gray-500 uppercase">Total Commissions</span>
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Clock className="w-4 h-4 text-amber-500" />
+              <span className="text-[10px] font-bold text-gray-500 uppercase">Pending Applications</span>
+            </div>
+            <p className="text-2xl font-black text-slate-900 dark:text-white">{programStats.pendingApplications}</p>
+            <p className="text-[10px] text-amber-600 font-bold mt-1">Needs review</p>
           </div>
-          <p className="text-2xl font-black text-slate-900 dark:text-white">₹{programStats.totalCommissionsPaid.toLocaleString()}</p>
-          <p className="text-[10px] text-gray-500 font-bold mt-1">₹{programStats.pendingPayouts.toLocaleString()} pending</p>
-        </div>
-        <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-4 h-4 text-blue-500" />
-            <span className="text-[10px] font-bold text-gray-500 uppercase">Conversion Rate</span>
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <DollarSign className="w-4 h-4 text-emerald-500" />
+              <span className="text-[10px] font-bold text-gray-500 uppercase">Total Commissions</span>
+            </div>
+            <p className="text-2xl font-black text-slate-900 dark:text-white">₹{programStats.totalCommissionsPaid.toLocaleString()}</p>
+            <p className="text-[10px] text-gray-500 font-bold mt-1">₹{programStats.pendingPayouts.toLocaleString()} pending</p>
           </div>
-          <p className="text-2xl font-black text-slate-900 dark:text-white">{programStats.conversionRate}%</p>
-          <p className="text-[10px] text-gray-500 font-bold mt-1">{programStats.totalReferrals} total referrals</p>
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <TrendingUp className="w-4 h-4 text-blue-500" />
+              <span className="text-[10px] font-bold text-gray-500 uppercase">Conversion Rate</span>
+            </div>
+            <p className="text-2xl font-black text-slate-900 dark:text-white">{programStats.conversionRate}%</p>
+            <p className="text-[10px] text-gray-500 font-bold mt-1">{programStats.totalReferrals} total referrals</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Tabs */}
       <div className="flex items-center gap-1 bg-gray-100 dark:bg-slate-800 rounded-xl p-1">
         {[
           { id: "affiliates" as AdminTab, label: "Affiliates", icon: Users },
-          { id: "payouts" as AdminTab, label: "Pending Payouts", icon: Wallet, badge: mockPendingPayouts.length },
+          { id: "payouts" as AdminTab, label: "Pending Payouts", icon: Wallet, badge: pendingPayouts.length || undefined },
           { id: "settings" as AdminTab, label: "Program Settings", icon: Settings },
         ].map((tab) => (
           <button
@@ -334,7 +384,7 @@ export default function AdminAffiliatesPage() {
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 shadow-sm">
             <div className="p-4 border-b border-gray-100 dark:border-slate-700">
               <h3 className="font-bold text-slate-800 dark:text-white">Pending Payout Requests</h3>
-              <p className="text-xs text-gray-500 mt-0.5">{mockPendingPayouts.length} requests waiting for processing</p>
+              <p className="text-xs text-gray-500 mt-0.5">{pendingPayouts.length} requests waiting for processing</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -348,7 +398,7 @@ export default function AdminAffiliatesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockPendingPayouts.map((payout) => (
+                  {pendingPayouts.map((payout) => (
                     <tr key={payout.id} className="border-b border-gray-50 dark:border-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700/30">
                       <td className="py-3 px-4">
                         <p className="font-semibold text-slate-800 dark:text-white">{payout.affiliateName}</p>
@@ -380,15 +430,15 @@ export default function AdminAffiliatesPage() {
           <div className="grid md:grid-cols-3 gap-4">
             <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-5">
               <p className="text-xs text-gray-500 font-bold uppercase">Total Pending</p>
-              <p className="text-2xl font-black text-amber-600 mt-1">₹{programStats.pendingPayouts.toLocaleString()}</p>
+              <p className="text-2xl font-black text-amber-600 mt-1">₹{(programStats?.pendingPayouts || 0).toLocaleString()}</p>
             </div>
             <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-5">
               <p className="text-xs text-gray-500 font-bold uppercase">Paid This Month</p>
-              <p className="text-2xl font-black text-emerald-600 mt-1">₹12,375</p>
+              <p className="text-2xl font-black text-emerald-600 mt-1">₹0</p>
             </div>
             <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700 p-5">
               <p className="text-xs text-gray-500 font-bold uppercase">All-Time Paid</p>
-              <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">₹{programStats.totalCommissionsPaid.toLocaleString()}</p>
+              <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">₹{(programStats?.totalCommissionsPaid || 0).toLocaleString()}</p>
             </div>
           </div>
         </div>

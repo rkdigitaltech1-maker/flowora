@@ -70,9 +70,7 @@ export default function AdminDashboard() {
 
   const planData = [
     { name: "Free", value: stats.planDistribution.free, fill: "#6366f1" },
-    { name: "Starter", value: stats.planDistribution.starter, fill: "#3b82f6" },
-    { name: "Pro", value: stats.planDistribution.pro, fill: "#a855f7" },
-    { name: "Enterprise", value: stats.planDistribution.enterprise, fill: "#f59e0b" },
+    { name: "Pro", value: stats.planDistribution.pro + (stats.planDistribution.starter || 0) + (stats.planDistribution.enterprise || 0), fill: "#a855f7" },
   ];
   const totalPlans = planData.reduce((sum, item) => sum + item.value, 0);
 
