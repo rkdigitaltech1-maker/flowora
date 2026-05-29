@@ -38,6 +38,14 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    heading: "Monetization",
+    items: [
+      { label: "Payment Gateway", icon: <CreditCard size={16} />, href: "/_sys/ctrl-panel/payments" },
+      { label: "Invoices", icon: <FileText size={16} />, href: "/_sys/ctrl-panel/invoices" },
+      { label: "Subscriptions", icon: <Layers size={16} />, href: "/_sys/ctrl-panel/subscriptions" },
+    ],
+  },
+  {
     heading: "Operations",
     items: [
       { label: "Digital Products", icon: <Package size={16} />, href: "/_sys/ctrl-panel/products" },
