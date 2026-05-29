@@ -20,6 +20,9 @@ import AdminSettingsPage from "./pages/admin/settings/page.tsx";
 import AdminLoginPage from "./pages/admin/login.tsx";
 import AdminAuthProvider from "./components/providers/admin-auth-provider.tsx";
 import AdminAffiliatesPage from "./pages/admin/affiliates/page.tsx";
+import AdminInvoicesPage from "./pages/admin/invoices/page.tsx";
+import AdminSubscriptionsPage from "./pages/admin/subscriptions/page.tsx";
+import AdminPaymentGatewayPage from "./pages/admin/payments/page.tsx";
 import LoginPage from "./pages/login.tsx";
 import WelcomePage from "./pages/welcome.tsx";
 import OnboardingPage from "./pages/onboarding/page.tsx";
@@ -124,6 +127,9 @@ export default function App() {
               <Route path="products" element={<AdminProductsPage />} />
               <Route path="campaigns" element={<AdminCampaignsPage />} />
               <Route path="affiliates" element={<AdminAffiliatesPage />} />
+              <Route path="payments" element={<AdminPaymentGatewayPage />} />
+              <Route path="invoices" element={<AdminInvoicesPage />} />
+              <Route path="subscriptions" element={<AdminSubscriptionsPage />} />
               <Route path="support" element={<AdminSupportPage />} />
               <Route path="settings" element={<AdminSettingsPage />} />
             </Route>

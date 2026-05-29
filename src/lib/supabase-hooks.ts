@@ -1965,3 +1965,229 @@ export function useAdminSupportTickets(filters?: { status?: string }) {
   return { tickets, loading, adminReply, refetch: fetchTickets };
 }
 
+
+
+// ─── Admin Payment Orders / Invoices ──────────────────────────────────────────
+export function useAdminPaymentOrders(filters?: { status?: string; search?: string; currency?: string }) {
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<any>(null);
+
+  const fetchOrders = useCallback(async () => {
+    try {
+      const [ordRes, profRes, wsRes] = await Promise.all([
+        supabase.from("payment_orders").select("*").order("created_at", { ascending: false }),
+        supabase.from("profiles").select("*"),
+        supabase.from("creator_workspaces").select("*"),
+      ]);
+
+      const paymentOrders = ordRes.data ?? [];
+      const profiles = profRes.data ?? [];
+      const workspaces = wsRes.data ?? [];
+
+      const enriched = paymentOrders.map((o: any) => {
+        const profile = profiles.find((p: any) => p.id === o.user_id);
+        const workspace = workspaces.find((w: any) => w.owner_id === o.user_id || w.owner_user_id === o.user_id);
+        return {
+          ...o,
+          userName: profile?.name || "Unknown User",
+          userEmail: profile?.email || "—",
+          workspaceName: workspace?.name || "—",
+          workspacePlan: workspace?.plan || "free",
+        };
+      });
+
+      // Apply filters
+      let filtered = enriched;
+      if (filters?.status && filters.status !== "all") {
+        filtered = filtered.filter((o: any) => o.status === filters.status);
+      }
+      if (filters?.currency && filters.currency !== "all") {
+        filtered = filtered.filter((o: any) => o.currency === filters.currency);
+      }
+      if (filters?.search) {
+        const q = filters.search.toLowerCase();
+        filtered = filtered.filter((o: any) =>
+          o.order_id?.toLowerCase().includes(q) ||
+          o.payment_id?.toLowerCase().includes(q) ||
+          o.userName?.toLowerCase().includes(q) ||
+          o.userEmail?.toLowerCase().includes(q) ||
+          o.receipt?.toLowerCase().includes(q)
+        );
+      }
+
+      // Compute stats
+      const totalOrders = paymentOrders.length;
+      const paidOrders = paymentOrders.filter((o: any) => o.status === "paid");
+      const failedOrders = paymentOrders.filter((o: any) => o.status === "failed" || o.status === "signature_failed");
+      const pendingOrders = paymentOrders.filter((o: any) => o.status === "created");
+      const refundedOrders = paymentOrders.filter((o: any) => o.status === "refunded");
+
+      const totalRevenueINR = paidOrders
+        .filter((o: any) => o.currency === "INR")
+        .reduce((sum: number, o: any) => sum + (o.amount || 0), 0);
+      const totalRevenueUSD = paidOrders
+        .filter((o: any) => o.currency === "USD")
+        .reduce((sum: number, o: any) => sum + (o.amount || 0), 0);
+
+      setStats({
+        totalOrders,
+        paidCount: paidOrders.length,
+        failedCount: failedOrders.length,
+        pendingCount: pendingOrders.length,
+        refundedCount: refundedOrders.length,
+        totalRevenueINR: totalRevenueINR / 100, // Convert from paise
+        totalRevenueUSD: totalRevenueUSD / 100, // Convert from cents
+      });
+
+      setOrders(filtered);
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching payment orders:", err);
+      setLoading(false);
+    }
+  }, [filters?.status, filters?.search, filters?.currency]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
+  const updateOrderStatus = async (orderId: string, status: string) => {
+    try {
+      await supabase.from("payment_orders").update({ status, updated_at: new Date().toISOString() }).eq("order_id", orderId);
+      fetchOrders();
+      toast.success(`Order status updated to ${status}`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update order status");
+    }
+  };
+
+  return { orders, loading, stats, updateOrderStatus, refetch: fetchOrders };
+}
+
+// ─── Admin Subscriptions ──────────────────────────────────────────────────────
+export function useAdminSubscriptions(filters?: { plan?: string; status?: string; search?: string }) {
+  const [subscriptions, setSubscriptions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<any>(null);
+
+  const fetchSubscriptions = useCallback(async () => {
+    try {
+      const [wsRes, profRes] = await Promise.all([
+        supabase.from("creator_workspaces").select("*"),
+        supabase.from("profiles").select("*"),
+      ]);
+
+      const workspaces = wsRes.data ?? [];
+      const profiles = profRes.data ?? [];
+
+      const enriched = workspaces.map((ws: any) => {
+        const profile = profiles.find((p: any) => p.id === ws.owner_id || p.id === ws.owner_user_id);
+        const isActive = ws.subscription_status === "active";
+        const isExpired = ws.subscription_end && new Date(ws.subscription_end) < new Date();
+        const daysUntilRenewal = ws.subscription_end
+          ? Math.ceil((new Date(ws.subscription_end).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+          : null;
+
+        return {
+          workspaceId: ws.id,
+          userId: ws.owner_id || ws.owner_user_id,
+          userName: profile?.name || ws.name || "Unknown Creator",
+          userEmail: profile?.email || "—",
+          plan: ws.plan || "free",
+          subscriptionStatus: ws.subscription_status || (ws.plan && ws.plan !== "free" ? "active" : "inactive"),
+          subscriptionStart: ws.subscription_start,
+          subscriptionEnd: ws.subscription_end,
+          razorpayPaymentId: ws.razorpay_payment_id,
+          razorpayOrderId: ws.razorpay_order_id,
+          daysUntilRenewal,
+          isExpired: isExpired && isActive,
+          createdAt: ws.created_at,
+          updatedAt: ws.updated_at,
+        };
+      });
+
+      // Apply filters
+      let filtered = enriched;
+      if (filters?.plan && filters.plan !== "all") {
+        filtered = filtered.filter((s: any) => s.plan === filters.plan);
+      }
+      if (filters?.status && filters.status !== "all") {
+        filtered = filtered.filter((s: any) => s.subscriptionStatus === filters.status);
+      }
+      if (filters?.search) {
+        const q = filters.search.toLowerCase();
+        filtered = filtered.filter((s: any) =>
+          s.userName?.toLowerCase().includes(q) ||
+          s.userEmail?.toLowerCase().includes(q) ||
+          s.workspaceId?.toLowerCase().includes(q) ||
+          s.razorpayPaymentId?.toLowerCase().includes(q)
+        );
+      }
+
+      // Compute stats
+      const totalWorkspaces = workspaces.length;
+      const freeCount = workspaces.filter((w: any) => !w.plan || w.plan === "free").length;
+      const proCount = workspaces.filter((w: any) => w.plan === "pro" || w.plan === "pro_annual").length;
+      const activeSubscriptions = workspaces.filter((w: any) => w.subscription_status === "active").length;
+      const canceledCount = workspaces.filter((w: any) => w.subscription_status === "canceled").length;
+      const expiringIn7Days = enriched.filter((s: any) => s.daysUntilRenewal !== null && s.daysUntilRenewal > 0 && s.daysUntilRenewal <= 7).length;
+
+      const mrr = workspaces.reduce((sum: number, w: any) => {
+        if (w.subscription_status !== "active") return sum;
+        if (w.plan === "pro") return sum + 499;
+        if (w.plan === "pro_annual") return sum + 399;
+        return sum;
+      }, 0);
+
+      setStats({
+        totalWorkspaces,
+        freeCount,
+        proCount,
+        activeSubscriptions,
+        canceledCount,
+        expiringIn7Days,
+        mrr,
+      });
+
+      setSubscriptions(filtered.sort((a: any, b: any) => (b.createdAt || "").localeCompare(a.createdAt || "")));
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching subscriptions:", err);
+      setLoading(false);
+    }
+  }, [filters?.plan, filters?.status, filters?.search]);
+
+  useEffect(() => {
+    fetchSubscriptions();
+  }, [fetchSubscriptions]);
+
+  const updateSubscription = async (workspaceId: string, updates: { plan?: string; subscription_status?: string }) => {
+    try {
+      await supabase.from("creator_workspaces").update({
+        ...updates,
+        updated_at: new Date().toISOString(),
+      } as any).eq("id", workspaceId);
+      fetchSubscriptions();
+      toast.success("Subscription updated successfully");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update subscription");
+    }
+  };
+
+  const cancelSubscription = async (workspaceId: string) => {
+    try {
+      await supabase.from("creator_workspaces").update({
+        subscription_status: "canceled",
+        plan: "free",
+        updated_at: new Date().toISOString(),
+      } as any).eq("id", workspaceId);
+      fetchSubscriptions();
+      toast.success("Subscription canceled");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to cancel subscription");
+    }
+  };
+
+  return { subscriptions, loading, stats, updateSubscription, cancelSubscription, refetch: fetchSubscriptions };
+}
