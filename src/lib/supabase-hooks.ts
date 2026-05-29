@@ -1525,9 +1525,7 @@ export function useAdminStats() {
       const mrr = workspaces.reduce((sum: number, w: any) => {
         if (w.status === "suspended") return sum;
         const plan = w.plan || "free";
-        if (plan === "starter") return sum + 399;
-        if (plan === "pro") return sum + 399;
-        if (plan === "agency" || plan === "enterprise") return sum + 999;
+        if (plan === "starter" || plan === "pro" || plan === "pro_annual" || plan === "creator" || plan === "agency" || plan === "enterprise") return sum + 399;
         return sum; // free = 0
       }, 0);
 
@@ -1571,9 +1569,7 @@ export function useAdminStats() {
       // Plan distribution - real numbers only
       const planDistribution = {
         free: workspaces.filter((w: any) => !w.plan || w.plan === "free").length,
-        starter: workspaces.filter((w: any) => w.plan === "starter" || w.plan === "creator").length,
-        pro: workspaces.filter((w: any) => w.plan === "pro").length,
-        enterprise: workspaces.filter((w: any) => w.plan === "agency" || w.plan === "enterprise").length,
+        pro: workspaces.filter((w: any) => w.plan === "pro" || w.plan === "pro_annual" || w.plan === "starter" || w.plan === "creator" || w.plan === "agency" || w.plan === "enterprise").length,
       };
 
       // Product type distribution

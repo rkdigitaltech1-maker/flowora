@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Users, Package, Wallet, BarChart3, Settings,
   Bell, ChevronDown, Menu, X, LogOut, Truck, ShieldCheck, Globe,
   ChevronRight, HeadphonesIcon, FileText, Calculator, MapPin,
-  CreditCard, GitBranch, Scale, AlertOctagon, UserCog, Layers,
+  CreditCard, GitBranch, Scale, AlertOctagon, UserCog, Layers, Mail,
 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import {
@@ -52,6 +52,13 @@ const NAV_SECTIONS: NavSection[] = [
       { label: "Automations", icon: <GitBranch size={16} />, href: "/_sys/ctrl-panel/campaigns" },
       { label: "Affiliates", icon: <Scale size={16} />, href: "/_sys/ctrl-panel/affiliates" },
       { label: "Support", icon: <HeadphonesIcon size={16} />, href: "/_sys/ctrl-panel/support" },
+    ],
+  },
+  {
+    heading: "Communication",
+    items: [
+      { label: "Email Marketing", icon: <Mail size={16} />, href: "/_sys/ctrl-panel/email-marketing" },
+      { label: "Email Setup", icon: <Settings size={16} />, href: "/_sys/ctrl-panel/email-setup" },
     ],
   },
 ];
@@ -134,7 +141,7 @@ function AdminSidebar({ onNav }: { onNav?: () => void }) {
       <div className="px-4 py-5 border-b border-white/10 flex-shrink-0">
         <div className="flex items-center gap-2">
           <div className="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-lg px-3 py-1.5 text-white font-extrabold text-xs tracking-wider shadow-sm">
-            CREATOR DM
+            FLOWORA
           </div>
         </div>
       </div>

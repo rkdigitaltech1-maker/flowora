@@ -414,7 +414,6 @@ function BillingSection() {
     free: "Free",
     pro: "Pro Monthly",
     pro_annual: "Pro Annual",
-    enterprise: "Enterprise",
   }[usage.plan as string] || "Free";
 
   const handleUpgrade = async (planKey: string) => {
@@ -522,10 +521,9 @@ function BillingSection() {
 
 function SandboxUpgradeSection({ currentPlan, onUpgrade }: { currentPlan: string; onUpgrade: (plan: string) => void }) {
   const plans = [
-    { key: "free", name: "Free Plan", price: "$0", desc: "1,000 monthly DMs, 1,000 contacts, unlimited workflows" },
-    { key: "pro", name: "Pro Monthly", price: "$14.90", desc: "Unlimited DMs & contacts, story automation, AI reply" },
-    { key: "pro_annual", name: "Pro Annual", price: "$9.99/mo", desc: "Billed annually ($119.88/yr), unlimited access" },
-    { key: "enterprise", name: "Enterprise", price: "Custom", desc: "Custom features, dedicated account manager, WhatsApp" },
+    { key: "free", name: "Free Plan", price: "₹0", desc: "1,000 monthly DMs, 1,000 contacts, 10 workflows" },
+    { key: "pro", name: "Pro Monthly", price: "₹499/mo", desc: "Unlimited DMs & contacts, all automations unlocked" },
+    { key: "pro_annual", name: "Pro Annual", price: "₹399/mo", desc: "Billed annually (₹4,788/yr), unlimited access" },
   ];
 
   return (

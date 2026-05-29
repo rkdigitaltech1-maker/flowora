@@ -23,6 +23,8 @@ import AdminAffiliatesPage from "./pages/admin/affiliates/page.tsx";
 import AdminInvoicesPage from "./pages/admin/invoices/page.tsx";
 import AdminSubscriptionsPage from "./pages/admin/subscriptions/page.tsx";
 import AdminPaymentGatewayPage from "./pages/admin/payments/page.tsx";
+import AdminEmailMarketingPage from "./pages/admin/email-marketing/page.tsx";
+import AdminEmailSetupPage from "./pages/admin/email-setup/page.tsx";
 import LoginPage from "./pages/login.tsx";
 import WelcomePage from "./pages/welcome.tsx";
 import OnboardingPage from "./pages/onboarding/page.tsx";
@@ -130,6 +132,8 @@ export default function App() {
               <Route path="payments" element={<AdminPaymentGatewayPage />} />
               <Route path="invoices" element={<AdminInvoicesPage />} />
               <Route path="subscriptions" element={<AdminSubscriptionsPage />} />
+              <Route path="email-marketing" element={<AdminEmailMarketingPage />} />
+              <Route path="email-setup" element={<AdminEmailSetupPage />} />
               <Route path="support" element={<AdminSupportPage />} />
               <Route path="settings" element={<AdminSettingsPage />} />
             </Route>

@@ -27,7 +27,6 @@ const PLAN_BADGES: Record<string, { label: string; color: string }> = {
   free: { label: "Free", color: "bg-slate-100 text-slate-600 border-slate-200" },
   pro: { label: "Pro Monthly", color: "bg-violet-100 text-violet-700 border-violet-200" },
   pro_annual: { label: "Pro Annual", color: "bg-indigo-100 text-indigo-700 border-indigo-200" },
-  enterprise: { label: "Enterprise", color: "bg-amber-100 text-amber-700 border-amber-200" },
 };
 
 const STATUS_BADGES: Record<string, { label: string; color: string }> = {
@@ -395,7 +394,6 @@ export default function AdminSubscriptionsPage() {
                   <SelectItem value="free">Free</SelectItem>
                   <SelectItem value="pro">Pro (Monthly)</SelectItem>
                   <SelectItem value="pro_annual">Pro (Annual)</SelectItem>
-                  <SelectItem value="enterprise">Enterprise</SelectItem>
                 </SelectContent>
               </Select>
             </div>
