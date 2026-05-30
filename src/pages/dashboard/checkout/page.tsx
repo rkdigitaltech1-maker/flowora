@@ -110,7 +110,10 @@ export default function CheckoutPage() {
       if (error.message?.includes("cancelled")) {
         toast.info("Payment was cancelled. You can try again whenever you're ready.");
       } else {
+        console.error("[Checkout] Payment error:", error);
         toast.error(error.message || "Payment failed. Please try again.");
+        // Show detailed error for debugging
+        alert(`Payment Error Details:\n\n${error.message}\n\nPlease share this with support.`);
       }
     }
   };

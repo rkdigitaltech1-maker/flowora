@@ -43,6 +43,8 @@ export async function processSubscriptionPayment(params: {
   const accessToken = await getAccessToken();
 
   // Step 1: Create order on server
+  console.log("[Razorpay] Creating order...", { billingInterval: params.billingInterval });
+
   const orderResponse = await fetch("/api/razorpay/create-order", {
     method: "POST",
     headers: {
@@ -58,6 +60,7 @@ export async function processSubscriptionPayment(params: {
   });
 
   const orderData = await orderResponse.json();
+  console.log("[Razorpay] Order response:", orderResponse.status, orderData);
 
   if (!orderResponse.ok) {
     throw new Error(orderData.error || "Failed to create payment order. Please try again.");
@@ -66,6 +69,14 @@ export async function processSubscriptionPayment(params: {
   if (!orderData.order_id) {
     throw new Error("Invalid response from server. Please try again.");
   }
+
+  console.log("[Razorpay] Order created successfully:", {
+    order_id: orderData.order_id,
+    amount: orderData.amount,
+    currency: orderData.currency,
+    key_id_present: !!RAZORPAY_KEY_ID,
+    key_id_prefix: RAZORPAY_KEY_ID?.substring(0, 12),
+  });
 
   // Step 2: Open Razorpay checkout modal
   const paymentResult = await openRazorpayCheckout({
@@ -128,13 +139,19 @@ function openRazorpayCheckout(options: {
       return;
     }
 
-    const rzp = new (window as any).Razorpay({
+    console.log("[Razorpay] Opening checkout with:", {
+      key: RAZORPAY_KEY_ID?.substring(0, 15) + "...",
+      order_id: options.orderId,
+      amount: options.amount,
+      currency: options.currency,
+    });
+
+    const rzpConfig = {
       key: RAZORPAY_KEY_ID,
       amount: options.amount,
       currency: options.currency,
       name: "Flowora",
       description: `Flowora Pro - ${options.billingInterval === "yearly" ? "Annual" : "Monthly"}`,
-      image: "/logo.png",
       order_id: options.orderId,
       prefill: {
         name: options.customerName,
@@ -145,6 +162,7 @@ function openRazorpayCheckout(options: {
         color: "#6d48ff",
       },
       handler: (response: PaymentResult) => {
+        console.log("[Razorpay] Payment SUCCESS:", response);
         if (response.razorpay_payment_id && response.razorpay_order_id && response.razorpay_signature) {
           resolve(response);
         } else {
@@ -153,14 +171,20 @@ function openRazorpayCheckout(options: {
       },
       modal: {
         ondismiss: () => {
+          console.log("[Razorpay] Modal dismissed by user");
           reject(new Error("Payment cancelled by user."));
         },
       },
-    });
+    };
+
+    const rzp = new (window as any).Razorpay(rzpConfig);
 
     rzp.on("payment.failed", (response: any) => {
+      console.error("[Razorpay] Payment FAILED:", JSON.stringify(response?.error || response, null, 2));
       const desc = response?.error?.description || "Payment failed.";
-      reject(new Error(desc));
+      const code = response?.error?.code || "UNKNOWN";
+      const reason = response?.error?.reason || "";
+      reject(new Error(`${desc} (Code: ${code}, Reason: ${reason})`));
     });
 
     rzp.open();
