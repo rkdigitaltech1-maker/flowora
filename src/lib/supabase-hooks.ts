@@ -123,12 +123,55 @@ export function useWorkspace() {
 
     fetchOrCreateWorkspace();
 
+    // Subscribe to real-time changes on the workspace (e.g., plan upgrades from admin)
+    let subscription: any = null;
+
+    async function setupRealtimeSubscription() {
+      // Wait for workspace to be loaded before subscribing
+      // We'll subscribe by owner_user_id filter
+      subscription = supabase
+        .channel(`workspace-${userId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "creator_workspaces",
+            filter: `owner_user_id=eq.${userId}`,
+          },
+          (payload: any) => {
+            console.log("[Workspace] Real-time update received:", payload.new?.plan);
+            if (payload.new && isMounted) {
+              setWorkspace(payload.new);
+            }
+          }
+        )
+        .subscribe();
+    }
+
+    setupRealtimeSubscription();
+
     return () => {
       isMounted = false;
+      if (subscription) {
+        supabase.removeChannel(subscription);
+      }
     };
   }, [user?.id]);
 
-  return { workspace, loading };
+  // Expose refetch for manual refresh after payment
+  const refetchWorkspace = useCallback(async () => {
+    if (!user?.id || user.id === "local") return;
+    const { data: workspaceList } = await supabase
+      .from("creator_workspaces")
+      .select("*")
+      .eq("owner_user_id", user.id);
+    if (workspaceList && workspaceList.length > 0) {
+      setWorkspace(workspaceList[0]);
+    }
+  }, [user?.id]);
+
+  return { workspace, loading, refetchWorkspace };
 }
 
 // ─── Overview (stats for sidebar + dashboard) ─────────────────────────────────
