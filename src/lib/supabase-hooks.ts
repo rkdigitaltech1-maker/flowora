@@ -124,38 +124,33 @@ export function useWorkspace() {
     fetchOrCreateWorkspace();
 
     // Subscribe to real-time changes on the workspace (e.g., plan upgrades from admin)
-    let subscription: any = null;
-
-    async function setupRealtimeSubscription() {
-      // Wait for workspace to be loaded before subscribing
-      // We'll subscribe by owner_user_id filter
-      subscription = supabase
-        .channel(`workspace-${userId}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "UPDATE",
-            schema: "public",
-            table: "creator_workspaces",
-            filter: `owner_user_id=eq.${userId}`,
-          },
-          (payload: any) => {
-            console.log("[Workspace] Real-time update received:", payload.new?.plan);
-            if (payload.new && isMounted) {
-              setWorkspace(payload.new);
-            }
+    const channelName = `workspace-changes-${userId}-${Date.now()}`;
+    const channel = supabase
+      .channel(channelName)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "creator_workspaces",
+          filter: `owner_user_id=eq.${userId}`,
+        },
+        (payload: any) => {
+          console.log("[Workspace] Real-time update received:", payload.new?.plan);
+          if (payload.new && isMounted) {
+            setWorkspace(payload.new);
           }
-        )
-        .subscribe();
-    }
-
-    setupRealtimeSubscription();
+        }
+      )
+      .subscribe((status: string) => {
+        if (status === "SUBSCRIBED") {
+          console.log("[Workspace] Real-time subscription active");
+        }
+      });
 
     return () => {
       isMounted = false;
-      if (subscription) {
-        supabase.removeChannel(subscription);
-      }
+      supabase.removeChannel(channel);
     };
   }, [user?.id]);
 
