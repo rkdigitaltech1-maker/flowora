@@ -31,7 +31,8 @@ import {
   X,
   Tag,
   Video,
-  Image
+  Image,
+  Repeat
 } from "lucide-react";
 
 // Simulator Preset Configuration
@@ -2031,6 +2032,220 @@ export default function Index() {
               </div>
             </div>
 
+          </div>
+        </div>
+      </section>
+
+      {/* ── RETRIGGER OLD COMMENTS SECTION ── */}
+      <section className="py-24 px-6 relative overflow-hidden bg-[#080b14]">
+        {/* Background effects */}
+        <div className="absolute top-1/4 left-1/3 w-[600px] h-[600px] bg-purple-900/20 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-indigo-900/15 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+
+            {/* Left Column - Interactive Demo Card */}
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="relative"
+            >
+              {/* Automation Card */}
+              <div className="rounded-3xl bg-[#0f1225] border border-slate-800/60 p-6 shadow-2xl shadow-purple-900/10">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/30">
+                      <Repeat className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-white font-bold text-sm">AI Shield · Active</h4>
+                      <p className="text-slate-400 text-[11px]">scanning every new comment</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-slate-400 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Zap className="h-2.5 w-2.5 text-amber-400" /> live demo
+                    </span>
+                    <span className="text-[10px] font-bold text-red-300 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">
+                      🔴 12 hidden today
+                    </span>
+                  </div>
+                </div>
+
+                {/* Comment List */}
+                <div className="space-y-3">
+                  {/* Kept Comment */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.2 }}
+                    className="flex items-center gap-3 rounded-xl bg-slate-800/40 border border-slate-700/50 p-3"
+                  >
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white text-xs font-bold shrink-0">S</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-white">@sarah.studio</p>
+                      <p className="text-[11px] text-slate-400 truncate">Love this drop 💕</p>
+                    </div>
+                    <span className="text-[9px] font-bold text-emerald-400 border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      ✓ KEPT
+                    </span>
+                  </motion.div>
+
+                  {/* Kept Comment */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.35 }}
+                    className="flex items-center gap-3 rounded-xl bg-slate-800/40 border border-slate-700/50 p-3"
+                  >
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white text-xs font-bold shrink-0">A</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-white">@arjun.vibes</p>
+                      <p className="text-[11px] text-slate-400 truncate">🔥🔥🔥 underrated</p>
+                    </div>
+                    <span className="text-[9px] font-bold text-emerald-400 border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      ✓ KEPT
+                    </span>
+                  </motion.div>
+
+                  {/* Hidden Comment */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.5 }}
+                    className="flex items-center gap-3 rounded-xl bg-red-950/20 border border-red-900/30 p-3"
+                  >
+                    <div className="h-8 w-8 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 text-xs font-bold shrink-0">H</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-slate-500">@h8r_42</p>
+                      <p className="text-[11px] text-slate-600 italic">hidden by AI moderation</p>
+                    </div>
+                    <span className="text-[9px] font-bold text-red-400 border border-red-400/30 bg-red-400/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      🔴 HIDDEN
+                    </span>
+                  </motion.div>
+
+                  {/* Kept Comment */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.65 }}
+                    className="flex items-center gap-3 rounded-xl bg-slate-800/40 border border-slate-700/50 p-3"
+                  >
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center text-white text-xs font-bold shrink-0">P</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-white">@priya.r</p>
+                      <p className="text-[11px] text-slate-400 truncate">where can i buy this?</p>
+                    </div>
+                    <span className="text-[9px] font-bold text-emerald-400 border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      ✓ KEPT
+                    </span>
+                  </motion.div>
+
+                  {/* Hidden Comment */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.8 }}
+                    className="flex items-center gap-3 rounded-xl bg-red-950/20 border border-red-900/30 p-3"
+                  >
+                    <div className="h-8 w-8 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 text-xs font-bold shrink-0">C</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-slate-500">@cash_link99</p>
+                      <p className="text-[11px] text-slate-600 italic">hidden by AI moderation</p>
+                    </div>
+                    <span className="text-[9px] font-bold text-red-400 border border-red-400/30 bg-red-400/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      🔴 HIDDEN
+                    </span>
+                  </motion.div>
+                </div>
+
+                {/* AI Moderation Toggle */}
+                <div className="mt-5 flex items-center justify-between rounded-xl bg-purple-500/10 border border-purple-500/20 p-3.5">
+                  <div className="flex items-center gap-2.5">
+                    <ShieldCheck className="h-5 w-5 text-purple-400" />
+                    <span className="text-sm font-bold text-white">AI moderation</span>
+                  </div>
+                  <div className="relative h-6 w-11 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 shadow-lg shadow-purple-500/30">
+                    <span className="absolute top-0.5 right-0.5 h-5 w-5 rounded-full bg-white shadow" />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Right Column - Copy */}
+            <motion.div
+              initial={{ opacity: 0, x: 40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="space-y-8"
+            >
+              <div>
+                <motion.span
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="inline-block px-3 py-1.5 rounded-full text-xs font-bold tracking-wider text-purple-300 bg-purple-500/10 border border-purple-500/20 uppercase mb-5"
+                >
+                  Brand Safety
+                </motion.span>
+                <h2 className="text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+                  AI hides hate before your audience sees it
+                </h2>
+                <p className="mt-5 text-base text-slate-400 leading-relaxed max-w-lg">
+                  Trained on millions of toxic patterns, ZipDM detects abuse, slurs, spam and scam-link comments — and hides them instantly from your post. Your audience never sees the noise.
+                </p>
+              </div>
+
+              {/* Feature Points */}
+              <div className="space-y-5">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/15 shrink-0">
+                    <ShieldCheck className="h-5 w-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <h4 className="text-base font-bold text-white">Brand-safe by default</h4>
+                    <p className="text-sm text-slate-400 mt-1 leading-relaxed">
+                      Auto-hides hate, slurs, scam links and competitor bait the second they land on your post.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/15 shrink-0">
+                    <Zap className="h-5 w-5 text-amber-400" />
+                  </div>
+                  <div>
+                    <h4 className="text-base font-bold text-white">Reacts in milliseconds</h4>
+                    <p className="text-sm text-slate-400 mt-1 leading-relaxed">
+                      Catches toxic comments before most followers refresh — no manual cleanup, no late-night damage control.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/15 shrink-0">
+                    <MessageSquare className="h-5 w-5 text-cyan-400" />
+                  </div>
+                  <div>
+                    <h4 className="text-base font-bold text-white">Tuned for Indian creators</h4>
+                    <p className="text-sm text-slate-400 mt-1 leading-relaxed">
+                      Multilingual model — catches Hinglish abuse, regional slurs, and repeat spam patterns.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
