@@ -83,6 +83,14 @@ const featureCards = [
     trigger: "ai_replies",
     previewType: "ai",
     isComingSoon: false
+  },
+  {
+    id: "brand_safety",
+    title: "Brand Safety",
+    description: "AI hides hate, spam & scam comments before your audience sees them",
+    trigger: "brand_safety",
+    previewType: "brand_safety",
+    isComingSoon: false
   }
 ];
 
@@ -144,6 +152,11 @@ export default function AutomationHealthPage() {
     // Re-trigger goes to dedicated page
     if (trigger === "re_trigger") {
       navigate("/dashboard/automations/retrigger");
+      return;
+    }
+    // Brand Safety goes to dedicated page
+    if (trigger === "brand_safety") {
+      navigate("/dashboard/automations/brand-safety");
       return;
     }
     const automationType = triggerToType[trigger] || "comment";
@@ -355,6 +368,41 @@ export default function AutomationHealthPage() {
                     </div>
                     <span className="mt-2 text-xs font-bold text-white tracking-wide">LinkPlease AI</span>
                     <span className="text-[8px] bg-green-400/20 text-green-300 border border-green-400/35 rounded-full px-2 py-0.5 mt-1 font-semibold uppercase tracking-wider scale-90">Active</span>
+                  </div>
+                )}
+
+                {card.previewType === "brand_safety" && (
+                  <div className="h-full bg-[#0a0c16] p-3 flex flex-col justify-between text-white">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <ShieldCheck className="h-3.5 w-3.5 text-purple-400" />
+                        <span className="text-[9px] font-bold text-purple-300">AI Shield</span>
+                      </div>
+                      <span className="text-[7px] font-bold bg-red-500/20 text-red-300 border border-red-500/30 px-1.5 py-0.5 rounded-full">3 hidden</span>
+                    </div>
+                    <div className="space-y-1.5 mt-2 flex-1 flex flex-col justify-center">
+                      <div className="flex items-center gap-1.5 bg-white/5 rounded-lg px-2 py-1">
+                        <div className="h-4 w-4 rounded-full bg-rose-500 text-white text-[7px] font-bold flex items-center justify-center">S</div>
+                        <span className="text-[8px] text-white/80 truncate flex-1">Love this! 💕</span>
+                        <span className="text-[7px] text-emerald-400 font-bold">✓</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 bg-red-500/10 rounded-lg px-2 py-1 border border-red-500/20">
+                        <div className="h-4 w-4 rounded-full bg-slate-600 text-slate-400 text-[7px] font-bold flex items-center justify-center">X</div>
+                        <span className="text-[8px] text-white/40 line-through truncate flex-1">spam link...</span>
+                        <span className="text-[7px] text-red-400 font-bold">HIDDEN</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 bg-white/5 rounded-lg px-2 py-1">
+                        <div className="h-4 w-4 rounded-full bg-cyan-500 text-white text-[7px] font-bold flex items-center justify-center">P</div>
+                        <span className="text-[8px] text-white/80 truncate flex-1">where to buy?</span>
+                        <span className="text-[7px] text-emerald-400 font-bold">✓</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between mt-1.5 bg-purple-500/10 border border-purple-500/20 rounded-lg px-2 py-1">
+                      <span className="text-[8px] font-bold text-purple-300">AI moderation</span>
+                      <div className="h-3.5 w-6 rounded-full bg-purple-500 relative">
+                        <span className="absolute top-0.5 right-0.5 h-2.5 w-2.5 rounded-full bg-white" />
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
