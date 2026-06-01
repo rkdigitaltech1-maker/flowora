@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Eye, EyeOff, MessageSquare, Users, Package, BarChart3, Zap, ArrowRight
@@ -10,6 +10,7 @@ import { useAdminAuth } from "@/hooks/use-admin-auth.ts";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Label } from "@/components/ui/label.tsx";
+import CloudflareTurnstile from "@/components/CloudflareTurnstile.tsx";
 
 const GoogleIcon = () => (
   <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none">
@@ -41,6 +42,15 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+
+  const handleTurnstileVerify = useCallback((token: string) => {
+    setTurnstileToken(token);
+  }, []);
+
+  const handleTurnstileExpire = useCallback(() => {
+    setTurnstileToken(null);
+  }, []);
 
   useEffect(() => {
     const errorCode = searchParams.get("error_code");
@@ -158,6 +168,13 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) { toast.error("Please fill in all fields."); return; }
+
+    // Require Turnstile verification for signups (skip for demo accounts)
+    if (mode === "signup" && !turnstileToken && email !== "aisha@createwith.co") {
+      toast.error("Please complete the security verification.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -448,9 +465,21 @@ export default function LoginPage() {
               </div>
             )}
 
+            {/* Cloudflare Turnstile — only shown on signup */}
+            {mode === "signup" && (
+              <div className="flex justify-center pt-1">
+                <CloudflareTurnstile
+                  onVerify={handleTurnstileVerify}
+                  onExpire={handleTurnstileExpire}
+                  theme="light"
+                  size="normal"
+                />
+              </div>
+            )}
+
             <Button 
               type="submit" 
-              disabled={loading}
+              disabled={loading || (mode === "signup" && !turnstileToken)}
               className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-extrabold h-11 rounded-xl shadow-lg shadow-purple-600/20 hover:shadow-purple-700/25 transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-3 text-sm"
             >
               {loading ? (
