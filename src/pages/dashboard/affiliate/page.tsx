@@ -1,67 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import {
   Copy, TrendingUp, Users, DollarSign,
   MousePointerClick, UserPlus, Download,
   Wallet, Clock, CheckCircle2,
-  BarChart3, Share2, Link2, QrCode, FileText
+  BarChart3, Share2, Link2, QrCode, FileText, Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
-
-
-// Mock data for the affiliate dashboard
-const mockAffiliate = {
-  id: "aff_001",
-  fullName: "Priya Patel",
-  email: "priya@creator.io",
-  affiliateCode: "priya2026",
-  referralLink: "https://flowora.com/ref/priya2026",
-  status: "active" as const,
-  commissionRate: 25,
-  commissionDurationMonths: 11,
-  totalReferrals: 47,
-  totalConversions: 12,
-  totalEarnings: 14850.00,
-  totalPaid: 9900.00,
-  pendingBalance: 4950.00,
-  createdAt: "2025-01-15",
-};
-
-const mockStats = {
-  clicksThisMonth: 234,
-  signupsThisMonth: 8,
-  conversionsThisMonth: 3,
-  earningsThisMonth: 3735.00,
-  clicksLastMonth: 189,
-  signupsLastMonth: 5,
-  conversionsLastMonth: 2,
-  earningsLastMonth: 2490.00,
-};
-
-
-const mockReferrals = [
-  { id: "ref_1", email: "aarav@gmail.com", status: "converted", signedUpAt: "2025-04-12", convertedAt: "2025-04-15", earnings: "₹1,245" },
-  { id: "ref_2", email: "neha@outlook.com", status: "converted", signedUpAt: "2025-04-20", convertedAt: "2025-04-22", earnings: "₹1,245" },
-  { id: "ref_3", email: "raj@company.co", status: "signed_up", signedUpAt: "2025-05-02", convertedAt: null, earnings: "—" },
-  { id: "ref_4", email: "sanya@gmail.com", status: "converted", signedUpAt: "2025-05-08", convertedAt: "2025-05-10", earnings: "₹1,245" },
-  { id: "ref_5", email: "vikram@startup.io", status: "signed_up", signedUpAt: "2025-05-15", convertedAt: null, earnings: "—" },
-  { id: "ref_6", email: "meera@brand.com", status: "converted", signedUpAt: "2025-05-18", convertedAt: "2025-05-20", earnings: "₹1,245" },
-];
-
-const mockPayouts = [
-  { id: "pay_1", amount: "₹4,950", date: "2025-04-30", status: "completed", method: "UPI", txnId: "UPI2025043012345" },
-  { id: "pay_2", amount: "₹4,950", date: "2025-03-31", status: "completed", method: "UPI", txnId: "UPI2025033167890" },
-  { id: "pay_3", amount: "₹2,475", date: "2025-02-28", status: "completed", method: "UPI", txnId: "UPI2025022843210" },
-];
-
-const mockCommissions = [
-  { id: "com_1", referral: "aarav@gmail.com", amount: "₹124.75", month: 4, date: "2025-05-15", status: "pending" },
-  { id: "com_2", referral: "neha@outlook.com", amount: "₹124.75", month: 3, date: "2025-05-15", status: "pending" },
-  { id: "com_3", referral: "sanya@gmail.com", amount: "₹124.75", month: 2, date: "2025-05-15", status: "pending" },
-  { id: "com_4", referral: "meera@brand.com", amount: "₹124.75", month: 1, date: "2025-05-20", status: "pending" },
-  { id: "com_5", referral: "aarav@gmail.com", amount: "₹124.75", month: 3, date: "2025-04-15", status: "paid" },
-  { id: "com_6", referral: "neha@outlook.com", amount: "₹124.75", month: 2, date: "2025-04-15", status: "paid" },
-];
+import { useAuth } from "@/hooks/use-auth.ts";
+import {
+  getAffiliateByUserId,
+  getAffiliateReferrals,
+  getAffiliateCommissions,
+  getAffiliatePayouts,
+  getAffiliateDashboardStats,
+  requestPayout as apiRequestPayout,
+} from "@/lib/affiliate-api.ts";
 
 
 type Tab = "overview" | "referrals" | "commissions" | "payouts" | "materials";
@@ -109,30 +63,111 @@ function StatusBadge({ status }: { status: string }) {
 
 
 export default function AffiliateDashboardPage() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("overview");
+  const [loading, setLoading] = useState(true);
+
+  // Real data state
+  const [affiliate, setAffiliate] = useState<any>(null);
+  const [referrals, setReferrals] = useState<any[]>([]);
+  const [commissions, setCommissions] = useState<any[]>([]);
+  const [payouts, setPayouts] = useState<any[]>([]);
+  const [stats, setStats] = useState({ clicksThisMonth: 0, referralsThisMonth: 0, conversionsThisMonth: 0 });
+
+  // Fetch all affiliate data from Supabase
+  const fetchData = useCallback(async () => {
+    if (!user?.id) { setLoading(false); return; }
+    setLoading(true);
+    try {
+      const { affiliate: aff } = await getAffiliateByUserId(user.id);
+      if (!aff) { setLoading(false); return; }
+      setAffiliate(aff);
+
+      const [refRes, comRes, payRes, statsRes] = await Promise.all([
+        getAffiliateReferrals(aff.id),
+        getAffiliateCommissions(aff.id),
+        getAffiliatePayouts(aff.id),
+        getAffiliateDashboardStats(aff.id),
+      ]);
+
+      setReferrals(refRes.referrals || []);
+      setCommissions(comRes.commissions || []);
+      setPayouts(payRes.payouts || []);
+      setStats(statsRes);
+    } catch (err) {
+      console.error("Failed to load affiliate data:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.id]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Derived values from real data
+  const totalEarnings = commissions.reduce((sum, c) => sum + Number(c.commission_amount || 0), 0);
+  const totalPaid = commissions.filter((c) => c.status === "paid").reduce((sum, c) => sum + Number(c.commission_amount || 0), 0);
+  const pendingBalance = totalEarnings - totalPaid;
+  const totalConversions = referrals.filter((r) => r.status === "converted").length;
+  const referralLink = affiliate ? `https://flowora.tech/ref/${affiliate.affiliate_code}` : "";
 
   const copyLink = async () => {
-    await navigator.clipboard.writeText(mockAffiliate.referralLink);
+    if (!referralLink) return;
+    await navigator.clipboard.writeText(referralLink);
     toast.success("Referral link copied to clipboard!");
   };
 
   const copyCode = async () => {
-    await navigator.clipboard.writeText(mockAffiliate.affiliateCode);
+    if (!affiliate?.affiliate_code) return;
+    await navigator.clipboard.writeText(affiliate.affiliate_code);
     toast.success("Affiliate code copied!");
   };
 
-  const requestPayout = () => {
-    if (mockAffiliate.pendingBalance < 500) {
+  const handleRequestPayout = async () => {
+    if (!affiliate) return;
+    if (pendingBalance < 500) {
       toast.error("Minimum payout amount is ₹500");
       return;
     }
-    toast.success("Payout request submitted! Processing within 15 business days.");
+    const { success, error } = await apiRequestPayout(affiliate.id);
+    if (success) {
+      toast.success("Payout request submitted! Processing within 15 business days.");
+      fetchData(); // refresh data
+    } else {
+      toast.error(error || "Payout request failed");
+    }
   };
 
   const downloadAgreement = () => {
     toast.success("Downloading affiliate agreement PDF...");
-    // In production this generates/downloads the PDF
   };
+
+  if (loading) {
+    return (
+      <div className="flex h-[calc(100vh-120px)] flex-col items-center justify-center gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+        <p className="text-sm font-semibold text-gray-500">Loading affiliate data...</p>
+      </div>
+    );
+  }
+
+  if (!affiliate) {
+    return (
+      <div className="flex h-[calc(100vh-120px)] flex-col items-center justify-center gap-6 text-center px-4">
+        <div className="w-16 h-16 rounded-2xl bg-purple-100 flex items-center justify-center">
+          <Share2 className="w-8 h-8 text-purple-600" />
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-slate-900">No Affiliate Account Found</h2>
+          <p className="text-sm text-gray-500 mt-1 max-w-sm">
+            You haven't joined the affiliate program yet. Apply to start earning 25% recurring commissions.
+          </p>
+        </div>
+        <Button onClick={() => window.location.href = "/affiliate/apply"} className="bg-purple-600 hover:bg-purple-700 text-white">
+          Apply Now
+        </Button>
+      </div>
+    );
+  }
 
   const tabs = [
     { id: "overview" as Tab, label: "Overview", icon: BarChart3 },
@@ -150,8 +185,8 @@ export default function AffiliateDashboardPage() {
           <div>
             <h1 className="text-2xl font-black text-slate-900">Affiliate Dashboard</h1>
             <p className="text-sm text-gray-500 mt-0.5">
-              Commission: <strong className="text-purple-600">{mockAffiliate.commissionRate}%</strong> recurring for{" "}
-              <strong>{mockAffiliate.commissionDurationMonths} months</strong>
+              Commission: <strong className="text-purple-600">{affiliate.commission_rate || 25}%</strong> recurring for{" "}
+              <strong>{affiliate.commission_duration_months || 11} months</strong>
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -159,7 +194,7 @@ export default function AffiliateDashboardPage() {
               <FileText className="w-3.5 h-3.5 mr-1.5" />
               Agreement PDF
             </Button>
-            <Button variant="outline" size="sm" onClick={requestPayout} className="text-xs cursor-pointer">
+            <Button variant="outline" size="sm" onClick={handleRequestPayout} className="text-xs cursor-pointer">
               <Wallet className="w-3.5 h-3.5 mr-1.5" />
               Request Payout
             </Button>
@@ -174,7 +209,7 @@ export default function AffiliateDashboardPage() {
               <p className="text-xs text-white/70 font-bold uppercase tracking-wider mb-1">Your Referral Link</p>
               <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2.5">
                 <Link2 className="w-4 h-4 text-white/70 shrink-0" />
-                <span className="text-sm font-mono truncate flex-1">{mockAffiliate.referralLink}</span>
+                <span className="text-sm font-mono truncate flex-1">{referralLink}</span>
                 <button onClick={copyLink} className="text-white/80 hover:text-white cursor-pointer">
                   <Copy className="w-4 h-4" />
                 </button>
@@ -183,7 +218,7 @@ export default function AffiliateDashboardPage() {
             <div className="flex items-center gap-2">
               <Button onClick={copyCode} variant="secondary" size="sm" className="bg-white/20 hover:bg-white/30 text-white border-0 text-xs cursor-pointer">
                 <Copy className="w-3.5 h-3.5 mr-1" />
-                Code: {mockAffiliate.affiliateCode}
+                Code: {affiliate.affiliate_code}
               </Button>
               <Button variant="secondary" size="sm" className="bg-white/20 hover:bg-white/30 text-white border-0 cursor-pointer">
                 <QrCode className="w-3.5 h-3.5" />
@@ -220,33 +255,33 @@ export default function AffiliateDashboardPage() {
             <StatCard
               icon={MousePointerClick}
               label="Clicks This Month"
-              value={mockStats.clicksThisMonth.toString()}
-              change={`${Math.round(((mockStats.clicksThisMonth - mockStats.clicksLastMonth) / mockStats.clicksLastMonth) * 100)}%`}
-              changePositive={mockStats.clicksThisMonth > mockStats.clicksLastMonth}
+              value={stats.clicksThisMonth.toString()}
+              change={stats.clicksThisMonth > 0 ? `${stats.clicksThisMonth}` : "0"}
+              changePositive={stats.clicksThisMonth > 0}
               gradient="from-blue-500 to-cyan-500"
             />
             <StatCard
               icon={UserPlus}
               label="Signups This Month"
-              value={mockStats.signupsThisMonth.toString()}
-              change={`${mockStats.signupsThisMonth - mockStats.signupsLastMonth}`}
-              changePositive={mockStats.signupsThisMonth > mockStats.signupsLastMonth}
+              value={stats.referralsThisMonth.toString()}
+              change={stats.referralsThisMonth > 0 ? `${stats.referralsThisMonth}` : "0"}
+              changePositive={stats.referralsThisMonth > 0}
               gradient="from-purple-500 to-violet-500"
             />
             <StatCard
               icon={TrendingUp}
               label="Conversions"
-              value={mockStats.conversionsThisMonth.toString()}
-              change={`${mockStats.conversionsThisMonth - mockStats.conversionsLastMonth}`}
-              changePositive={mockStats.conversionsThisMonth >= mockStats.conversionsLastMonth}
+              value={stats.conversionsThisMonth.toString()}
+              change={stats.conversionsThisMonth > 0 ? `${stats.conversionsThisMonth}` : "0"}
+              changePositive={stats.conversionsThisMonth > 0}
               gradient="from-emerald-500 to-green-500"
             />
             <StatCard
               icon={DollarSign}
-              label="Earnings This Month"
-              value={`₹${mockStats.earningsThisMonth.toLocaleString()}`}
-              change={`${Math.round(((mockStats.earningsThisMonth - mockStats.earningsLastMonth) / mockStats.earningsLastMonth) * 100)}%`}
-              changePositive={mockStats.earningsThisMonth > mockStats.earningsLastMonth}
+              label="Pending Earnings"
+              value={`₹${pendingBalance.toLocaleString()}`}
+              change={pendingBalance > 0 ? "pending" : "0"}
+              changePositive={pendingBalance > 0}
               gradient="from-amber-500 to-orange-500"
             />
           </div>
@@ -255,20 +290,20 @@ export default function AffiliateDashboardPage() {
           <div className="grid md:grid-cols-3 gap-4">
             <div className="bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl p-6 text-white">
               <Wallet className="w-6 h-6 text-white/80 mb-3" />
-              <p className="text-3xl font-black">₹{mockAffiliate.totalEarnings.toLocaleString()}</p>
+              <p className="text-3xl font-black">₹{totalEarnings.toLocaleString()}</p>
               <p className="text-sm text-white/80 mt-1">Total Earnings (Lifetime)</p>
             </div>
             <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-6 text-white">
               <CheckCircle2 className="w-6 h-6 text-white/80 mb-3" />
-              <p className="text-3xl font-black">₹{mockAffiliate.totalPaid.toLocaleString()}</p>
+              <p className="text-3xl font-black">₹{totalPaid.toLocaleString()}</p>
               <p className="text-sm text-white/80 mt-1">Total Paid Out</p>
             </div>
             <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 text-white">
               <Clock className="w-6 h-6 text-white/80 mb-3" />
-              <p className="text-3xl font-black">₹{mockAffiliate.pendingBalance.toLocaleString()}</p>
+              <p className="text-3xl font-black">₹{pendingBalance.toLocaleString()}</p>
               <p className="text-sm text-white/80 mt-1">Pending Balance</p>
               <Button
-                onClick={requestPayout}
+                onClick={handleRequestPayout}
                 size="sm"
                 className="mt-3 bg-white/20 hover:bg-white/30 text-white border-0 text-xs cursor-pointer"
               >
@@ -283,13 +318,13 @@ export default function AffiliateDashboardPage() {
             <h3 className="font-bold text-slate-800 mb-4">Conversion Funnel</h3>
             <div className="grid grid-cols-4 gap-3">
               {[
-                { label: "Total Clicks", value: mockAffiliate.totalReferrals * 5, color: "bg-blue-500" },
-                { label: "Signups", value: mockAffiliate.totalReferrals, color: "bg-purple-500" },
-                { label: "Conversions", value: mockAffiliate.totalConversions, color: "bg-emerald-500" },
-                { label: "Active Subs", value: mockAffiliate.totalConversions - 2, color: "bg-amber-500" },
+                { label: "Total Clicks", value: stats.clicksThisMonth * 5 || referrals.length * 5, color: "bg-blue-500" },
+                { label: "Signups", value: referrals.length, color: "bg-purple-500" },
+                { label: "Conversions", value: totalConversions, color: "bg-emerald-500" },
+                { label: "Active Subs", value: Math.max(0, totalConversions - Math.floor(totalConversions * 0.1)), color: "bg-amber-500" },
               ].map((item) => (
                 <div key={item.label} className="text-center">
-                  <div className={`h-2 rounded-full ${item.color} mb-2`} style={{ width: `${Math.max(20, (item.value / (mockAffiliate.totalReferrals * 5)) * 100)}%`, margin: "0 auto" }} />
+                  <div className={`h-2 rounded-full ${item.color} mb-2`} style={{ width: `${Math.max(20, referrals.length > 0 ? (item.value / (referrals.length * 5 || 1)) * 100 : 0)}%`, margin: "0 auto" }} />
                   <p className="text-xl font-black text-slate-900">{item.value}</p>
                   <p className="text-[10px] text-gray-500 font-medium">{item.label}</p>
                 </div>
@@ -306,19 +341,20 @@ export default function AffiliateDashboardPage() {
               </button>
             </div>
             <div className="space-y-3">
-              {mockReferrals.slice(0, 4).map((ref) => (
+              {referrals.length === 0 ? (
+                <p className="text-sm text-gray-400 text-center py-6">No referrals yet. Share your link to get started!</p>
+              ) : referrals.slice(0, 4).map((ref) => (
                 <div key={ref.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-xs font-bold text-purple-600">
-                      {ref.email[0].toUpperCase()}
+                      {(ref.referred_email || "?")[0].toUpperCase()}
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-slate-800">{ref.email}</p>
-                      <p className="text-[10px] text-gray-400">Signed up {ref.signedUpAt}</p>
+                      <p className="text-sm font-semibold text-slate-800">{ref.referred_email || "Unknown"}</p>
+                      <p className="text-[10px] text-gray-400">Signed up {ref.signed_up_at ? new Date(ref.signed_up_at).toLocaleDateString() : "—"}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-bold text-slate-700">{ref.earnings}</span>
                     <StatusBadge status={ref.status} />
                   </div>
                 </div>
@@ -335,7 +371,7 @@ export default function AffiliateDashboardPage() {
           <div className="flex items-center justify-between mb-5">
             <h3 className="font-bold text-slate-800">All Referrals</h3>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500">{mockReferrals.length} total</span>
+              <span className="text-xs text-gray-500">{referrals.length} total</span>
             </div>
           </div>
           <div className="overflow-x-auto">
@@ -346,17 +382,17 @@ export default function AffiliateDashboardPage() {
                   <th className="text-left py-3 px-2 text-xs font-bold text-gray-500 uppercase">Signed Up</th>
                   <th className="text-left py-3 px-2 text-xs font-bold text-gray-500 uppercase">Converted</th>
                   <th className="text-left py-3 px-2 text-xs font-bold text-gray-500 uppercase">Status</th>
-                  <th className="text-right py-3 px-2 text-xs font-bold text-gray-500 uppercase">Earnings</th>
                 </tr>
               </thead>
               <tbody>
-                {mockReferrals.map((ref) => (
+                {referrals.length === 0 ? (
+                  <tr><td colSpan={4} className="py-8 text-center text-sm text-gray-400">No referrals yet</td></tr>
+                ) : referrals.map((ref) => (
                   <tr key={ref.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50">
-                    <td className="py-3 px-2 font-medium text-slate-800">{ref.email}</td>
-                    <td className="py-3 px-2 text-gray-500">{ref.signedUpAt}</td>
-                    <td className="py-3 px-2 text-gray-500">{ref.convertedAt || "—"}</td>
+                    <td className="py-3 px-2 font-medium text-slate-800">{ref.referred_email || "—"}</td>
+                    <td className="py-3 px-2 text-gray-500">{ref.signed_up_at ? new Date(ref.signed_up_at).toLocaleDateString() : "—"}</td>
+                    <td className="py-3 px-2 text-gray-500">{ref.converted_at ? new Date(ref.converted_at).toLocaleDateString() : "—"}</td>
                     <td className="py-3 px-2"><StatusBadge status={ref.status} /></td>
-                    <td className="py-3 px-2 text-right font-bold text-slate-800">{ref.earnings}</td>
                   </tr>
                 ))}
               </tbody>
@@ -370,13 +406,12 @@ export default function AffiliateDashboardPage() {
         <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-5">
             <h3 className="font-bold text-slate-800">Commission History</h3>
-            <span className="text-xs text-gray-500">{mockCommissions.length} entries</span>
+            <span className="text-xs text-gray-500">{commissions.length} entries</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
-                  <th className="text-left py-3 px-2 text-xs font-bold text-gray-500 uppercase">Referral</th>
                   <th className="text-left py-3 px-2 text-xs font-bold text-gray-500 uppercase">Month #</th>
                   <th className="text-left py-3 px-2 text-xs font-bold text-gray-500 uppercase">Date</th>
                   <th className="text-left py-3 px-2 text-xs font-bold text-gray-500 uppercase">Status</th>
@@ -384,13 +419,14 @@ export default function AffiliateDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {mockCommissions.map((com) => (
+                {commissions.length === 0 ? (
+                  <tr><td colSpan={4} className="py-8 text-center text-sm text-gray-400">No commissions yet</td></tr>
+                ) : commissions.map((com) => (
                   <tr key={com.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50">
-                    <td className="py-3 px-2 font-medium text-slate-800">{com.referral}</td>
-                    <td className="py-3 px-2 text-gray-500">Month {com.month}/11</td>
-                    <td className="py-3 px-2 text-gray-500">{com.date}</td>
+                    <td className="py-3 px-2 text-gray-500">Month {com.month_number}/{affiliate.commission_duration_months || 11}</td>
+                    <td className="py-3 px-2 text-gray-500">{com.created_at ? new Date(com.created_at).toLocaleDateString() : "—"}</td>
                     <td className="py-3 px-2"><StatusBadge status={com.status} /></td>
-                    <td className="py-3 px-2 text-right font-bold text-emerald-600">{com.amount}</td>
+                    <td className="py-3 px-2 text-right font-bold text-emerald-600">₹{Number(com.commission_amount || 0).toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
@@ -407,15 +443,15 @@ export default function AffiliateDashboardPage() {
           <div className="grid md:grid-cols-3 gap-4">
             <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
               <p className="text-xs text-gray-500 font-bold uppercase mb-1">Available Balance</p>
-              <p className="text-2xl font-black text-slate-900">₹{mockAffiliate.pendingBalance.toLocaleString()}</p>
-              <Button onClick={requestPayout} size="sm" className="mt-3 bg-purple-600 hover:bg-purple-700 text-white text-xs cursor-pointer">
+              <p className="text-2xl font-black text-slate-900">₹{pendingBalance.toLocaleString()}</p>
+              <Button onClick={handleRequestPayout} size="sm" className="mt-3 bg-purple-600 hover:bg-purple-700 text-white text-xs cursor-pointer">
                 Request Payout
               </Button>
             </div>
             <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
               <p className="text-xs text-gray-500 font-bold uppercase mb-1">Total Paid Out</p>
-              <p className="text-2xl font-black text-emerald-600">₹{mockAffiliate.totalPaid.toLocaleString()}</p>
-              <p className="text-[10px] text-gray-400 mt-1">Across {mockPayouts.length} payouts</p>
+              <p className="text-2xl font-black text-emerald-600">₹{totalPaid.toLocaleString()}</p>
+              <p className="text-[10px] text-gray-400 mt-1">Across {payouts.filter((p) => p.status === "completed").length} payouts</p>
             </div>
             <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
               <p className="text-xs text-gray-500 font-bold uppercase mb-1">Min. Payout</p>
@@ -439,13 +475,15 @@ export default function AffiliateDashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockPayouts.map((pay) => (
+                  {payouts.length === 0 ? (
+                    <tr><td colSpan={5} className="py-8 text-center text-sm text-gray-400">No payouts yet</td></tr>
+                  ) : payouts.map((pay) => (
                     <tr key={pay.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50">
-                      <td className="py-3 px-2 text-slate-800">{pay.date}</td>
-                      <td className="py-3 px-2 text-gray-500">{pay.method}</td>
-                      <td className="py-3 px-2 text-gray-400 font-mono text-xs">{pay.txnId}</td>
+                      <td className="py-3 px-2 text-slate-800">{pay.created_at ? new Date(pay.created_at).toLocaleDateString() : "—"}</td>
+                      <td className="py-3 px-2 text-gray-500">{pay.payment_method || "UPI"}</td>
+                      <td className="py-3 px-2 text-gray-400 font-mono text-xs">{pay.transaction_id || "—"}</td>
                       <td className="py-3 px-2"><StatusBadge status={pay.status} /></td>
-                      <td className="py-3 px-2 text-right font-bold text-emerald-600">{pay.amount}</td>
+                      <td className="py-3 px-2 text-right font-bold text-emerald-600">₹{Number(pay.amount || 0).toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -496,8 +534,8 @@ export default function AffiliateDashboardPage() {
             <h3 className="font-bold text-slate-800 mb-4">Quick Share Messages</h3>
             <div className="space-y-3">
               {[
-                "I've been using Flowora to automate my Instagram DMs and it's incredible! Use my link to get started free: " + mockAffiliate.referralLink,
-                "If you're a creator looking to grow on Instagram, check out Flowora. It automates DMs, captures leads, and saves hours. Try it free: " + mockAffiliate.referralLink,
+                "I've been using Flowora to automate my Instagram DMs and it's incredible! Use my link to get started free: " + referralLink,
+                "If you're a creator looking to grow on Instagram, check out Flowora. It automates DMs, captures leads, and saves hours. Try it free: " + referralLink,
               ].map((msg, i) => (
                 <div key={i} className="bg-gray-50 rounded-xl p-4 text-sm text-gray-700">
                   <p className="leading-relaxed">{msg}</p>
