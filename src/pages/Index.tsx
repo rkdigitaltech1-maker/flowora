@@ -1198,67 +1198,7 @@ export default function Index() {
 
 
 
-      {/* ── VIDEO ACTION DEMO SECTION ── */}
-      <section className="py-20 px-6 bg-white relative overflow-hidden">
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-blue-200/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="max-w-5xl mx-auto relative z-10">
-          <div className="text-center mb-12 space-y-4">
-            <h2 className="text-4xl lg:text-5xl font-extrabold tracking-tight">
-              See Flowora in{" "}
-              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Action
-              </span>
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              Watch how easy it is to automate your Instagram engagement and convert followers into customers.
-            </p>
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="relative"
-          >
-            {/* Visual placeholder for the product demo video */}
-            <div className="relative aspect-video bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl overflow-hidden shadow-2xl border border-slate-800/80 flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-purple-500/10 pointer-events-none" />
-              
-              {!demoPlaying ? (
-                <motion.button
-                  className="absolute inset-0 flex flex-col items-center justify-center group z-10 cursor-pointer"
-                  onClick={() => setDemoPlaying(true)}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-2xl group-hover:shadow-blue-500/40 transition-all">
-                    <Play className="w-8 h-8 text-purple-600 fill-purple-600 ml-1" />
-                  </div>
-                  <span className="text-white/80 font-bold text-xs mt-4 tracking-widest uppercase">Click to Play Demo</span>
-                </motion.button>
-              ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-8 bg-slate-950/90 text-white z-10">
-                  <Play className="w-12 h-12 text-yellow-300 fill-yellow-300 animate-ping mb-4" />
-                  <p className="text-sm font-bold uppercase tracking-widest text-slate-350">Streaming demo content...</p>
-                  <button 
-                    onClick={() => setDemoPlaying(false)}
-                    className="mt-6 text-xs border border-white/20 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full font-bold cursor-pointer"
-                  >
-                    Pause Video
-                  </button>
-                </div>
-              )}
-
-              <div className="absolute inset-0 flex flex-col justify-end p-8 text-white bg-gradient-to-t from-slate-950/50 via-transparent to-transparent pointer-events-none">
-                <h4 className="text-lg font-bold">Product Demo Video</h4>
-                <p className="text-xs text-white/70">Setup in 5 min • No coding needed • 24/7 automation</p>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      {/* Demo video section removed */}
 
       {/* ── CUSTOM SOLUTIONS SECTION ── */}
       <section className="py-24 px-6 bg-white relative overflow-hidden">
@@ -2036,19 +1976,18 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ── RETRIGGER OLD COMMENTS SECTION ── */}
-      <section className="py-24 px-6 relative overflow-hidden bg-gradient-to-b from-[#080b14] to-[#0f0a1e]">
-        {/* Background effects */}
-        <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-violet-900/15 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-1/4 left-1/3 w-[400px] h-[400px] bg-indigo-900/10 rounded-full blur-[100px] pointer-events-none" />
+      {/* ── NEVER MISS A LEAD — COMMENT RECOVERY ── */}
+      <section className="py-24 px-6 relative overflow-hidden bg-white border-t border-gray-100">
+        <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-gradient-to-br from-purple-100/40 to-indigo-100/30 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-blue-100/30 to-cyan-100/20 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
 
             {/* Left Column - Copy */}
             <motion.div
-              initial={{ opacity: 0, x: -40 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
               className="space-y-8"
@@ -2058,53 +1997,53 @@ export default function Index() {
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  className="inline-block px-3 py-1.5 rounded-full text-xs font-bold tracking-wider text-violet-300 bg-violet-500/10 border border-violet-500/20 uppercase mb-5"
+                  className="inline-block px-4 py-1.5 rounded-full text-xs font-bold tracking-wider text-purple-700 bg-purple-50 border border-purple-100 uppercase mb-5"
                 >
-                  Retrigger Old Comments
+                  Lead Recovery Engine
                 </motion.span>
-                <h2 className="text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
-                  Recover every comment you already{" "}
-                  <span className="bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">missed</span>
+                <h2 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+                  Turn Past Comments Into{" "}
+                  <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Future Revenue</span>
                 </h2>
-                <p className="mt-5 text-base text-slate-400 leading-relaxed max-w-lg">
-                  Flip on <strong className="text-white">Retrigger old comments</strong> and ZipDM instantly DMs every person who commented your keyword <em>before</em> the automation existed. Months of missed leads — recovered in minutes.
+                <p className="mt-5 text-lg text-gray-600 leading-relaxed max-w-lg">
+                  Flowora scans your older posts for keyword matches and automatically delivers the DM those followers never received. No lead left behind.
                 </p>
               </div>
 
               {/* Feature Points */}
-              <div className="space-y-5">
+              <div className="space-y-6">
                 <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/15 shrink-0">
-                    <Repeat className="h-5 w-5 text-violet-400" />
-                  </div>
+                  <motion.div whileHover={{ scale: 1.1, rotate: 5 }} className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-md text-white shrink-0">
+                    <Repeat className="h-5 w-5" />
+                  </motion.div>
                   <div>
-                    <h4 className="text-base font-bold text-white">One-click reactivation</h4>
-                    <p className="text-sm text-slate-400 mt-1 leading-relaxed">
-                      Toggle it on — we fetch every matching old comment from the post and queue the DMs.
+                    <h4 className="text-lg font-bold text-slate-900">Activate with one toggle</h4>
+                    <p className="text-sm text-gray-500 mt-1 leading-relaxed">
+                      Switch it on and Flowora pulls every unserved comment from your posts, then lines up DMs automatically.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/15 shrink-0">
-                    <Zap className="h-5 w-5 text-amber-400" />
-                  </div>
+                  <motion.div whileHover={{ scale: 1.1, rotate: 5 }} className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-md text-white shrink-0">
+                    <ShieldCheck className="h-5 w-5" />
+                  </motion.div>
                   <div>
-                    <h4 className="text-base font-bold text-white">Sent in safe batches</h4>
-                    <p className="text-sm text-slate-400 mt-1 leading-relaxed">
-                      Throttled to Meta's published rate limits, so your account stays healthy.
+                    <h4 className="text-lg font-bold text-slate-900">Rate-limit safe delivery</h4>
+                    <p className="text-sm text-gray-500 mt-1 leading-relaxed">
+                      Messages are dispatched in controlled batches, fully compliant with Meta's API guidelines. Zero risk to your account.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15 shrink-0">
-                    <TrendingUp className="h-5 w-5 text-emerald-400" />
-                  </div>
+                  <motion.div whileHover={{ scale: 1.1, rotate: 5 }} className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center shadow-md text-white shrink-0">
+                    <TrendingUp className="h-5 w-5" />
+                  </motion.div>
                   <div>
-                    <h4 className="text-base font-bold text-white">Track every recovered lead</h4>
-                    <p className="text-sm text-slate-400 mt-1 leading-relaxed">
-                      A live counter on the automation card shows DMs sent and replies coming back.
+                    <h4 className="text-lg font-bold text-slate-900">Real-time recovery dashboard</h4>
+                    <p className="text-sm text-gray-500 mt-1 leading-relaxed">
+                      Watch your recovered leads count climb live — see exactly how many DMs went out and who replied.
                     </p>
                   </div>
                 </div>
@@ -2115,145 +2054,86 @@ export default function Index() {
                 <motion.button
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
-                  className="mt-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white px-8 py-3.5 rounded-full font-bold text-sm shadow-xl shadow-violet-500/25 hover:shadow-violet-500/40 transition-all flex items-center gap-2 cursor-pointer"
+                  className="mt-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-full font-bold text-sm shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all flex items-center gap-2 cursor-pointer"
                 >
-                  Start Recovering Leads
+                  Recover My Missed Leads
                   <ArrowRight className="w-4 h-4" />
                 </motion.button>
               </Link>
             </motion.div>
 
-            {/* Right Column - Interactive Demo */}
+            {/* Right Column - Visual Card */}
             <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
               className="relative"
             >
-              <div className="rounded-3xl bg-[#0f1225] border border-slate-800/60 p-6 shadow-2xl shadow-violet-900/10">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-5">
+              <div className="rounded-3xl bg-gradient-to-br from-slate-50 to-white border border-gray-200/80 p-8 shadow-xl">
+                {/* Card Header */}
+                <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-violet-500/30">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-md">
                       <Repeat className="h-5 w-5" />
                     </div>
                     <div>
-                      <h4 className="text-white font-bold text-sm">Retrigger · Running</h4>
-                      <p className="text-slate-400 text-[11px]">scanning old comments</p>
+                      <h4 className="text-slate-900 font-bold text-sm">Comment Recovery</h4>
+                      <p className="text-gray-400 text-[11px]">processing older posts</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="relative flex h-2.5 w-2.5">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                      <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
-                    </span>
-                    <span className="text-[10px] font-bold text-emerald-400">Active</span>
-                  </div>
+                  <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Running
+                  </span>
                 </div>
 
-                {/* Recovered Comments Preview */}
-                <div className="space-y-2.5">
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.3 }}
-                    className="flex items-center gap-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20 p-3"
-                  >
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center text-white text-xs font-bold shrink-0">R</div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-white">@riya.fashion</p>
-                      <p className="text-[10px] text-slate-400 truncate">"LINK please!" · 3 weeks ago</p>
-                    </div>
-                    <span className="text-[9px] font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2 py-0.5 rounded-full">DM SENT ✓</span>
-                  </motion.div>
-
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.45 }}
-                    className="flex items-center gap-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20 p-3"
-                  >
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0">A</div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-white">@amit.creates</p>
-                      <p className="text-[10px] text-slate-400 truncate">"INFO" · 2 months ago</p>
-                    </div>
-                    <span className="text-[9px] font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2 py-0.5 rounded-full">DM SENT ✓</span>
-                  </motion.div>
-
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.6 }}
-                    className="flex items-center gap-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20 p-3"
-                  >
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-xs font-bold shrink-0">D</div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-white">@deepa.yoga</p>
-                      <p className="text-[10px] text-slate-400 truncate">"WANT this!" · 6 weeks ago</p>
-                    </div>
-                    <span className="text-[9px] font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2 py-0.5 rounded-full">DM SENT ✓</span>
-                  </motion.div>
-
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.75 }}
-                    className="flex items-center gap-3 rounded-xl bg-violet-500/5 border border-violet-500/20 p-3"
-                  >
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center text-white text-xs font-bold shrink-0">P</div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-white">@priya.travels</p>
-                      <p className="text-[10px] text-slate-400 truncate">"Send LINK" · 5 days ago</p>
-                    </div>
-                    <span className="text-[9px] font-bold text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" /> QUEUED
-                    </span>
-                  </motion.div>
-                </div>
-
-                {/* Live Stats Bar */}
-                <div className="mt-5 grid grid-cols-3 gap-3">
-                  <div className="rounded-xl bg-white/5 border border-white/10 p-3 text-center">
-                    <p className="text-lg font-black text-white">47</p>
-                    <p className="text-[9px] text-slate-400 font-medium">Found</p>
-                  </div>
-                  <div className="rounded-xl bg-white/5 border border-white/10 p-3 text-center">
-                    <p className="text-lg font-black text-emerald-400">38</p>
-                    <p className="text-[9px] text-slate-400 font-medium">DMs Sent</p>
-                  </div>
-                  <div className="rounded-xl bg-white/5 border border-white/10 p-3 text-center">
-                    <p className="text-lg font-black text-violet-400">12</p>
-                    <p className="text-[9px] text-slate-400 font-medium">Replies</p>
-                  </div>
-                </div>
-
-                {/* Progress bar */}
-                <div className="mt-4 space-y-1.5">
-                  <div className="flex items-center justify-between text-[10px]">
-                    <span className="text-slate-400 font-medium">Batch 4 of 5</span>
-                    <span className="text-emerald-400 font-bold">80% complete</span>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-white/5 overflow-hidden">
+                {/* Recovered Users */}
+                <div className="space-y-3">
+                  {[
+                    { initials: "M", name: "meera.fit", keyword: "GUIDE", time: "Apr 2", color: "from-pink-500 to-rose-500", status: "delivered" },
+                    { initials: "K", name: "karan_photo", keyword: "PRICE", time: "Mar 18", color: "from-blue-500 to-indigo-500", status: "delivered" },
+                    { initials: "T", name: "tanvi.eats", keyword: "LINK", time: "Mar 5", color: "from-amber-500 to-orange-500", status: "delivered" },
+                    { initials: "V", name: "vikram.dev", keyword: "INFO", time: "Feb 22", color: "from-emerald-500 to-teal-500", status: "sending" },
+                  ].map((user, idx) => (
                     <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: "80%" }}
+                      key={user.name}
+                      initial={{ opacity: 0, x: 20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
-                      transition={{ duration: 1.5, delay: 0.5, ease: "easeOut" }}
-                      className="h-full rounded-full bg-gradient-to-r from-violet-500 to-emerald-500"
-                    />
-                  </div>
+                      transition={{ delay: 0.3 + idx * 0.12 }}
+                      className="flex items-center gap-3 rounded-2xl bg-white border border-gray-100 p-3 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <div className={`h-9 w-9 rounded-full bg-gradient-to-br ${user.color} flex items-center justify-center text-white text-xs font-bold shrink-0`}>{user.initials}</div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-slate-800">@{user.name}</p>
+                        <p className="text-[11px] text-gray-400">commented &ldquo;{user.keyword}&rdquo; &middot; {user.time}</p>
+                      </div>
+                      {user.status === "delivered" ? (
+                        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">Delivered</span>
+                      ) : (
+                        <span className="text-[10px] font-bold text-blue-600 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <span className="h-1 w-1 rounded-full bg-blue-500 animate-pulse" /> Sending
+                        </span>
+                      )}
+                    </motion.div>
+                  ))}
                 </div>
 
-                {/* Safety indicator */}
-                <div className="mt-4 flex items-center gap-2 text-[10px]">
-                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-                  <span className="text-emerald-400 font-semibold">Account safe — within Meta rate limits (20 DMs/min)</span>
+                {/* Stats Row */}
+                <div className="mt-6 grid grid-cols-3 gap-3">
+                  <div className="rounded-2xl bg-purple-50 border border-purple-100 p-3 text-center">
+                    <p className="text-xl font-black text-purple-700">126</p>
+                    <p className="text-[10px] text-purple-500 font-semibold">Discovered</p>
+                  </div>
+                  <div className="rounded-2xl bg-emerald-50 border border-emerald-100 p-3 text-center">
+                    <p className="text-xl font-black text-emerald-700">98</p>
+                    <p className="text-[10px] text-emerald-500 font-semibold">Delivered</p>
+                  </div>
+                  <div className="rounded-2xl bg-blue-50 border border-blue-100 p-3 text-center">
+                    <p className="text-xl font-black text-blue-700">34</p>
+                    <p className="text-[10px] text-blue-500 font-semibold">Replied</p>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -2261,215 +2141,154 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ── BRAND SAFETY / AI MODERATION SECTION ── */}
-      <section className="py-24 px-6 relative overflow-hidden bg-[#080b14]">
-        {/* Background effects */}
-        <div className="absolute top-1/4 left-1/3 w-[600px] h-[600px] bg-purple-900/20 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-indigo-900/15 rounded-full blur-[100px] pointer-events-none" />
+      {/* ── INTELLIGENT COMMENT PROTECTION ── */}
+      <section className="py-24 px-6 relative overflow-hidden bg-gray-50/50 border-t border-gray-100">
+        <div className="absolute top-1/3 left-0 w-96 h-96 bg-indigo-200/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-pink-200/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
 
-            {/* Left Column - Interactive Demo Card */}
+            {/* Left Column — Visual */}
             <motion.div
-              initial={{ opacity: 0, x: -40 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="relative"
+              className="relative order-2 lg:order-1"
             >
-              {/* Automation Card */}
-              <div className="rounded-3xl bg-[#0f1225] border border-slate-800/60 p-6 shadow-2xl shadow-purple-900/10">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-5">
+              <div className="rounded-3xl bg-white border border-gray-200/80 p-8 shadow-xl">
+                <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/30">
-                      <Repeat className="h-5 w-5" />
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md">
+                      <ShieldCheck className="h-5 w-5" />
                     </div>
                     <div>
-                      <h4 className="text-white font-bold text-sm">AI Shield · Active</h4>
-                      <p className="text-slate-400 text-[11px]">scanning every new comment</p>
+                      <h4 className="text-slate-900 font-bold text-sm">Flowora Guard</h4>
+                      <p className="text-gray-400 text-[11px]">real-time comment scanner</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-slate-400 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <Zap className="h-2.5 w-2.5 text-amber-400" /> live demo
-                    </span>
-                    <span className="text-[10px] font-bold text-red-300 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">
-                      🔴 12 hidden today
-                    </span>
-                  </div>
+                  <span className="text-[10px] font-bold text-red-600 bg-red-50 border border-red-100 px-2.5 py-1 rounded-full">7 blocked today</span>
                 </div>
 
-                {/* Comment List */}
                 <div className="space-y-3">
-                  {/* Kept Comment */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.2 }}
-                    className="flex items-center gap-3 rounded-xl bg-slate-800/40 border border-slate-700/50 p-3"
-                  >
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white text-xs font-bold shrink-0">S</div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-white">@sarah.studio</p>
-                      <p className="text-[11px] text-slate-400 truncate">Love this drop 💕</p>
-                    </div>
-                    <span className="text-[9px] font-bold text-emerald-400 border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      ✓ KEPT
-                    </span>
-                  </motion.div>
-
-                  {/* Kept Comment */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.35 }}
-                    className="flex items-center gap-3 rounded-xl bg-slate-800/40 border border-slate-700/50 p-3"
-                  >
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white text-xs font-bold shrink-0">A</div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-white">@arjun.vibes</p>
-                      <p className="text-[11px] text-slate-400 truncate">🔥🔥🔥 underrated</p>
-                    </div>
-                    <span className="text-[9px] font-bold text-emerald-400 border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      ✓ KEPT
-                    </span>
-                  </motion.div>
-
-                  {/* Hidden Comment */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.5 }}
-                    className="flex items-center gap-3 rounded-xl bg-red-950/20 border border-red-900/30 p-3"
-                  >
-                    <div className="h-8 w-8 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 text-xs font-bold shrink-0">H</div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-slate-500">@h8r_42</p>
-                      <p className="text-[11px] text-slate-600 italic">hidden by AI moderation</p>
-                    </div>
-                    <span className="text-[9px] font-bold text-red-400 border border-red-400/30 bg-red-400/10 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      🔴 HIDDEN
-                    </span>
-                  </motion.div>
-
-                  {/* Kept Comment */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.65 }}
-                    className="flex items-center gap-3 rounded-xl bg-slate-800/40 border border-slate-700/50 p-3"
-                  >
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center text-white text-xs font-bold shrink-0">P</div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-white">@priya.r</p>
-                      <p className="text-[11px] text-slate-400 truncate">where can i buy this?</p>
-                    </div>
-                    <span className="text-[9px] font-bold text-emerald-400 border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      ✓ KEPT
-                    </span>
-                  </motion.div>
-
-                  {/* Hidden Comment */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.8 }}
-                    className="flex items-center gap-3 rounded-xl bg-red-950/20 border border-red-900/30 p-3"
-                  >
-                    <div className="h-8 w-8 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 text-xs font-bold shrink-0">C</div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-slate-500">@cash_link99</p>
-                      <p className="text-[11px] text-slate-600 italic">hidden by AI moderation</p>
-                    </div>
-                    <span className="text-[9px] font-bold text-red-400 border border-red-400/30 bg-red-400/10 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      🔴 HIDDEN
-                    </span>
-                  </motion.div>
+                  {[
+                    { name: "neha.designs", text: "This is stunning! Where can I order? 😍", safe: true, color: "from-pink-500 to-fuchsia-500" },
+                    { name: "rahul_codes", text: "Super helpful content, thanks!", safe: true, color: "from-sky-500 to-blue-500" },
+                    { name: "bot_xz91", text: "Make easy money DM me now!!!", safe: false, color: "from-gray-400 to-gray-500" },
+                    { name: "ananya.art", text: "Just ordered mine! Can't wait 🎉", safe: true, color: "from-emerald-500 to-teal-500" },
+                    { name: "spammer_44", text: "Follow @scampage for free...", safe: false, color: "from-gray-400 to-gray-500" },
+                  ].map((comment, idx) => (
+                    <motion.div
+                      key={comment.name}
+                      initial={{ opacity: 0, y: 12 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.2 + idx * 0.1 }}
+                      className={`flex items-center gap-3 rounded-2xl p-3 border ${comment.safe ? "bg-white border-gray-100 shadow-sm" : "bg-red-50/50 border-red-100/60"}`}
+                    >
+                      <div className={`h-8 w-8 rounded-full bg-gradient-to-br ${comment.color} flex items-center justify-center text-white text-[10px] font-bold shrink-0`}>
+                        {comment.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-xs font-semibold ${comment.safe ? "text-slate-800" : "text-gray-400"}`}>@{comment.name}</p>
+                        <p className={`text-[11px] truncate ${comment.safe ? "text-gray-500" : "text-gray-400 line-through"}`}>{comment.text}</p>
+                      </div>
+                      {comment.safe ? (
+                        <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">Safe</span>
+                      ) : (
+                        <span className="text-[9px] font-bold text-red-500 bg-red-50 border border-red-100 px-2 py-0.5 rounded-full">Blocked</span>
+                      )}
+                    </motion.div>
+                  ))}
                 </div>
 
-                {/* AI Moderation Toggle */}
-                <div className="mt-5 flex items-center justify-between rounded-xl bg-purple-500/10 border border-purple-500/20 p-3.5">
+                <div className="mt-6 flex items-center justify-between rounded-2xl bg-indigo-50 border border-indigo-100 p-4">
                   <div className="flex items-center gap-2.5">
-                    <ShieldCheck className="h-5 w-5 text-purple-400" />
-                    <span className="text-sm font-bold text-white">AI moderation</span>
+                    <ShieldCheck className="h-5 w-5 text-indigo-600" />
+                    <span className="text-sm font-bold text-slate-900">Flowora Guard</span>
                   </div>
-                  <div className="relative h-6 w-11 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 shadow-lg shadow-purple-500/30">
+                  <div className="relative h-6 w-11 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500">
                     <span className="absolute top-0.5 right-0.5 h-5 w-5 rounded-full bg-white shadow" />
                   </div>
                 </div>
               </div>
             </motion.div>
 
-            {/* Right Column - Copy */}
+            {/* Right Column — Copy */}
             <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="space-y-8"
+              transition={{ duration: 0.6, delay: 0.15 }}
+              className="space-y-8 order-1 lg:order-2"
             >
               <div>
                 <motion.span
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  className="inline-block px-3 py-1.5 rounded-full text-xs font-bold tracking-wider text-purple-300 bg-purple-500/10 border border-purple-500/20 uppercase mb-5"
+                  className="inline-block px-4 py-1.5 rounded-full text-xs font-bold tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-100 uppercase mb-5"
                 >
-                  Brand Safety
+                  Comment Protection
                 </motion.span>
-                <h2 className="text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
-                  AI hides hate before your audience sees it
+                <h2 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+                  Your Comment Section,{" "}
+                  <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Always Clean</span>
                 </h2>
-                <p className="mt-5 text-base text-slate-400 leading-relaxed max-w-lg">
-                  Trained on millions of toxic patterns, ZipDM detects abuse, slurs, spam and scam-link comments — and hides them instantly from your post. Your audience never sees the noise.
+                <p className="mt-5 text-lg text-gray-600 leading-relaxed max-w-lg">
+                  Flowora Guard uses AI trained on millions of toxic patterns to detect spam, abuse, and scam links — then removes them before your audience ever scrolls past.
                 </p>
               </div>
 
-              {/* Feature Points */}
-              <div className="space-y-5">
+              <div className="space-y-6">
                 <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/15 shrink-0">
-                    <ShieldCheck className="h-5 w-5 text-purple-400" />
-                  </div>
+                  <motion.div whileHover={{ scale: 1.1, rotate: 5 }} className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-md text-white shrink-0">
+                    <ShieldCheck className="h-5 w-5" />
+                  </motion.div>
                   <div>
-                    <h4 className="text-base font-bold text-white">Brand-safe by default</h4>
-                    <p className="text-sm text-slate-400 mt-1 leading-relaxed">
-                      Auto-hides hate, slurs, scam links and competitor bait the second they land on your post.
+                    <h4 className="text-lg font-bold text-slate-900">Zero-tolerance auto-filter</h4>
+                    <p className="text-sm text-gray-500 mt-1 leading-relaxed">
+                      Hate speech, slurs, phishing links, and competitor spam are blocked the instant they are posted.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/15 shrink-0">
-                    <Zap className="h-5 w-5 text-amber-400" />
-                  </div>
+                  <motion.div whileHover={{ scale: 1.1, rotate: 5 }} className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-md text-white shrink-0">
+                    <Zap className="h-5 w-5" />
+                  </motion.div>
                   <div>
-                    <h4 className="text-base font-bold text-white">Reacts in milliseconds</h4>
-                    <p className="text-sm text-slate-400 mt-1 leading-relaxed">
-                      Catches toxic comments before most followers refresh — no manual cleanup, no late-night damage control.
+                    <h4 className="text-lg font-bold text-slate-900">Sub-second response</h4>
+                    <p className="text-sm text-gray-500 mt-1 leading-relaxed">
+                      Comments are classified in under 200ms — faster than a follower can hit refresh. No manual moderation needed.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/15 shrink-0">
-                    <MessageSquare className="h-5 w-5 text-cyan-400" />
-                  </div>
+                  <motion.div whileHover={{ scale: 1.1, rotate: 5 }} className="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center shadow-md text-white shrink-0">
+                    <Sparkles className="h-5 w-5" />
+                  </motion.div>
                   <div>
-                    <h4 className="text-base font-bold text-white">Tuned for Indian creators</h4>
-                    <p className="text-sm text-slate-400 mt-1 leading-relaxed">
-                      Multilingual model — catches Hinglish abuse, regional slurs, and repeat spam patterns.
+                    <h4 className="text-lg font-bold text-slate-900">Works in every language</h4>
+                    <p className="text-sm text-gray-500 mt-1 leading-relaxed">
+                      Multilingual AI that understands Hindi, English, Hinglish, and regional languages — catches abuse others miss.
                     </p>
                   </div>
                 </div>
               </div>
+
+              <Link to="/login">
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="mt-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-full font-bold text-sm shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  Protect My Comments
+                  <ArrowRight className="w-4 h-4" />
+                </motion.button>
+              </Link>
             </motion.div>
           </div>
         </div>
