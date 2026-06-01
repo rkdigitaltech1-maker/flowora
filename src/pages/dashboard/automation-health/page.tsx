@@ -141,6 +141,11 @@ export default function AutomationHealthPage() {
       data_capture: "data_capture",
       ai_replies: "ai_replies",
     };
+    // Re-trigger goes to dedicated page
+    if (trigger === "re_trigger") {
+      navigate("/dashboard/automations/retrigger");
+      return;
+    }
     const automationType = triggerToType[trigger] || "comment";
     navigate(`/dashboard/automations/create?type=${automationType}`);
   };

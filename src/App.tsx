@@ -52,6 +52,7 @@ import ReferPage from "./pages/dashboard/refer/page.tsx";
 import CheckoutPage from "./pages/dashboard/checkout/page.tsx";
 import BillingPage from "./pages/dashboard/billing/page.tsx";
 import StripePlayground from "./pages/dashboard/stripe-playground.tsx";
+import RetriggerPage from "./pages/dashboard/retrigger/page.tsx";
 import PricingPage from "./pages/pricing.tsx";
 
 // Affiliate Module
@@ -109,6 +110,7 @@ export default function App() {
               <Route path="workflows/:workflowId" element={<WorkflowBuilderPage />} />
               <Route path="automations" element={<AutomationHealthPage />} />
               <Route path="automations/create" element={<CreateAutomationPage />} />
+              <Route path="automations/retrigger" element={<RetriggerPage />} />
               <Route path="campaigns" element={<CampaignsPage />} />
               <Route path="products" element={<ProductsPage />} />
               <Route path="contacts" element={<LeadsPage />} />
