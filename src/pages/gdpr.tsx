@@ -176,10 +176,10 @@ export default function GdprPage() {
             </p>
             <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
               <a
-                href="mailto:privacy@flowora.com"
+                href="mailto:privacy@flowora.tech"
                 className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-black text-purple-700 transition hover:bg-slate-50"
               >
-                privacy@flowora.com
+                privacy@flowora.tech
               </a>
               <Link
                 to="/privacy"

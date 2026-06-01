@@ -482,7 +482,7 @@ export default function AffiliateApplyPage() {
                 <p className="text-xs text-purple-500 font-bold uppercase mb-2">Your Affiliate Code (Preview)</p>
                 <p className="text-2xl font-black text-purple-700">{form.affiliateCode || generateAffiliateCode(form.fullName)}</p>
                 <p className="text-xs text-purple-400 mt-2">
-                  Link: flowora.com/ref/{form.affiliateCode || generateAffiliateCode(form.fullName)}
+                  Link: flowora.tech/ref/{form.affiliateCode || generateAffiliateCode(form.fullName)}
                 </p>
               </div>
 

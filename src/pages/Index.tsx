@@ -44,7 +44,7 @@ const simulatorPresets = {
     replyComment: "Sent! Check your DMs for the link 🚀",
     dmText: "Hey! Here is your download link for the IG growth secrets guide:",
     ctaLabel: "Get eBook",
-    link: "https://flowora.com/free-guide",
+    link: "https://flowora.tech/free-guide",
     color: "from-violet-500 to-indigo-600",
   },
   discount: {
@@ -54,7 +54,7 @@ const simulatorPresets = {
     replyComment: "Done! Check your DMs for 20% off 💸",
     dmText: "Here is your 20% off coupon code: SAVE20. Use it at checkout:",
     ctaLabel: "Apply Code",
-    link: "https://flowora.com/shop",
+    link: "https://flowora.tech/shop",
     color: "from-pink-500 to-rose-600",
   },
   webinar: {
@@ -64,7 +64,7 @@ const simulatorPresets = {
     replyComment: "Reserved! Check your DMs to complete sign-up 🎟️",
     dmText: "Click below to secure your spot for tomorrow's live automation masterclass:",
     ctaLabel: "Secure Spot",
-    link: "https://flowora.com/webinar-register",
+    link: "https://flowora.tech/webinar-register",
     color: "from-blue-500 to-cyan-600",
   }
 };
@@ -397,7 +397,7 @@ const showcaseTabs = [
     bubbles: [
       { sender: "user", content: "GIVEAWAY" },
       { sender: "bot", content: "Checking if you follow @flowora... 🔍" },
-      { sender: "bot", content: "Thanks for the follow! 🎉 Here is your entry ticket: https://flowora.com/ticket", hasButton: true, btnText: "Get Ticket" }
+      { sender: "bot", content: "Thanks for the follow! 🎉 Here is your entry ticket: https://flowora.tech/ticket", hasButton: true, btnText: "Get Ticket" }
     ]
   },
   {

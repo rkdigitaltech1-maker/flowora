@@ -303,7 +303,7 @@ function generateAgreementHTML(data: AgreementData): string {
 
   <div class="footer">
     <p>This document was generated electronically and is valid without a physical signature.</p>
-    <p>Flowora Technologies Pvt. Ltd. | support@flowora.tech | www.flowora.com</p>
+    <p>Flowora Technologies Pvt. Ltd. | support@flowora.tech | flowora.tech</p>
     <p>Agreement Version: ${data.version} | Document ID: AGR-${data.affiliateCode.toUpperCase()}-${Date.now().toString(36).toUpperCase()}</p>
   </div>
 </body>

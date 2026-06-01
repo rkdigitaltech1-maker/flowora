@@ -103,7 +103,7 @@ export default function AdminSettingsPage() {
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Domain</label>
-              <Input value="www.flowora.tech" disabled className="text-xs bg-slate-50" />
+              <Input value="flowora.tech" disabled className="text-xs bg-slate-50" />
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Supabase Project</label>

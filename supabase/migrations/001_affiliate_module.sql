@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS affiliates (
   
   -- Affiliate Identity
   affiliate_code TEXT NOT NULL UNIQUE, -- e.g., "priya2026" - used in referral links
-  referral_link TEXT GENERATED ALWAYS AS ('https://flowora.com/ref/' || affiliate_code) STORED,
+  referral_link TEXT GENERATED ALWAYS AS ('https://flowora.tech/ref/' || affiliate_code) STORED,
   
   -- Status & Approval
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'active', 'suspended', 'rejected')),

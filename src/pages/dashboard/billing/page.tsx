@@ -517,7 +517,7 @@ export default function BillingPage() {
             className="border-[#dfdbea] text-[#665d82] hover:bg-[#f4f1fb] text-xs"
             asChild
           >
-            <a href="mailto:billing@flowora.com">Email Billing Team</a>
+            <a href="mailto:billing@flowora.tech">Email Billing Team</a>
           </Button>
         </div>
       </div>
