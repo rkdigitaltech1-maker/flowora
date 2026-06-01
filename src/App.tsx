@@ -47,6 +47,7 @@ import LeadsPage from "./pages/dashboard/leads/page.tsx";
 import ProductsPage from "./pages/dashboard/products/page.tsx";
 import AutomationHealthPage from "./pages/dashboard/automation-health/page.tsx";
 import CreateAutomationPage from "./pages/dashboard/automations/create/page.tsx";
+import AutomationsListPage from "./pages/dashboard/automations/page.tsx";
 import LearnPage from "./pages/dashboard/learn/page.tsx";
 import ReferPage from "./pages/dashboard/refer/page.tsx";
 import CheckoutPage from "./pages/dashboard/checkout/page.tsx";
@@ -109,7 +110,8 @@ export default function App() {
               {/* Creator Dashboard Routes */}
               <Route path="workflows" element={<WorkflowsPage />} />
               <Route path="workflows/:workflowId" element={<WorkflowBuilderPage />} />
-              <Route path="automations" element={<AutomationHealthPage />} />
+              <Route path="automations" element={<AutomationsListPage />} />
+              <Route path="automations/hub" element={<AutomationHealthPage />} />
               <Route path="automations/create" element={<CreateAutomationPage />} />
               <Route path="automations/retrigger" element={<RetriggerPage />} />
               <Route path="automations/brand-safety" element={<BrandSafetyPage />} />

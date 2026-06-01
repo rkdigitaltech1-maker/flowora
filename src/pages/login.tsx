@@ -223,7 +223,7 @@ export default function LoginPage() {
       setEmail("aisha@createwith.co"); setPassword("creator_demo_2026"); setMode("signin");
       toast.success("Creator credentials autofilled!");
     } else {
-      setEmail("admin@flowora.com"); setPassword("admin_demo_2026"); setMode("signin");
+      setEmail("admin@flowora.tech"); setPassword("admin_demo_2026"); setMode("signin");
       toast.success("Admin credentials autofilled!");
     }
   };
@@ -514,7 +514,7 @@ export default function LoginPage() {
             <div className="mt-3 grid grid-cols-2 gap-2">
               {[
                 { role: "creator" as const, label: "Creator", color: "purple", email: "aisha@createwith.co" },
-                { role: "admin" as const, label: "Admin", color: "slate", email: "admin@flowora.com" },
+                { role: "admin" as const, label: "Admin", color: "slate", email: "admin@flowora.tech" },
               ].map(({ role, label, color, email: demoEmail }) => (
                 <button 
                   key={role} 
