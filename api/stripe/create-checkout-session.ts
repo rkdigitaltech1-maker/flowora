@@ -67,6 +67,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const stripe = new Stripe(stripeSecretKey);
 
+    const deploymentUrl = process.env.VERCEL_URL
+      ? process.env.VERCEL_URL.startsWith("http")
+        ? process.env.VERCEL_URL.replace(/\/$/, "")
+        : `https://${process.env.VERCEL_URL.replace(/\/$/, "")}`
+      : "http://localhost:5173";
+
     // Determine the price ID based on billing interval
     const priceId = STRIPE_PRICE_IDS[billing_interval];
     if (!priceId) {
@@ -114,8 +120,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           },
         ],
         mode: billing_interval === "yearly" ? "subscription" : "subscription",
-        success_url: `${process.env.VERCEL_URL || "http://localhost:5173"}/dashboard/checkout?session_id={CHECKOUT_SESSION_ID}&status=success`,
-        cancel_url: `${process.env.VERCEL_URL || "http://localhost:5173"}/dashboard/checkout?status=cancelled`,
+        success_url: `${deploymentUrl}/dashboard/checkout?session_id={CHECKOUT_SESSION_ID}&status=success`,
+        cancel_url: `${deploymentUrl}/dashboard/checkout?status=cancelled`,
         client_reference_id: user.id,
         metadata: {
           user_id: user.id,
