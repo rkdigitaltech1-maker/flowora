@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Check, Sparkles, ArrowLeft, Lock, HelpCircle, Star, X
+  Check, Sparkles, ArrowLeft, Lock, HelpCircle, Star, X, CreditCard
 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
@@ -10,12 +10,21 @@ import { toast } from "sonner";
 import { PLANS, getAnnualSavingsPercent, type Currency } from "@/lib/pricing.ts";
 import { usePricing } from "@/hooks/use-pricing.ts";
 import { processSubscriptionPayment } from "@/lib/razorpay.ts";
+import { processStripePayment } from "@/lib/stripe.ts";
 
 const FAQS = [
   { q: "Can I cancel my subscription anytime?", a: "Yes, you can cancel in one click from your account billing settings. You will retain access to Pro features until the end of your billing cycle." },
   { q: "How does the 30-day money-back guarantee work?", a: "If you are not satisfied with Flowora Pro within 30 days, just email our support team. We'll issue a full refund immediately—no questions asked." },
   { q: "What counts as a DM or contact limit?", a: "A 'DM' is any automated message sent by your campaigns. A 'contact' is a unique user who has interacted with your automations or whose details were captured." }
 ];
+
+// Countries that use Stripe (non-India)
+const STRIPE_COUNTRIES = ["United States", "United Kingdom", "Singapore", "UAE"];
+
+// Helper function to determine payment provider
+const getPaymentProvider = (countryName: string): "razorpay" | "stripe" => {
+  return STRIPE_COUNTRIES.includes(countryName) ? "stripe" : "razorpay";
+};
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
@@ -32,7 +41,7 @@ export default function CheckoutPage() {
   // Billing Form Fields (Razorpay-style)
   const [billedTo, setBilledTo] = useState("");
   const [phone, setPhone] = useState("");
-  const [country, setCountry] = useState("India");
+  const [country, setCountry] = useState("");
   const [state, setState] = useState("");
 
   // Interactive flow states
@@ -78,31 +87,50 @@ export default function CheckoutPage() {
     e.preventDefault();
     if (!billedTo.trim()) { toast.error("Please enter your name."); return; }
     if (!phone.trim()) { toast.error("Please enter your phone number."); return; }
-    if (!state.trim()) { toast.error("Please select your state/province."); return; }
+    if (!country.trim()) { toast.error("Please select your country."); return; }
+    if (!state.trim()) { toast.error("Please enter your state/province."); return; }
 
     setProcessing(true);
 
     try {
-      const result = await processSubscriptionPayment({
-        billingInterval: billingInterval === "yearly" ? "yearly" : "monthly",
-        customerName: billedTo.trim(),
-        customerPhone: phone.trim(),
-      });
+      const paymentProvider = getPaymentProvider(country);
 
-      if (result.success) {
-        // Payment verified server-side, subscription is now active
-        setProcessing(false);
-        setSuccess(true);
-        toast.success("Payment completed successfully! Welcome to Flowora Pro.");
+      if (paymentProvider === "stripe") {
+        // Use Stripe for non-India countries
+        const result = await processStripePayment({
+          billingInterval: billingInterval === "yearly" ? "yearly" : "monthly",
+          customerName: billedTo.trim(),
+          customerPhone: phone.trim(),
+        });
 
-        // Update local state to reflect Pro status
-        localStorage.setItem("cs_is_pro", "true");
+        if (result.success) {
+          // Stripe will redirect to checkout page, success is handled by webhook
+          toast.success("Redirecting to payment page...");
+          // Note: The actual success modal will be shown after webhook confirms payment
+        }
+      } else {
+        // Use Razorpay for India
+        const result = await processSubscriptionPayment({
+          billingInterval: billingInterval === "yearly" ? "yearly" : "monthly",
+          customerName: billedTo.trim(),
+          customerPhone: phone.trim(),
+        });
 
-        setTimeout(() => {
-          navigate("/dashboard");
-          // Reload to refresh subscription context from server
-          window.location.reload();
-        }, 3500);
+        if (result.success) {
+          // Payment verified server-side, subscription is now active
+          setProcessing(false);
+          setSuccess(true);
+          toast.success("Payment completed successfully! Welcome to Flowora Pro.");
+
+          // Update local state to reflect Pro status
+          localStorage.setItem("cs_is_pro", "true");
+
+          setTimeout(() => {
+            navigate("/dashboard");
+            // Reload to refresh subscription context from server
+            window.location.reload();
+          }, 3500);
+        }
       }
     } catch (error: any) {
       setProcessing(false);
@@ -159,7 +187,9 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between font-medium">
                 <span className="text-slate-400">Payment via:</span>
-                <span className="text-slate-900 font-bold">Razorpay</span>
+                <span className="text-slate-900 font-bold">
+                  {getPaymentProvider(country) === "stripe" ? "Stripe" : "Razorpay"}
+                </span>
               </div>
             </div>
             <p className="text-[11px] text-slate-400 mt-6 animate-pulse">Redirecting you to dashboard...</p>
@@ -263,6 +293,7 @@ export default function CheckoutPage() {
                         onChange={e => setCountry(e.target.value)}
                         className="w-full bg-white border border-slate-200 rounded-xl h-12 px-4 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-[#6d48ff]/20 focus:border-[#6d48ff] appearance-none cursor-pointer"
                       >
+                        <option value="">Select a country</option>
                         <option value="India">India</option>
                         <option value="United States">United States</option>
                         <option value="United Kingdom">United Kingdom</option>
@@ -300,19 +331,47 @@ export default function CheckoutPage() {
                     </span>
                   ) : (
                     <span className="flex items-center gap-1.5">
-                      Proceed to Pay {currSymbol}{total.toFixed(0)}
+                      {getPaymentProvider(country) === "stripe" ? "Proceed with Stripe" : "Proceed with Razorpay"} {currSymbol}{total.toFixed(0)}
                     </span>
                   )}
                 </Button>
 
-                {/* Razorpay Secured Badge */}
+                {/* Payment Provider Badge - Dynamic */}
                 <div className="flex items-center justify-center gap-2 pt-2">
                   <Lock className="h-3.5 w-3.5 text-slate-400" />
                   <span className="text-[11px] text-slate-400 font-medium">Secured by</span>
-                  <span className="text-[11px] font-bold text-blue-600">Razorpay</span>
+                  {getPaymentProvider(country) === "stripe" ? (
+                    <span className="text-[11px] font-bold text-blue-500">Stripe</span>
+                  ) : country ? (
+                    <span className="text-[11px] font-bold text-blue-600">Razorpay</span>
+                  ) : (
+                    <span className="text-[11px] font-bold text-slate-500">Choose country to select gateway</span>
+                  )}
                 </div>
               </form>
             </div>
+          </div>
+
+          {/* Payment Method Info */}
+          <div className={`rounded-2xl p-4 border shadow-sm flex items-center gap-3 ${
+            getPaymentProvider(country) === "stripe"
+              ? "bg-blue-50 border-blue-100"
+              : "bg-amber-50 border-amber-100"
+          }`}>
+            <CreditCard className={`h-4 w-4 ${
+              getPaymentProvider(country) === "stripe"
+                ? "text-blue-600"
+                : "text-amber-600"
+            }`} />
+            <span className={`text-xs font-medium ${
+              getPaymentProvider(country) === "stripe"
+                ? "text-blue-800"
+                : "text-amber-800"
+            }`}>
+              {getPaymentProvider(country) === "stripe"
+                ? "You'll be redirected to Stripe Checkout for secure payment"
+                : "Payment powered by Razorpay UPI, Cards & Netbanking"}
+            </span>
           </div>
 
           {/* Testimonial */}
