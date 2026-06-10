@@ -105,6 +105,7 @@ export async function processRazorpayPayment(params: {
 
   throw new Error("Unexpected Razorpay response");
 }
+
 /**
  * Razorpay Payment Integration (Client-Side)
  *
@@ -120,24 +121,11 @@ export async function processRazorpayPayment(params: {
  *   5. Razorpay handles auto-renewal (for subscriptions)
  */
 
-import { supabase } from "./supabase";
-
-const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID as string;
-
 interface PaymentResult {
   razorpay_payment_id: string;
   razorpay_order_id?: string;
   razorpay_subscription_id?: string;
   razorpay_signature: string;
-}
-
-async function getAccessToken(): Promise<string> {
-  const { data: sessionData } = await supabase.auth.getSession();
-  const accessToken = sessionData?.session?.access_token;
-  if (!accessToken) {
-    throw new Error("You must be logged in to make a payment. Please sign in and try again.");
-  }
-  return accessToken;
 }
 
 /**
