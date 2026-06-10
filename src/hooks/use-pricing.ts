@@ -9,12 +9,19 @@ const CURRENCY_STORAGE_KEY = "flowora_preferred_currency";
  */
 export function usePricing() {
   const [currency, setCurrencyState] = useState<Currency>(() => {
-    // Check localStorage first
+    if (typeof window === "undefined") return "USD";
+
     const stored = localStorage.getItem(CURRENCY_STORAGE_KEY);
     if (stored === "INR" || stored === "USD") return stored;
 
-    // Default to INR (primary market is India)
-    return "INR";
+    const locale = navigator.language || "en-US";
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+
+    if (locale.includes("IN") || locale.startsWith("hi") || tz.includes("Kolkata")) {
+      return "INR";
+    }
+
+    return "USD";
   });
 
   const [billingInterval, setBillingInterval] = useState<BillingInterval>("annual");

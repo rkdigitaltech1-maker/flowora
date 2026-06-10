@@ -59,6 +59,30 @@ export const CURRENCY_CONFIG: Record<Currency, { symbol: string; code: string; l
   USD: { symbol: "$", code: "USD", locale: "en-US" },
 };
 
+export function detectCurrencyFromLocale(): Currency {
+  if (typeof navigator === "undefined") return "USD";
+
+  const locale = navigator.language || "en-US";
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+
+  if (
+    locale.includes("IN") ||
+    locale.startsWith("hi") ||
+    locale === "hi-IN" ||
+    locale === "en-IN" ||
+    timeZone.includes("Kolkata") ||
+    timeZone.includes("Asia/Kolkata")
+  ) {
+    return "INR";
+  }
+
+  return "USD";
+}
+
+export function getPaymentProviderForCurrency(currency: Currency): "razorpay" | "stripe" {
+  return currency === "INR" ? "razorpay" : "stripe";
+}
+
 export function formatPrice(amount: number, currency: Currency): string {
   const config = CURRENCY_CONFIG[currency];
   if (amount === 0) return "Free";

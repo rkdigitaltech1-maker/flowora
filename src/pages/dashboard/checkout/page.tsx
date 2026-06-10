@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Check, Sparkles, ArrowLeft, Lock, HelpCircle, Star, X, CreditCard
 } from "lucide-react";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Label } from "@/components/ui/label.tsx";
 import { toast } from "sonner";
-import { PLANS, getAnnualSavingsPercent, type Currency } from "@/lib/pricing.ts";
+import { PLANS, getAnnualSavingsPercent, type Currency, detectCurrencyFromLocale, getPaymentProviderForCurrency } from "@/lib/pricing.ts";
 import { usePricing } from "@/hooks/use-pricing.ts";
 import { processSubscriptionPayment } from "@/lib/razorpay.ts";
 import { processStripePayment } from "@/lib/stripe.ts";
@@ -31,9 +31,18 @@ export default function CheckoutPage() {
   const { currency, setCurrency, billingInterval: pricingInterval, setBillingInterval: setPricingInterval } = usePricing();
   const proPlan = PLANS.find(p => p.id === "pro")!;
   const savingsPercent = getAnnualSavingsPercent(proPlan, currency);
+  const [searchParams] = useSearchParams();
+
+  const initialBillingInterval = (() => {
+    const queryInterval = searchParams.get("interval");
+    if (queryInterval === "monthly" || queryInterval === "yearly") {
+      return queryInterval;
+    }
+    return pricingInterval === "annual" ? "yearly" : "monthly";
+  })();
 
   // Checkout State
-  const [billingInterval, setBillingInterval] = useState<"monthly" | "yearly">(pricingInterval === "annual" ? "yearly" : "monthly");
+  const [billingInterval, setBillingInterval] = useState<"monthly" | "yearly">(initialBillingInterval);
   const [promoCode, setPromoCode] = useState("");
   const [appliedDiscount, setAppliedDiscount] = useState<number>(0);
   const [promoApplied, setPromoApplied] = useState(false);
@@ -47,6 +56,15 @@ export default function CheckoutPage() {
   // Interactive flow states
   const [processing, setProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [detectedCurrency, setDetectedCurrency] = useState<Currency>("USD");
+  const [paymentProvider, setPaymentProvider] = useState<"razorpay" | "stripe">("stripe");
+
+  useEffect(() => {
+    const geoCurrency = detectCurrencyFromLocale();
+    setDetectedCurrency(geoCurrency);
+    setPaymentProvider(getPaymentProviderForCurrency(geoCurrency));
+    setCurrency(geoCurrency);
+  }, [setCurrency]);
 
   // Price calculations
   const baseMonthly = proPlan.pricing[currency].monthly;
@@ -93,10 +111,9 @@ export default function CheckoutPage() {
     setProcessing(true);
 
     try {
-      const paymentProvider = getPaymentProvider(country);
+      const geoPaymentProvider = paymentProvider;
 
-      if (paymentProvider === "stripe") {
-        // Use Stripe for non-India countries
+      if (geoPaymentProvider === "stripe") {
         const result = await processStripePayment({
           billingInterval: billingInterval === "yearly" ? "yearly" : "monthly",
           customerName: billedTo.trim(),
@@ -104,12 +121,9 @@ export default function CheckoutPage() {
         });
 
         if (result.success) {
-          // Stripe will redirect to checkout page, success is handled by webhook
-          toast.success("Redirecting to payment page...");
-          // Note: The actual success modal will be shown after webhook confirms payment
+          toast.success("Redirecting to Stripe Checkout...");
         }
       } else {
-        // Use Razorpay for India
         const result = await processSubscriptionPayment({
           billingInterval: billingInterval === "yearly" ? "yearly" : "monthly",
           customerName: billedTo.trim(),
@@ -117,17 +131,14 @@ export default function CheckoutPage() {
         });
 
         if (result.success) {
-          // Payment verified server-side, subscription is now active
           setProcessing(false);
           setSuccess(true);
           toast.success("Payment completed successfully! Welcome to Flowora Pro.");
 
-          // Update local state to reflect Pro status
           localStorage.setItem("cs_is_pro", "true");
 
           setTimeout(() => {
             navigate("/dashboard");
-            // Reload to refresh subscription context from server
             window.location.reload();
           }, 3500);
         }
@@ -228,22 +239,29 @@ export default function CheckoutPage() {
           </div>
 
           {/* Currency Toggle */}
-          <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-700">Currency</span>
-            <div className="bg-slate-100 p-1 rounded-lg flex gap-1 border border-slate-200 select-none">
-              <button
-                onClick={() => setCurrency("USD")}
-                className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${currency === "USD" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"}`}
-              >
-                🇺🇸 USD ($)
-              </button>
-              <button
-                onClick={() => setCurrency("INR")}
-                className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${currency === "INR" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"}`}
-              >
-                🇮🇳 INR ({currSymbol})
-              </button>
+          <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-700">Currency</span>
+              <div className="bg-slate-100 p-1 rounded-lg flex gap-1 border border-slate-200 select-none">
+                <button
+                  onClick={() => setCurrency("USD")}
+                  className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${currency === "USD" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"}`}
+                >
+                  🇺🇸 USD ($)
+                </button>
+                <button
+                  onClick={() => setCurrency("INR")}
+                  className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${currency === "INR" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"}`}
+                >
+                  🇮🇳 INR ({currSymbol})
+                </button>
+              </div>
             </div>
+            <p className="text-[11px] mt-3 text-slate-500">
+              {paymentProvider === "stripe"
+                ? "Location detected outside India. You will be redirected to Stripe Checkout with USD."
+                : "Location detected as India. You will be redirected to Razorpay in INR."}
+            </p>
           </div>
 
           {/* Billing Details Form - Razorpay Style */}

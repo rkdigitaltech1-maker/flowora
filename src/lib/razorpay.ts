@@ -1,3 +1,110 @@
+import { supabase } from "./supabase";
+
+const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID as string;
+
+async function getAccessToken(): Promise<string> {
+  const { data: sessionData } = await supabase.auth.getSession();
+  const accessToken = sessionData?.session?.access_token;
+  if (!accessToken) {
+    throw new Error("You must be logged in to make a payment. Please sign in and try again.");
+  }
+  return accessToken;
+}
+
+function loadRazorpayScript(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if ((window as any).Razorpay) return resolve();
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load Razorpay script"));
+    document.head.appendChild(script);
+  });
+}
+
+export async function processRazorpayPayment(params: {
+  billingInterval: "monthly" | "yearly";
+  customerName: string;
+  customerEmail?: string;
+  customerPhone?: string;
+}): Promise<{ success: boolean; message?: string } | undefined> {
+  const accessToken = await getAccessToken();
+
+  const createResponse = await fetch("/api/razorpay/create-order", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      billing_interval: params.billingInterval,
+      customer_name: params.customerName,
+      customer_email: params.customerEmail || undefined,
+      customer_phone: params.customerPhone || undefined,
+    }),
+  });
+
+  const data = await createResponse.json();
+  if (!createResponse.ok) {
+    throw new Error(data.error || "Failed to create Razorpay order");
+  }
+
+  // If server returned a subscription with a short_url, redirect user to hosted flow
+  if (data.type === "subscription" && data.short_url) {
+    window.location.href = data.short_url;
+    return { success: true };
+  }
+
+  // For one-time orders, open Razorpay Checkout
+  if (data.type === "order" && data.order_id) {
+    await loadRazorpayScript();
+
+    const options: any = {
+      key: RAZORPAY_KEY_ID,
+      order_id: data.order_id,
+      name: "Flowora",
+      description: `Upgrade - ${params.billingInterval}`,
+      handler: async function (response: any) {
+        try {
+          // Verify payment on server
+          const verifyResp = await fetch("/api/razorpay/verify-payment", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+              billing_interval: params.billingInterval,
+              type: "order",
+            }),
+          });
+
+          const verifyData = await verifyResp.json();
+          if (!verifyResp.ok) {
+            console.error("Razorpay verify failed", verifyData);
+            alert(verifyData.message || "Payment verification failed");
+          } else {
+            window.location.href = "/dashboard/checkout?status=success";
+          }
+        } catch (err) {
+          console.error("Error verifying razorpay payment", err);
+          alert("Payment completed but verification failed. Contact support.");
+        }
+      },
+      modal: { escape: true },
+    };
+
+    const rzp = new (window as any).Razorpay(options);
+    rzp.open();
+    return { success: true };
+  }
+
+  throw new Error("Unexpected Razorpay response");
+}
 /**
  * Razorpay Payment Integration (Client-Side)
  *

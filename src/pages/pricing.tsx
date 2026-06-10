@@ -23,6 +23,7 @@ import {
   formatPrice,
   formatAnnualTotal,
   getAnnualSavingsPercent,
+  detectCurrencyFromLocale,
   type Currency,
   type BillingInterval,
   type Plan,
@@ -231,7 +232,7 @@ function ProPlanCard({
 
       {/* CTA */}
       <Button
-        onClick={() => navigate(`/dashboard/checkout?plan=pro&interval=${interval}&currency=${currency}`)}
+        onClick={() => navigate(`/dashboard/checkout?plan=pro&interval=${interval}`)}
         className="w-full my-5 bg-gradient-to-r from-[#6d48ff] to-violet-500 hover:from-[#5a38e0] hover:to-violet-600 text-white font-semibold py-5 shadow-lg shadow-violet-200"
       >
         {plan.cta}
@@ -337,6 +338,8 @@ export default function PricingPage() {
   const proPlan = PLANS.find((p) => p.id === "pro")!;
 
   const proSavings = getAnnualSavingsPercent(proPlan, currency);
+  const geoCurrency = typeof window !== "undefined" ? detectCurrencyFromLocale() : "USD";
+  const geoRoute = geoCurrency === "INR" ? "INR/Razorpay" : "USD/Stripe";
 
   return (
     <PageLayout>
@@ -382,6 +385,9 @@ export default function PricingPage() {
             </h2>
             <p className="text-violet-200 mb-6 max-w-lg mx-auto text-sm">
               Join thousands of creators using Flowora to engage their audience, capture leads, and sell on autopilot.
+            </p>
+            <p className="text-xs text-violet-100 max-w-lg mx-auto">
+              Payment routing is selected by your location: {geoRoute}.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button

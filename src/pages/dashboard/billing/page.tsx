@@ -434,7 +434,7 @@ function UpgradeBanner({ currency }: { currency: Currency }) {
           </div>
         </div>
         <Button
-          onClick={() => navigate(`/dashboard/checkout?plan=pro&currency=${currency}`)}
+          onClick={() => navigate(`/dashboard/checkout?plan=pro`)}
           className="bg-white text-[#6d48ff] hover:bg-violet-50 font-semibold shadow-sm"
         >
           Upgrade Now
