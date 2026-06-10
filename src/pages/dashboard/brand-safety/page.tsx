@@ -24,7 +24,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils.ts";
 import { Button } from "@/components/ui/button.tsx";
-import { useCommentModeration, ToxicityCategory } from "@/hooks/use-comment-moderation.ts";
+import { useCommentModeration } from "@/hooks/use-comment-moderation.ts";
+import type { ToxicityCategory } from "@/hooks/use-comment-moderation.ts";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
