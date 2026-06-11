@@ -80,8 +80,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) return;
       if (event.data?.type !== "supabase-auth-success") return;
+      if (googlePopupRef.current && event.source !== googlePopupRef.current) return;
+      if (event.origin !== window.location.origin) return;
 
       if (googleAuthTimerRef.current) {
         window.clearInterval(googleAuthTimerRef.current);

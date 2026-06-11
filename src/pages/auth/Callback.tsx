@@ -30,44 +30,43 @@ export default function AuthCallback() {
     // If we're in a popup, wait for Supabase to exchange the code from the URL,
     // then close the popup so the parent window can detect the session.
     if (isPopup) {
-      const closeTimer = setTimeout(() => {
+      const closeTimer = window.setTimeout(() => {
         window.close();
       }, 5000);
 
-      let cleanupFn: (() => void) | undefined;
-
       const finishPopupSignIn = async () => {
         try {
-          await supabase.auth.getSessionFromUrl();
+          await supabase.auth.getSessionFromUrl({ storeSession: true });
         } catch {
           // ignore if the session exchange is already handled automatically
         }
 
-        const checkSession = setInterval(async () => {
+        const checkSession = window.setInterval(async () => {
           const { data } = await supabase.auth.getSession();
           if (data?.session) {
-            clearInterval(checkSession);
-            clearTimeout(closeTimer);
+            window.clearInterval(checkSession);
+            window.clearTimeout(closeTimer);
 
             if (window.opener && !window.opener.closed) {
-              window.opener.postMessage({ type: "supabase-auth-success" }, window.location.origin);
+              window.opener.postMessage({ type: "supabase-auth-success" }, "*");
             }
 
             // Small delay so the session gets persisted to localStorage
-            setTimeout(() => window.close(), 300);
+            window.setTimeout(() => {
+              window.open("", "_self");
+              window.close();
+            }, 300);
           }
         }, 250);
 
-        cleanupFn = () => {
-          clearInterval(checkSession);
-          clearTimeout(closeTimer);
+        // If the popup still exists after 5s, try to close it explicitly anyway.
+        return () => {
+          window.clearInterval(checkSession);
+          window.clearTimeout(closeTimer);
         };
       };
 
       finishPopupSignIn();
-      return () => {
-        cleanupFn?.();
-      };
     }
   }, [isPopup]);
 
