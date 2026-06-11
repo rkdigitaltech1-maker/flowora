@@ -30,26 +30,43 @@ export default function AuthCallback() {
     // If we're in a popup, wait for Supabase to exchange the code from the URL,
     // then close the popup so the parent window can detect the session.
     if (isPopup) {
-      // Supabase's detectSessionInUrl:true will auto-exchange the code.
-      // We just need to wait a moment for that to complete, then close.
       const closeTimer = setTimeout(() => {
         window.close();
-      }, 1500);
+      }, 5000);
 
-      // Also close immediately once we detect the session is ready
-      const checkSession = setInterval(async () => {
-        const { data } = await supabase.auth.getSession();
-        if (data?.session) {
+      let cleanupFn: (() => void) | undefined;
+
+      const finishPopupSignIn = async () => {
+        try {
+          await supabase.auth.getSessionFromUrl();
+        } catch {
+          // ignore if the session exchange is already handled automatically
+        }
+
+        const checkSession = setInterval(async () => {
+          const { data } = await supabase.auth.getSession();
+          if (data?.session) {
+            clearInterval(checkSession);
+            clearTimeout(closeTimer);
+
+            if (window.opener && !window.opener.closed) {
+              window.opener.postMessage({ type: "supabase-auth-success" }, window.location.origin);
+            }
+
+            // Small delay so the session gets persisted to localStorage
+            setTimeout(() => window.close(), 300);
+          }
+        }, 250);
+
+        cleanupFn = () => {
           clearInterval(checkSession);
           clearTimeout(closeTimer);
-          // Small delay so the session gets persisted to localStorage
-          setTimeout(() => window.close(), 300);
-        }
-      }, 200);
+        };
+      };
 
+      finishPopupSignIn();
       return () => {
-        clearInterval(checkSession);
-        clearTimeout(closeTimer);
+        cleanupFn?.();
       };
     }
   }, [isPopup]);

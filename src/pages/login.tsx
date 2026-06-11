@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Eye, EyeOff, MessageSquare, Users, Package, BarChart3, Zap, ArrowRight
@@ -43,6 +43,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const googlePopupRef = useRef<Window | null>(null);
+  const googleAuthTimerRef = useRef<number | null>(null);
 
   const handleTurnstileVerify = useCallback((token: string) => {
     setTurnstileToken(token);
@@ -75,6 +77,35 @@ export default function LoginPage() {
       navigate("/_sys/ctrl-panel");
     }
   }, [isUserAuthenticated, isAdminAuthenticated, navigate]);
+
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type !== "supabase-auth-success") return;
+
+      if (googleAuthTimerRef.current) {
+        window.clearInterval(googleAuthTimerRef.current);
+        googleAuthTimerRef.current = null;
+      }
+
+      if (googlePopupRef.current && !googlePopupRef.current.closed) {
+        googlePopupRef.current.close();
+      }
+
+      setGoogleLoading(false);
+      const { data } = await supabase.auth.getSession();
+      if (data?.session) {
+        toast.success("Signed in with Google!");
+        const onboardingDone = localStorage.getItem("cs_onboarding_done");
+        navigate(onboardingDone ? "/dashboard" : "/welcome", { replace: true });
+      } else {
+        toast.error("Signed in, but session was not detected. Please refresh and try again.");
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [navigate]);
 
   // ── Supabase Google OAuth (Popup) ─────────────────────────────────────────
   const handleGoogleLogin = async () => {
@@ -124,21 +155,23 @@ export default function LoginPage() {
         return;
       }
 
-      // Poll for popup close and session
-      const timer = setInterval(async () => {
+      googlePopupRef.current = popup;
+
+      // Poll for popup close and session as a fallback when no message is received.
+      const timer = window.setInterval(async () => {
         if (popup.closed) {
-          clearInterval(timer);
+          window.clearInterval(timer);
+          googleAuthTimerRef.current = null;
+
           // Give a short delay for the session to propagate from popup to parent via localStorage
           await new Promise((resolve) => setTimeout(resolve, 800));
-          
-          // Refresh the session from storage (the popup persisted it)
+
           const { data: sessionData } = await supabase.auth.getSession();
           if (sessionData?.session) {
             toast.success("Signed in with Google!");
             const onboardingDone = localStorage.getItem("cs_onboarding_done");
             navigate(onboardingDone ? "/dashboard" : "/welcome", { replace: true });
           } else {
-            // One more retry after another delay (session propagation can be slow)
             await new Promise((resolve) => setTimeout(resolve, 1000));
             const { data: retryData } = await supabase.auth.getSession();
             if (retryData?.session) {
@@ -152,6 +185,8 @@ export default function LoginPage() {
           }
         }
       }, 500);
+
+      googleAuthTimerRef.current = timer;
 
     } catch (err: any) {
       toast.error(err.message ?? "Google sign-in failed.");

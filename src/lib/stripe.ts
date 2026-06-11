@@ -10,9 +10,6 @@
  */
 
 import { supabase } from "./supabase";
-import { loadStripe } from "@stripe/stripe-js";
-
-const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as string;
 
 async function getAccessToken(): Promise<string> {
   const { data: sessionData } = await supabase.auth.getSession();
@@ -59,26 +56,16 @@ export async function processStripePayment(params: {
     throw new Error(createData.error || "Failed to create checkout session. Please try again.");
   }
 
-  // Redirect to Stripe Checkout
-  const stripe = await loadStripe(STRIPE_PUBLISHABLE_KEY);
-  if (!stripe) {
-    throw new Error("Stripe failed to load. Please refresh and try again.");
+  const checkoutUrl = createData.url;
+  if (!checkoutUrl) {
+    throw new Error("Failed to create Stripe checkout session. Please try again.");
   }
 
-  const { sessionId } = createData;
-
-  // Redirect to hosted Checkout page
-  const result = await stripe.redirectToCheckout({
-    sessionId,
-  });
-
-  if (result.error) {
-    throw new Error(result.error.message || "Failed to redirect to checkout.");
-  }
+  window.location.href = checkoutUrl;
 
   return {
     success: true,
-    sessionId,
+    sessionId: createData.session_id,
   };
 }
 

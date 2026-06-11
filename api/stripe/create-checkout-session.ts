@@ -132,6 +132,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       return res.status(200).json({
         session_id: session.id,
+        url: session.url,
         client_secret: session.client_secret,
         stripe_publishable_key: process.env.STRIPE_PUBLISHABLE_KEY,
       });
